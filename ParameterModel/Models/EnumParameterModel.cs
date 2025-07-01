@@ -13,7 +13,7 @@ namespace ParameterModel.Models
     public class EnumParameterModel : ParameterModelBase<int>
     {
         private Array _enumValues;
-        private Array _intValues;
+        private int[] _intValues;
         private readonly string[] _enumItemsSource;
 
         public EnumParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) : base(parameterPromptAttribute, propertyInfo, propertyOwner)
@@ -41,7 +41,7 @@ namespace ParameterModel.Models
 
         protected override int GetDefault()
         {
-            return 0; // Default for Enum is not defined, can be set to null or a specific value if needed
+            return _intValues[0]; 
         }
 
         public override string[] GetSelections()

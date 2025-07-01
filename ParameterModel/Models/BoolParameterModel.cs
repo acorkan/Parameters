@@ -35,7 +35,7 @@ namespace ParameterModel.Models
             return null;
         }
 
-        private readonly string[] _selections = new string[] { "True", "False" };
+        private readonly string[] _selections = { "True", "False" };
         public override string[] GetSelections()
         {
             return _selections;

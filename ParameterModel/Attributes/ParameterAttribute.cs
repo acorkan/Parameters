@@ -75,6 +75,10 @@ namespace ParameterModel.Attributes
                 if(parameterPromptAttribute != null)
                 {
                     ret.Add(vmProp, parameterPromptAttribute);
+                    if(string.IsNullOrEmpty(parameterPromptAttribute.Label))
+                    {
+                        parameterPromptAttribute.Label = vmProp.Name; // Default label to property name if not set
+                    }
                 }
             }
             return ret.OrderBy(s => s.Value.PresentationOrder).ToDictionary();

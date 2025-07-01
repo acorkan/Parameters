@@ -9,6 +9,6 @@ namespace ParameterModel.Interfaces
     /// </summary>
     public interface IImplementsParameterAttribute
     {
-        Dictionary<PropertyInfo, ParameterAttribute> GetAttributeMap();
+        //Dictionary<PropertyInfo, ParameterAttribute> GetAttributeMap();
     }
 }

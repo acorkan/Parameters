@@ -19,7 +19,7 @@ namespace ParameterModel.Models
         }
         public override string[] GetSelections() 
         {
-            return null; // String parameters do not have selections like enums or strings.
+            return Array.Empty<string>();
         }
         protected override string FormatType(string typeValue)
         {

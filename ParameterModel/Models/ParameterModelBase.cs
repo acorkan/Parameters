@@ -8,8 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
 
 namespace ParameterModel.Models
 {
@@ -71,7 +69,7 @@ namespace ParameterModel.Models
         protected abstract string FormatType(T typeValue);
 
         /// <summary>
-        /// Return the default, which ios trivial for int or flot, but more complex for enum and string[]
+        /// Return the default value.
         /// </summary>
         /// <returns></returns>
         protected abstract T GetDefault();
@@ -87,6 +85,7 @@ namespace ParameterModel.Models
 
         public bool Validate(List<string> errors)
         {
+            errors.Clear();
             if (TryGetValue(out T val, _statementEvaluator, errors))
             {
                 string validationError = ValidateAttibute(val);
@@ -239,56 +238,6 @@ namespace ParameterModel.Models
             return default;
         }
 
-        public static List<IParameterModel> MarshalParameterModels(IImplementsParameterAttribute propertyOwner)
-        {
-            Dictionary<PropertyInfo, ParameterAttribute> attributeMap = ParameterAttribute.GetAttributeMap(propertyOwner);
-            List<IParameterModel> ret = new List<IParameterModel>();
-            foreach (var kvp in attributeMap)
-            {
-                PropertyInfo propertyInfo = kvp.Key;
-                ParameterAttribute parameterPromptAttribute = kvp.Value;
-                IParameterModel parameterModel = null;
-                Type type = null;
-                if (parameterPromptAttribute.EvaluateType != null)
-                {
-                    type = parameterPromptAttribute.EvaluateType;
-                }
-                else
-                {
-                    type = propertyInfo.PropertyType;
-                }
-                if (type == typeof(string))
-                {
-                    parameterModel = new StringParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else if (type == typeof(int))
-                {
-                    parameterModel = new IntParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else if (type == typeof(float))
-                {
-                    parameterModel = new FloatParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else if (type == typeof(bool))
-                {
-                    parameterModel = new BoolParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else if (type == typeof(string[]))
-                {
-                    parameterModel = new StringArrayParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else if (type.IsEnum)
-                {
-                    parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else
-                {
-                    throw new NotSupportedException($"Type {type} is not supported.");
-                }
-                ret.Add(parameterModel);
-            }
-            return ret;
-        }
     }
     /*
      *                 string valueString = PropertyInfo.GetValue(_propertyOwner)?.ToString() ?? string.Empty;

@@ -1,14 +1,7 @@
-﻿using ParameterModel.Attributes;
-using ParameterViews.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ParameterModel.Models
 {
-    internal static class TypeValidator
+ /*   internal static class TypeValidator
     {
         public static Func<T, ParameterAttribute, string> GetValidateType<T>()
         {
@@ -93,5 +86,5 @@ namespace ParameterModel.Models
             }
             return true;
         }
-    }
+    }*/
 }

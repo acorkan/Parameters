@@ -24,7 +24,7 @@ namespace ParameterModel.Models
 
         public override string[] GetSelections()
         {
-            return null;
+            return Array.Empty<string>(); 
         }
 
         protected override string FormatType(string[] typeValue)
