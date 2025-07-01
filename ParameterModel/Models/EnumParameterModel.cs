@@ -13,22 +13,28 @@ namespace ParameterModel.Models
     public class EnumParameterModel : ParameterModelBase<int>
     {
         private Array _enumValues;
-        private int[] _intValues;
+        //private int[] _intValues;
+        private readonly Dictionary<int, string> _values;
         private readonly string[] _enumItemsSource;
 
         public EnumParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) : base(parameterPromptAttribute, propertyInfo, propertyOwner)
         {
-            if(ParameterAttribute.EvaluateType != null)
+            //if(ParameterAttribute.EvaluateType != null)
+            //{
+            //    _enumValues = Enum.GetValues(ParameterAttribute.EvaluateType);
+            //    _enumItemsSource = _enumValues.Cast<Enum>().Select(s => s.ToString()).ToArray();
+            //}
+            //else 
+            //{
+            _enumValues = Enum.GetValues(ParameterAttribute.EnumType);
+            if(_enumValues.Length == 0)
             {
-                _enumValues = Enum.GetValues(ParameterAttribute.EvaluateType);
-                _enumItemsSource = _enumValues.Cast<Enum>().Select(s => s.ToString()).ToArray();
+                throw new ArgumentException($"Enum type {ParameterAttribute.EnumType} does not contain any values.", nameof(ParameterAttribute.EnumType));
             }
-            else 
-            {
-                _enumValues = Enum.GetValues(propertyInfo.PropertyType);
-                _enumItemsSource = _enumValues.Cast<Enum>().Select(s => EnumToDescriptionOrString(s)).ToArray();
-            }
-            _intValues = _enumValues.Cast<int>().ToArray();
+            _enumItemsSource = _enumValues.Cast<Enum>().Select(s => EnumToDescriptionOrString(s)).ToArray();
+            //}
+            //_intValues = _enumValues.Cast<int>().ToArray();
+            _values = _enumValues.Cast<Enum>().ToDictionary(e => Convert.ToInt32(e), e => EnumToDescriptionOrString(e));
         }
 
         private string EnumToDescriptionOrString(Enum value)
@@ -41,7 +47,7 @@ namespace ParameterModel.Models
 
         protected override int GetDefault()
         {
-            return _intValues[0]; 
+            return _values.Keys.First(); 
         }
 
         public override string[] GetSelections()
@@ -51,7 +57,7 @@ namespace ParameterModel.Models
 
         protected override string FormatType(int typeValue)
         {
-            return _enumItemsSource[typeValue];
+            return _values[typeValue];
         }
 
         protected override bool TryParse(string valueString, out int value)
@@ -70,11 +76,7 @@ namespace ParameterModel.Models
 
         protected override string ValidateAttibute(int val)
         {
-            if((val < 0) || (val >= _intValues.Length))
-            {
-                return $"Value {val} is not a valid selection for {PropertyInfo.Name}.";
-            }
-            return null;
+            return _values.Keys.Contains(val) ? null : $"Value {val} is not a valid selection for {PropertyInfo.Name}.";
         }
     }
 }

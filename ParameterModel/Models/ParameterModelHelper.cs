@@ -30,7 +30,15 @@ namespace ParameterModel.Models
                 }
                 else if (type == typeof(int))
                 {
-                    parameterModel = new IntParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
+                    if (parameterPromptAttribute.EnumType != null)
+                    {
+                        // If EnumType is specified, use EnumParameterModel
+                        parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
+                    }
+                    else
+                    {
+                        parameterModel = new IntParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
+                    }
                 }
                 else if (type == typeof(float))
                 {
@@ -43,10 +51,6 @@ namespace ParameterModel.Models
                 else if (type == typeof(string[]))
                 {
                     parameterModel = new StringArrayParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
-                else if (type.IsEnum)
-                {
-                    parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
                 }
                 else
                 {
