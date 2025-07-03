@@ -30,7 +30,7 @@ namespace ParameterModel.Models
             return bool.TryParse(valueString.ToLower(), out value);
         }
 
-        protected override string ValidateAttibute(bool val)
+        protected override string TestAttibuteValidation(bool val)
         {
             return null;
         }

@@ -30,7 +30,7 @@ namespace ParameterModel.Models
             value = valueString;
             return true;
         }
-        protected override string ValidateAttibute(string s)
+        protected override string TestAttibuteValidation(string s)
         {
             if (!ParameterAttribute.AllowEmptyString && string.IsNullOrEmpty(s))
             {

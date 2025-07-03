@@ -20,7 +20,7 @@ namespace ParameterModel.Models
         protected override string[] GetDefault()
         {
             return new string[0];
-        }
+        } 
 
         public override string[] GetSelections()
         {
@@ -38,7 +38,7 @@ namespace ParameterModel.Models
             return true;
         }
 
-        protected override string ValidateAttibute(string[] val)
+        protected override string TestAttibuteValidation(string[] val)
         {
             if (ParameterAttribute.AllowEmptyString || (val.Length > 0))
             {

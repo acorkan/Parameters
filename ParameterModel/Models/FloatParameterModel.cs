@@ -35,7 +35,7 @@ namespace ParameterModel.Models
             return float.TryParse(valueString, out value);
         }
 
-        protected override string ValidateAttibute(float f)
+        protected override string TestAttibuteValidation(float f)
         {
             if (ParameterAttribute.Min != ParameterAttribute.Max)
             {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace ParameterModel.Models
 {
@@ -79,7 +80,7 @@ namespace ParameterModel.Models
         /// Return null if valid, or a validation error message if invalid.
         /// </summary>
         /// <returns></returns>
-        protected abstract string ValidateAttibute(T val);
+        protected abstract string TestAttibuteValidation(T val);
 
         //protected abstract bool TryGetPropertyValue(string valueString, out T value);
 
@@ -88,7 +89,7 @@ namespace ParameterModel.Models
             errors.Clear();
             if (TryGetValue(out T val, _statementEvaluator, errors))
             {
-                string validationError = ValidateAttibute(val);
+                string validationError = TestAttibuteValidation(val);
                 if (!string.IsNullOrEmpty(validationError))
                 {
                     errors.Add(validationError);
@@ -96,12 +97,17 @@ namespace ParameterModel.Models
                 }
                 return true;
             }
+            errors.Add($"Unable to resolve value of {PropertyInfo.Name} type {PropertyInfo.PropertyType.Name}");
             return false;
         }
 
         public string Format()
         {
             if (ParameterAttribute.EvaluateType != null)
+            {
+                return (string)PropertyInfo.GetValue(_propertyOwner);
+            }
+            else if (ParameterAttribute.EnumType != null) // If the EvaluateType is not set, but EnumType is set, we format the enum value.
             {
                 return (string)PropertyInfo.GetValue(_propertyOwner);
             }
@@ -237,6 +243,12 @@ namespace ParameterModel.Models
             }
             return default;
         }
+
+        public override string ToString()
+        {
+            return $"{PropertyInfo.Name}:{ParameterAttribute.Label}:{PropertyInfo.PropertyType.Name}";
+        }
+
 
     }
     /*
