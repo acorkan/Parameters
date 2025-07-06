@@ -1,5 +1,6 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
+using ParameterModel.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ParameterModel.Models
 {
-    public class EnumParameterModel : ParameterModelBase<Enum>
+/*    public class EnumParameterModel : ParameterModelBase<Enum>
     {
         private Array _enumValues;
         //private int[] _intValues;
@@ -50,7 +51,7 @@ namespace ParameterModel.Models
             return _enumItemsDisplaySource.First().Key; 
         }
 
-        public override string[] GetSelections()
+        public override string[] GetSelectionItems()
         {
             return _enumItemsDisplaySource.Values.ToArray();
         }
@@ -126,5 +127,5 @@ namespace ParameterModel.Models
         //    }
         //    return $"Value {val} is not a valid selection for {PropertyInfo.Name}.";
         //}
-    }
+    }*/
 }

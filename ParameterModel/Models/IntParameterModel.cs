@@ -1,5 +1,6 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
+using ParameterModel.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParameterModel.Models
-{
+{/*
     public class IntParameterModel : ParameterModelBase<int>
     {
         public IntParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) 
@@ -19,7 +20,7 @@ namespace ParameterModel.Models
         {
             return 0;
         }
-        public override string[] GetSelections() 
+        public override string[] GetSelectionItems() 
         {
             return Array.Empty<string>();
         }
@@ -46,5 +47,5 @@ namespace ParameterModel.Models
             }
             return null;
         }
-    }
+    }*/
 }

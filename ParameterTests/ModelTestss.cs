@@ -1,7 +1,7 @@
 using Newtonsoft.Json.Linq;
 using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
-using ParameterModel.Models;
+using ParameterModel.Models.Base;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Documents;
@@ -128,8 +128,8 @@ namespace ParameterTests
             List<string> output = new List<string>();
             foreach (IParameterModel model in models)
             {
-                bool valid = model.Validate(errors);
-                string outString = $"{model.PropertyInfo.Name}, {model.PropertyInfo.PropertyType}, {model.Format()}, {model.ParameterAttribute.Label}, {valid}, {string.Join('|', errors)}, {string.Join('|', model.GetSelections())}";
+                bool valid = model.IsValid(errors);
+                string outString = $"{model.PropertyInfo.Name}, {model.PropertyInfo.PropertyType}, {model.ToDisplayString()}, {model.ParameterAttribute.Label}, {valid}, {string.Join('|', errors)}, {string.Join('|', model.GetSelectionItems())}";
                 output.Add(outString);
                 Console.WriteLine(outString);
             }

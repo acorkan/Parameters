@@ -1,5 +1,6 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
+using ParameterModel.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParameterModel.Models
-{
+{/*
     public class StringArrayParameterModel : ParameterModelBase<string[]>
     {
         public static readonly char StrArrayParameterDelimiter = ',';
@@ -22,7 +23,7 @@ namespace ParameterModel.Models
             return new string[0];
         } 
 
-        public override string[] GetSelections()
+        public override string[] GetSelectionItems()
         {
             return Array.Empty<string>(); 
         }
@@ -46,5 +47,5 @@ namespace ParameterModel.Models
             }
             return "Entry cannot be blank";
         }
-    }
+    }*/
 }

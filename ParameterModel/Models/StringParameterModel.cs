@@ -1,12 +1,13 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
+using ParameterModel.Models.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
 namespace ParameterModel.Models
-{
+{/*
     public class StringParameterModel : ParameterModelBase<string>
     {
         public StringParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) 
@@ -17,7 +18,7 @@ namespace ParameterModel.Models
         {
             return string.Empty;
         }
-        public override string[] GetSelections() 
+        public override string[] GetSelectionItems() 
         {
             return Array.Empty<string>();
         }
@@ -38,5 +39,5 @@ namespace ParameterModel.Models
             }
             return null;
         }
-    }
+    }*/
 }

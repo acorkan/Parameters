@@ -40,7 +40,7 @@ namespace PythonWrapper
                 Trace.WriteLine($"Tracking index decremented to: {trackingIndex}");
             }
         }
-        public void Eval(string code, IVariableContext variableContext)
+        public void Eval(string code, IVariablesContext variableContext)
         {
             using (Py.GIL())  // Ensure thread safety
             {

@@ -1,12 +1,21 @@
-﻿using ParameterModel.Attributes;
+﻿using log4net;
+using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
 using System.Reflection;
 
-namespace ParameterModel.Models
+namespace ParameterModel.Models.Base
 {
-    public static class ParameterModelHelper
+    public class ParameterModelHelper
     {
-        public static List<IParameterModel> Collect(IImplementsParameterAttribute propertyOwner)
+        private IEvaluationContext _evaluationContext;
+        private ILog _log;
+        public ParameterModelHelper(IEvaluationContext evaluationContext, ILog log) 
+        { 
+            _evaluationContext = evaluationContext ?? throw new ArgumentNullException(nameof(evaluationContext));
+            _log = log ?? throw new ArgumentNullException(nameof(log));
+        }
+
+        public List<IParameterModel> Collect(IImplementsParameterAttribute propertyOwner)
         {
             Dictionary<PropertyInfo, ParameterAttribute> attributeMap = ParameterAttribute.GetAttributeMap(propertyOwner);
             List<IParameterModel> ret = new List<IParameterModel>();
@@ -24,12 +33,16 @@ namespace ParameterModel.Models
                 {
                     type = propertyInfo.PropertyType;
                 }
-                if (type == typeof(string))
+                if (type == typeof(bool))
+                {
+                    parameterModel = new BoolParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner, _evaluationContext);
+                }
+/*                else if (type == typeof(string))
                 {
                     if (parameterPromptAttribute.EnumType != null)
                     {
                         // If EnumType is specified, use EnumParameterModel
-                        parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
+                        parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner, _evaluationContext);
                     }
                     else
                     {
@@ -52,14 +65,10 @@ namespace ParameterModel.Models
                 {
                     parameterModel = new FloatParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
                 }
-                else if (type == typeof(bool))
-                {
-                    parameterModel = new BoolParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
                 else if (type == typeof(string[]))
                 {
                     parameterModel = new StringArrayParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }
+                }*/
                 else
                 {
                     throw new NotSupportedException($"Type {type} is not supported.");

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ParameterModel.Interfaces
 {
-    public interface IVariableContext
+    public interface IVariablesContext
     {
         //public Dictionary<string, string> Variables { get; } = new Dictionary<string, string>();
         Dictionary<string, string> Variables { get; }
