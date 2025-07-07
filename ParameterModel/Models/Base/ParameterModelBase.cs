@@ -27,6 +27,7 @@ namespace ParameterModel.Models.Base
         protected IImplementsParameterAttribute _propertyOwner;
         protected IStatementEvaluator _statementEvaluator;
 
+        protected readonly List<string> _evaluateErrors = new List<string>();
         public IEvaluationContext EvaluationContext { get; }
 
         public ParameterModelBase(ParameterAttribute parameterPromptAttribute, 
@@ -102,7 +103,7 @@ namespace ParameterModel.Models.Base
 
         public bool IsParameterError { get => !string.IsNullOrEmpty(ParameterError);  }
 
-        public bool IsEvaluateError { get; protected set; }
+        public bool IsEvaluateError { get => _evaluateErrors.Count != 0; }
 
         public bool IsAnyError { get => IsAttributeError || IsParameterError || IsEvaluateError; }
 
@@ -228,6 +229,20 @@ namespace ParameterModel.Models.Base
         }
 
         public abstract bool TryParse(string valString, out T val);
+
+        public bool IsValid(List<string> errors)
+        {
+            errors.Clear();
+            if(IsAttributeError)
+            {
+                errors.Add(AttributeError);
+            }
+            if(IsEvaluateError)
+            {
+                errors.AddRange(_evaluateErrors);
+            }
+            return (errors.Count == 0);
+        }
         #endregion IParameterModel<T>
 
         //public abstract bool TryGetValue(out T val);

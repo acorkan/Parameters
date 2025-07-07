@@ -64,7 +64,7 @@ namespace ParameterModel.Interfaces
         /// </summary>
         bool IsAnyError { get; }
 
-        //bool IsValid { get; }
+        bool IsValid(List<string> errors);
 
         /// <summary>
         /// If IsPropertyTypeString is set then returns the property value, 

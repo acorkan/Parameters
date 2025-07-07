@@ -1,3 +1,7 @@
+using log4net;
+using log4net.Appender;
+using log4net.Config;
+using log4net.Layout;
 using Newtonsoft.Json.Linq;
 using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
@@ -10,6 +14,37 @@ namespace ParameterTests
 {
     public class Tests
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Tests));
+
+        static Tests()
+        {
+            ConfigureLogging();
+
+            log.Debug("This is a DEBUG message");
+            log.Info("This is an INFO message");
+            log.Warn("This is a WARN message");
+            log.Error("This is an ERROR message");
+            log.Fatal("This is a FATAL message");
+
+            Console.ReadLine();
+        }
+
+        private static void ConfigureLogging()
+        {
+            PatternLayout layout = new PatternLayout
+            {
+                ConversionPattern = "%date %-5level - %message%newline"
+            };
+            layout.ActivateOptions();
+
+            ConsoleAppender consoleAppender = new ConsoleAppender
+            {
+                Layout = layout
+            };
+            consoleAppender.ActivateOptions();
+
+            BasicConfigurator.Configure(consoleAppender);
+        }
         internal enum OptionEnum
         {
             [System.ComponentModel.Description("Option 1 Description")]
@@ -102,9 +137,11 @@ namespace ParameterTests
             "TestStringArray2, System.String[], , TestStringArray2, True, , ",
         };
 
+        private ParameterModelHelper _parameterModelHelper = null;
         [SetUp]
         public void Setup()
         {
+            _parameterModelHelper = new ParameterModelHelper(null, log);
         } 
 
         [Test]
@@ -122,7 +159,7 @@ namespace ParameterTests
         [Test]
         public void Test2()
         {
-            List<IParameterModel> models = ParameterModelHelper.Collect(new ParameterClassLiteral());
+            List<IParameterModel> models = _parameterModelHelper.Collect(new ParameterClassLiteral());
             Console.WriteLine($"Property name, Type, Format, Label, Validate, Errors, Selections");
             List<string> errors = new List<string>();
             List<string> output = new List<string>();

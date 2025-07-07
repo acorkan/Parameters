@@ -26,42 +26,96 @@ namespace PythonWrapper
             Trace.WriteLine($"PyEval instance created with tracking index: {_trackingIndex}");
         }
 
-        ~PyEval()
+        //~PyEval()
+        //{
+        //    _trackingIndex--; // Decrement the tracking index when the instance is finalized
+        //    Trace.WriteLine($"PyEval instance destroyed with tracking index: {_trackingIndex}");
+        //    int trackingIndex = Interlocked.Decrement(ref _TrackingIndexCounter);
+        //    if(trackingIndex < 0)
+        //    {
+        //        Trace.WriteLine("Tracking index is negative, which is unexpected.");
+        //    }
+        //    else
+        //    {
+        //        Trace.WriteLine($"Tracking index decremented to: {trackingIndex}");
+        //    }
+        //}
+
+        public bool Eval(string code, IVariablesContext variableContext, out string result, out string error)
         {
-            _trackingIndex--; // Decrement the tracking index when the instance is finalized
-            Trace.WriteLine($"PyEval instance destroyed with tracking index: {_trackingIndex}");
-            int trackingIndex = Interlocked.Decrement(ref _TrackingIndexCounter);
-            if(trackingIndex < 0)
-            {
-                Trace.WriteLine("Tracking index is negative, which is unexpected.");
-            }
-            else
-            {
-                Trace.WriteLine($"Tracking index decremented to: {trackingIndex}");
-            }
-        }
-        public void Eval(string code, IVariablesContext variableContext)
-        {
+            result = string.Empty;
+            error = string.Empty;
             using (Py.GIL())  // Ensure thread safety
             {
                 PyDict globals = new PyDict();
-                PyObject locals = null; // new PyObject(PyObject.Null);
+                //PyObject locals = null; // new PyObject(PyObject.Null);
+                // Convert C# context dictionary to Python dict
+                using var locals = new PyDict();
+                foreach (var varItem in variableContext.Variables)
+                {
+                    if(varItem.Type == VariableType.Boolean)
+                    { 
+                        locals.SetItem(varItem.Name.ToPython(), varItem.GetValueAsBool().ToPython());
+                    }
+                    else if (varItem.Type == VariableType.Integer)
+                    {
+                        locals.SetItem(varItem.Name.ToPython(), varItem.GetValueAsInt().ToPython());
+                    }
+                    else if (varItem.Type == VariableType.Float)
+                    {
+                        locals.SetItem(varItem.Name.ToPython(), varItem.GetValueAsFloat().ToPython());
+                    }
+                    else if ((varItem.Type == VariableType.String) ||
+                        (varItem.Type == VariableType.JSON))
+                    {
+                        locals.SetItem(varItem.Name.ToPython(), varItem.GetValueAsString().ToPython());
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Unsupported variable type: {varItem.Type} for variable '{varItem.Name}'");
+                    }
+                }
                 try
                 {
                     //string code = "3 * 4 + 5";
-                    dynamic result = PythonEngine.Eval(code, globals, locals);
+                    dynamic dResult = PythonEngine.Eval(code, globals, locals);
 
-                    Trace.WriteLine($"Result: {result}");
+                    //Trace.WriteLine($"Result: {result}");
+                    result = dResult.ToString();
+                    return true;
                 }
                 catch (PythonException ex)
                 {
-                    Trace.WriteLine($"Python error: {ex.Message}");
+                    error = ex.Message;
+                    Trace.WriteLine($"Python error: {error}");
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"General error: {ex.Message}");
+                    error = ex.Message;
+                    Trace.WriteLine($"General error: {error}");
                 }
             }
+            return false;
+        }
+
+        public bool EvalInt(string code, IVariablesContext variableContext, out int result, out string error)
+        {
+
+        }
+
+                    public bool EvalFloat(string code, IVariablesContext variableContext, out float result, out string error)
+        {
+
+        }
+
+                                public bool EvalBool(string code, IVariablesContext variableContext, out bool result, out string error)
+        {
+
+        }
+
+                    public bool EvalJson(string code, IVariablesContext variableContext, out string result, out string error)
+        {
+
         }
 
         /*
