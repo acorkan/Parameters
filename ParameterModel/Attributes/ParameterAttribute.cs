@@ -1,4 +1,6 @@
 ﻿using ParameterModel.Interfaces;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -8,6 +10,11 @@ namespace ParameterModel.Attributes
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class ParameterAttribute : Attribute
     {
+        private Array _enumValues;
+        private Dictionary<int, string> _values;
+        public Dictionary<Enum, string> EnumItemsDisplaySource { get; protected set; }
+
+
         /// <summary>
         /// Used in a prompt.
         /// </summary>
@@ -26,15 +33,15 @@ namespace ParameterModel.Attributes
         /// </summary>
         public int PresentationOrder { get; set; } = 5;
 
-        /// <summary>
-        /// Applies only to numeric inputs.
-        /// </summary>
-        public float Min { get; set; } = 0.0F;
+        ///// <summary>
+        ///// Applies only to numeric inputs.
+        ///// </summary>
+        //public float Min { get; set; } = 0.0F;
 
-        /// <summary>
-        /// Applies only to numeric inputs.
-        /// </summary>
-        public float Max { get; set; } = 0.0F;
+        ///// <summary>
+        ///// Applies only to numeric inputs.
+        ///// </summary>
+        //public float Max { get; set; } = 0.0F;
 
         public Type EnumType { get; set; } = null!;
         /// <summary>
@@ -43,15 +50,23 @@ namespace ParameterModel.Attributes
         public string ToolTipNotes { get; set; } = "";
 
         /// <summary>
-        /// Applies only to string or string[] inputs
+        /// If true, then this property can be a variable. 
+        /// This is used to indicate that the value can be set by a variable in the context of the application.
+        /// This meas there will be an entry in a VariableAssignments property to resolve.
         /// </summary>
-        public bool AllowEmptyString { get; set; } = false;
+        public bool IsVariable { get; set; } = false; 
+        ///// <summary>
+        ///// Applies only to string or string[] inputs
+        ///// </summary>
+        //public bool AllowEmptyString { get; set; } = false;
 
-        /// <summary>
-        /// If the value can be evaluated as a statement, then this is the type of the evaluation result.
-        /// This can only ever be applied to a property type of string.
-        /// </summary>
-        public Type EvaluateType { get; set; }
+        ///// <summary>
+        ///// If the value can be a variable, then this is the type of the evaluation result.
+        ///// This can only ever be applied to a property type of string.
+        ///// </summary>
+        //public Type VariableType { get; set; }
+
+        public PropertyInfo PropertyInfo { get; protected set; }
 
         public ParameterAttribute() { }
 
@@ -60,73 +75,52 @@ namespace ParameterModel.Attributes
             Label = label;
         }
 
-        /// <summary>
-        /// Get a map of the PropertyInfo and its corresponding ParameterAttribute.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public static Dictionary<PropertyInfo, ParameterAttribute> GetAttributeMap(IImplementsParameterAttribute obj)
+        public static void SetPropertyInfo(ParameterAttribute parameterAttribute, PropertyInfo propertyInfo)
         {
-            Dictionary<PropertyInfo, ParameterAttribute> ret = new Dictionary<PropertyInfo, ParameterAttribute>();
-            var props = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance); // | BindingFlags.NonPublic 
-            foreach (var vmProp in props)
+            if(parameterAttribute.PropertyInfo == null)
             {
-                ParameterAttribute? parameterPromptAttribute = vmProp.GetCustomAttribute(typeof(ParameterAttribute)) as ParameterAttribute;
-                if(parameterPromptAttribute != null)
+                parameterAttribute.PropertyInfo = propertyInfo;
+            }
+        }
+
+        public static void InitEnumData(ParameterAttribute parameterAttribute)
+        {
+            if (parameterAttribute.PropertyInfo.PropertyType.IsEnum)
+            {
+                parameterAttribute._enumValues = Enum.GetValues(parameterAttribute.PropertyInfo.PropertyType);//);.EnumType);
+                if (parameterAttribute._enumValues.Length == 0)
                 {
-                    ret.Add(vmProp, parameterPromptAttribute);
-                    if(string.IsNullOrEmpty(parameterPromptAttribute.Label))
-                    {
-                        parameterPromptAttribute.Label = vmProp.Name; // Default label to property name if not set
-                    }
+                    throw new ArgumentException($"Enum type {parameterAttribute.PropertyInfo.PropertyType} does not contain any values.", nameof(parameterAttribute.PropertyInfo.Name));
                 }
+                parameterAttribute.EnumItemsDisplaySource =
+                   parameterAttribute._enumValues.Cast<Enum>().ToDictionary(s => s, s => EnumToDescriptionOrString(s));
+                parameterAttribute._values = parameterAttribute._enumValues.Cast<Enum>().ToDictionary(e => Convert.ToInt32(e), e => EnumToDescriptionOrString(e));
             }
-            return ret.OrderBy(s => s.Value.PresentationOrder).ToDictionary();
         }
 
-        public static void CopyParameters(IImplementsParameterAttribute source, IImplementsParameterAttribute dest)
+        private static string EnumToDescriptionOrString(Enum value)
         {
-            if(source.GetType() != dest.GetType())
-            {
-                throw new ArgumentException("Source and destination must be of the same type.");
-            }
-            Dictionary<PropertyInfo, ParameterAttribute> attribMap = GetAttributeMap(source);
-            foreach (var prop in attribMap.Keys)
-            {
-                var sourceValue = prop.GetValue(source);
-                prop.SetValue(dest, sourceValue);
-            }
+            return value.GetType().GetField(value.ToString())
+                       .GetCustomAttributes(typeof(DescriptionAttribute), false)
+                       .Cast<DescriptionAttribute>()
+                       .FirstOrDefault()?.Description ?? value.ToString();
         }
 
-        public static void UpdateParametersFromJson(JsonNode jsonNode, IImplementsParameterAttribute dest)
-        {
-            //if (source.GetType() != dest.GetType())
-            //{
-            //    throw new ArgumentException("Source and destination must be of the same type.");
-            //}
-            Dictionary<PropertyInfo, ParameterAttribute> attribMap = GetAttributeMap(dest);
-            //foreach (var prop in attribMap.Keys)
-            //{
-            //    var sourceValue = prop.GetValue(source);
-            //    prop.SetValue(dest, sourceValue);
-            //}
-            foreach (var prop in attribMap.Keys)
-            {
-                if (prop.CanWrite && jsonNode[prop.Name] != null)
-                {
-                    var valueNode = jsonNode[prop.Name];
+        //#region 
+        //protected RequiredAttribute _requiredAttribute; //Ensures that a property cannot be null or empty.It's commonly used to indicate mandatory fields. 
+        //protected StringLengthAttribute _stringLengthAttribute; //Specifies the minimum and maximum length of a string property. 
+        //protected RangeAttribute _rangeAttribute; //Limits a numeric property to a specific range of values. 
+        //protected EmailAddressAttribute _emailAddressAttribute; //Validates that a string property is a valid email address. 
+        //protected PhoneAttribute _phoneAttribute; //Validates that a string property is a valid phone number. 
+        //protected UrlAttribute _urlAttribute; //Validates that a string property is a valid URL.
+        //protected DataTypeAttribute _dataTypeAttribute; //Provides metadata about the data type of a property, such as Date, Time, PhoneNumber, Currency, etc.
+        //protected EnumDataTypeAttribute _enumDataTypeAttribute; //Links an enum to a data column, ensuring the property's value is within the enum's range.
+        //protected FileExtensionsAttribute _fileExtensionsAttribute; //Validates that a file name extension is valid.
+        //protected CustomValidationAttribute _customValidationAttribute; //Allows for custom validation logic to be applied to a property.
+        //protected DisplayAttribute _displayAttribute; // Specifies localizable strings for display purposes, such as the field's name, description, or prompt.
+        //protected DisplayFormatAttribute _displayFormatAttribute; // Controls how data fields are displayed and formatted in user interfaces.
+        //protected EditableAttribute _editableAttribute; // Indicates whether a property is editable or read-only
+        //#endregion
 
-                    try
-                    {
-                        object? value = valueNode.Deserialize(prop.PropertyType);
-                        prop.SetValue(dest, value);
-                    }
-                    catch
-                    {
-                        // Optionally log or handle deserialization errors
-                    }
-                }
-            }
-        }
     }
 }

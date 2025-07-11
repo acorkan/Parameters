@@ -1,4 +1,5 @@
 ﻿using ParameterModel.Interfaces;
+using ParameterModel.Variables;
 using Python.Runtime;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
@@ -77,10 +78,7 @@ namespace PythonWrapper
                 }
                 try
                 {
-                    //string code = "3 * 4 + 5";
                     dynamic dResult = PythonEngine.Eval(code, globals, locals);
-
-                    //Trace.WriteLine($"Result: {result}");
                     result = dResult.ToString();
                     return true;
                 }
@@ -100,22 +98,63 @@ namespace PythonWrapper
 
         public bool EvalInt(string code, IVariablesContext variableContext, out int result, out string error)
         {
-
+            result = 0;
+            error = "";
+            if (Eval(code, variableContext, out string evalResult, out error))
+            {
+                if ((evalResult != null) && int.TryParse(evalResult, out result))
+                {
+                    return true;
+                }
+                error = $"Unable to convert evaluation result '{evalResult}' to int.";
+            }
+            return false;
         }
 
-                    public bool EvalFloat(string code, IVariablesContext variableContext, out float result, out string error)
+        public bool EvalFloat(string code, IVariablesContext variableContext, out float result, out string error)
         {
-
+            result = 0F;
+            error = "";
+            if (Eval(code, variableContext, out string evalResult, out error))
+            {
+                if ((evalResult != null) && float.TryParse(evalResult, out result))
+                {
+                    return true;
+                }
+                error = $"Unable to convert evaluation result '{evalResult}' to float.";
+            }
+            return false;
         }
 
-                                public bool EvalBool(string code, IVariablesContext variableContext, out bool result, out string error)
+        public bool EvalBool(string code, IVariablesContext variableContext, out bool result, out string error)
         {
-
+            result = false;
+            error = "";
+            if (Eval(code, variableContext, out string evalResult, out error))
+            {
+                if ((evalResult != null) && bool.TryParse(evalResult, out result))
+                {
+                    return true;
+                }
+                error = $"Unable to convert evaluation result '{evalResult}' to float.";
+            }
+            return false;
         }
 
-                    public bool EvalJson(string code, IVariablesContext variableContext, out string result, out string error)
+        public bool EvalJson(string code, IVariablesContext variableContext, out string result, out string error)
         {
-
+            result = "";
+            error = "";
+            if (Eval(code, variableContext, out string evalResult, out error))
+            {
+                if ((evalResult != null) && VariableBase.IsJson(evalResult))
+                {
+                    result = evalResult;
+                    return true;
+                }
+                error = $"Evaluation result '{evalResult}' is not JSON.";
+            }
+            return false;
         }
 
         /*
@@ -155,13 +194,6 @@ namespace PythonWrapper
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~PyEval()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

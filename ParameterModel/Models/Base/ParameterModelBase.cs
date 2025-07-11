@@ -1,6 +1,7 @@
 ﻿using MileHighWpf.MvvmModelMessaging;
 using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
+using ParameterModel.Variables;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,31 +20,36 @@ namespace ParameterModel.Models.Base
     /// <typeparam name="T"></typeparam>
     public abstract class ParameterModelBase<T> : ModelBase<ParameterModelMessage>, IParameterModel<T>
     {
-        static ParameterModelBase()
-        {
-            //??TypeValidator.ValidateType<T>();
-        }
+        //static ParameterModelBase()
+        //{
+        //    //??TypeValidator.ValidateType<T>();
+        //}
 
         protected IImplementsParameterAttribute _propertyOwner;
-        protected IStatementEvaluator _statementEvaluator;
+        //protected IStatementEvaluator _statementEvaluator;
 
-        protected readonly List<string> _evaluateErrors = new List<string>();
-        public IEvaluationContext EvaluationContext { get; }
+        public IVariablesContext VariablesContext { get; }
 
         public ParameterModelBase(ParameterAttribute parameterPromptAttribute, 
             PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner,
-            IEvaluationContext evaluationContext)
+            IVariablesContext variablesContext)
         {
             ParameterAttribute = parameterPromptAttribute;
             PropertyInfo = propertyInfo;
             _propertyOwner = propertyOwner;
             IsPropertyTypeString = PropertyInfo.PropertyType == typeof(string);
-            CanEvaluate = ParameterAttribute.EvaluateType != null;
-            EvaluationContext = evaluationContext;
-            if (CanEvaluate && (EvaluationContext == null))
+            IsVariableAllowed = ParameterAttribute.VariableType != null;
+            VariablesContext = variablesContext;
+            if (IsVariableAllowed && (VariablesContext == null))
             {
-                throw new InvalidOperationException($"EvaluationContext cannot be null for properties like {PropertyInfo.Name} with EvaluateType set.");
+                throw new InvalidOperationException($"VariablesContext cannot be null for property {PropertyInfo.Name} VariableType set to {ParameterAttribute.VariableType}.");
             }
+
+            if (IsVariableAllowed && !TryGetPropertyValue(out T propertyValue, out string propertyError))
+            {
+                VariableError = propertyError;
+            }
+
 
             //try
             //{
@@ -93,7 +99,7 @@ namespace ParameterModel.Models.Base
         public bool IsPropertyTypeString { get; }
         public PropertyInfo PropertyInfo { get; }
 
-        public bool CanEvaluate { get; }
+        public bool IsVariableAllowed { get; }
 
         public string AttributeError { get; protected set; }
 
@@ -103,9 +109,13 @@ namespace ParameterModel.Models.Base
 
         public bool IsParameterError { get => !string.IsNullOrEmpty(ParameterError);  }
 
-        public bool IsEvaluateError { get => _evaluateErrors.Count != 0; }
+        public string VariableError { get; protected set; }
 
-        public bool IsAnyError { get => IsAttributeError || IsParameterError || IsEvaluateError; }
+        public bool IsVariableError { get => !string.IsNullOrEmpty(VariableError); }
+
+        public bool IsAnyError { get => IsAttributeError || IsParameterError || IsVariableError; }
+
+        public Type ParameterType { get => IsVariableAllowed ? ParameterAttribute.VariableType : PropertyInfo.PropertyType; }
 
         public virtual string ToDisplayString()
         {
@@ -116,7 +126,7 @@ namespace ParameterModel.Models.Base
             else
             {
                 T val = (T)PropertyInfo.GetValue(_propertyOwner);
-                return ToDisplayString(val);
+                return Format(val);
             }
         }
 
@@ -148,7 +158,7 @@ namespace ParameterModel.Models.Base
         /// This returns selections that can be used in a combobox.
         /// </summary>
         /// <returns></returns>
-        public abstract string[] GetSelectionItems();
+        public virtual string[] GetSelectionItems() => Array.Empty<string>(); // Default implementation returns an empty array.
 
         #endregion IParameterModel
         #region IParameterModel<T>
@@ -165,17 +175,23 @@ namespace ParameterModel.Models.Base
         /// Return the default value.
         /// </summary>
         /// <returns></returns>
-        public abstract T GetDefault();
+        public virtual T GetDefault()
+        {
+            return default(T); // Default implementation returns the default value for type T.
+        }
 
         //public abstract bool TryGetFormat(T val, out string formattedValue);
 
-        public abstract string ToDisplayString(T val);
+        public virtual string Format(T val)
+        {
+            return val?.ToString() ?? string.Empty; // Default formatting to string representation.
+        }
 
         public void SetPropertyValue(T newValue)
         {
             if (IsPropertyTypeString)// && (typeof(T) != typeof(string)))
             {
-                PropertyInfo.SetValue(_propertyOwner, ToDisplayString(newValue));
+                PropertyInfo.SetValue(_propertyOwner, Format(newValue));
             }
             else
             {
@@ -188,44 +204,34 @@ namespace ParameterModel.Models.Base
             propertyError = "";
             val = GetDefault();
             AttributeError = null;
-            if (IsPropertyTypeString)
+            if (PropertyInfo.PropertyType == typeof(T))
+            {
+                // If the property type is already T, we can just get the value directly.
+                val = (T)PropertyInfo.GetValue(_propertyOwner);
+                return true; // Successfully retrieved the value.
+            }
+            else if (IsVariableAllowed) //(IsPropertyTypeString)
             {
                 string propertyString = (string)PropertyInfo.GetValue(_propertyOwner);
+                // Generate the error message here and clear it if OK.
+                propertyError = $"Can not resolve parameter {PropertyInfo.Name} to type {typeof(T)} from '{propertyString}'.";
 
-                if (string.IsNullOrEmpty(propertyString))
+                // Maybe it is a variable.
+                VariableBase variable = VariablesContext.GetVariable(propertyString);
+                if (variable != null)
                 {
-                    return false; // No value to parse.
-                }
-                if (_statementEvaluator != null)
-                {
-                    List<string> errors = new List<string>();
-                    if (_statementEvaluator.TryEvaluate(propertyString, out string result, errors))
-                    {
-                        propertyString = result;
-                    }
-                    else
-                    {
-                        propertyError = string.Join(", ", errors); // Collect all errors from evaluation.
-                        AttributeError = propertyError;
-                        return false; // Evaluation failed, no value to parse.
-                    }
+                    propertyString = variable.GetValueAsString(); // Get the value of the variable as a string.
+                    // Generate the error message if the variable is not of the expected type.
+                    propertyError = $"Can not resolve parameter {PropertyInfo.Name} to type {typeof(T)} from variable '{variable.Name}' with contents '{propertyString}'.";
                 }
 
                 if (TryParse(propertyString, out val, out propertyError))
                 {
+                    propertyError = ""; // Clear the error if parsing was successful.
                     return true; // Successfully parsed the value.
                 }
-                else
-                {
-                    AttributeError = propertyError;
-                }
             }
-            else
-            {
-                val = (T)PropertyInfo.GetValue(_propertyOwner);
-                return true; // Parsing failed.
-            }
-            return false;
+            return false; // Failed to get the value or parse it.
         }
 
         public abstract bool TryParse(string valString, out T val);
@@ -237,182 +243,22 @@ namespace ParameterModel.Models.Base
             {
                 errors.Add(AttributeError);
             }
-            if(IsEvaluateError)
+            if(IsVariableError)
             {
-                errors.AddRange(_evaluateErrors);
+//                errors.AddRange(_evaluateErrors);
             }
             return (errors.Count == 0);
         }
+
+        public void UpdateCurrentAssignmentErrors()
+        {
+            throw new NotImplementedException();
+        }
         #endregion IParameterModel<T>
 
-        //public abstract bool TryGetValue(out T val);
-
-
-        //public abstract bool TestValue(T val, out string parseError);
-
-        //public bool TestValue<T>(T val, out string parseError)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public T GetDefault<T>()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public T1 GetValue<T1>()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public bool SetPropertyValueFromString(string newValue)
-        //{
-        //    if (TryParse(newValue, out T tValue, out string err) && TestValue(tValue, out err))
-        //    {
-        //        PropertyInfo.SetValue(_propertyOwner, tValue);
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-        //public bool SetPropertyValue(T newValue)
-        //{
-        //    if (TestValue(newValue, out string err))
-        //    {
-        //        if (PropertyTypeIsString)
-        //        {
-        //            PropertyInfo.SetValue(_propertyOwner, newValue.ToString());
-        //        }
-        //        else
-        //        {
-        //            PropertyInfo.SetValue(_propertyOwner, newValue);
-        //        }
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-
-        ////private string _valueString = string.Empty;
-        ////public string ValueString
-        ////{
-        ////    get => _valueString;
-        ////    set
-        ////    {
-        ////        if (_valueString != value)
-        ////        {
-        ////            _valueString = value;
-        ////            SendModelUpdate(nameof(ValueString));
-        ////        }
-        ////    }
-        ////}
-        //private T _lastParsedValue;
-        //private bool _lastParsedValueValid;
-
-        ///// <summary>
-        ///// Tries to either parse or evaluate the property value.
-        ///// For non-evaluation the model provides the value of the property,
-        ///// but for the evaluation version it will try to evaluate and then parse.
-        ///// </summary>
-        ///// <param name="value"></param>
-        ///// <param name="statementEvaluator"></param>
-        ///// <returns></returns>
-        //protected bool TryGetValue(out T value, IStatementEvaluator statementEvaluator = null, List<string> errors = null)
-        //{
-        //    if (_lastParsedValueValid)
-        //    {
-        //        // If the value has not changed, we can just return the last parsed value.
-        //        value = _lastParsedValue;
-        //        return true;
-        //    }
-        //    value = default;
-        //    //string valueString = GetValueString();
-
-        //    string valueString = PropertyInfo.GetValue(_propertyOwner)?.ToString() ?? string.Empty;
-
-        //    // If this is an evaluation then we first try to parse a string for the correct type.
-        //    if (ParameterAttribute.EvaluateType != null) // 
-        //    {
-        //        if (statementEvaluator == null)
-        //        {
-        //            throw new InvalidOperationException("StatementEvaluator is required for properties with EvaluateType set.");
-        //        }
-        //        if (errors == null)
-        //        {
-        //            throw new ArgumentNullException(nameof(errors), "Errors list cannot be null.");
-        //        }
-        //        if (statementEvaluator.TryEvaluate(valueString, out string evaluatedValueString, errors))
-        //        {
-        //            if (TryParse(evaluatedValueString, out value))
-        //            {
-        //                _lastParsedValue = value; // Store the last parsed value for quick access next time.
-        //                _lastParsedValueValid = true;
-        //            }
-        //        }
-        //    }
-        //    // If this is not an evaluation, or the evaluation failed, we just try to parse the value string directly.
-        //    if (TryParse(valueString, out value))
-        //    {
-        //        _lastParsedValue = value; // Store the last parsed value for quick access next time.
-        //        _lastParsedValueValid = true;
-        //    }
-        //    return _lastParsedValueValid;
-        //}
-
-        //public V GetValue<V>() //IStatementEvaluator statementEvaluator = null, List<string> errors = null)
-        //{
-        //    List<string> errors = new List<string>();
-        //    if (TryGetValue(out T value, _statementEvaluator, errors))
-        //    {
-        //        if (value is V vValue)
-        //        {
-        //            return vValue;
-        //        }
-        //        else
-        //        {
-        //            throw new InvalidCastException($"Cannot cast value of type {typeof(T).Name} to {typeof(V).Name}.");
-        //        }
-        //    }
-        //    return default;
-        //}
-
-        //public override string ToString()
-        //{
-        //    return $"{PropertyInfo.Name}:{ParameterAttribute.Label}:{PropertyInfo.PropertyType.Name}";
-        //}
-
-
-        //public void SetPropertyValue<V>(V newValue)
-        //{
-        //    if (newValue is T tValue)
-        //    {
-        //        // If the EvaluateType is set, we assume the value is a string and we just set it directly.
-        //        if (ParameterAttribute.EvaluateType != null)
-        //        {
-        //            PropertyInfo.SetValue(_propertyOwner, tValue.ToString());
-        //        }
-        //        else // If EvaluateType is not set, we assume the value is of type T and we can set it directly.
-        //        {
-        //            PropertyInfo.SetValue(_propertyOwner, tValue);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidCastException($"Cannot cast value of type {typeof(V).Name} to {typeof(T).Name}.");
-        //    }
-        //}
+  
     }
-    /*
-     *                 string valueString = PropertyInfo.GetValue(_propertyOwner)?.ToString() ?? string.Empty;
-            string[] strings = valueString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if((strings.Length == 1) && TryParse(strings[0], out value))
-            {
-                return true;
-            }
-
-     * */
 
     public class ParameterModelMessage : ModelDependentMessage { }
-
-  
+     
 }

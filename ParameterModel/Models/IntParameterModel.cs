@@ -9,43 +9,49 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParameterModel.Models
-{/*
+{
     public class IntParameterModel : ParameterModelBase<int>
     {
-        public IntParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) 
-            : base(parameterPromptAttribute, propertyInfo, propertyOwner)
+        public IntParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner, IVariablesContext variablesContext) : base(parameterPromptAttribute, propertyInfo, propertyOwner, variablesContext)
         {
+            //if (IsVariableAllowed &&  !TryGetPropertyValue(out bool propertyValue, out string propertyError))
+            //{
+            //    VariableError = propertyError;
+            //}
         }
-        protected override int GetDefault()
+
+        //public override string Format(int val)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //public override int GetDefault()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //public override string[] GetSelectionItems() => [];
+
+        public override bool TestAttibuteValidation(int val, out string attributeError)
         {
-            return 0;
-        }
-        public override string[] GetSelectionItems() 
-        {
-            return Array.Empty<string>();
-        }
-        protected override string FormatType(int typeValue)
-        {
-            return typeValue.ToString();
-        }
-        protected override bool TryParse(string valueString, out int value)
-        {
-            return int.TryParse(valueString, out value);
-        }
-        protected override string TestAttibuteValidation(int i)
-        {
+            attributeError = "";
             if (ParameterAttribute.Min != ParameterAttribute.Max)
             {
-                if (i < ParameterAttribute.Min)
+                if (val < (int)ParameterAttribute.Min)
                 {
-                    return $"Value must be greater than or equal to {ParameterAttribute.Min}";
+                    attributeError = $"Value must be greater than or equal to {(int)ParameterAttribute.Min}";
                 }
-                if (i > ParameterAttribute.Max)
+                if (i > (int)ParameterAttribute.Max)
                 {
-                    return $"Value must be less than or equal to {ParameterAttribute.Max}";
+                    attributeError = $"Value must be less than or equal to {(int)ParameterAttribute.Max}";
                 }
             }
-            return null;
+            return string.IsNullOrEmpty(attributeError);
         }
-    }*/
+
+        public override bool TryParse(string valString, out int val)
+        {
+            return int.TryParse(valString, out val);
+        }
+    }
 }

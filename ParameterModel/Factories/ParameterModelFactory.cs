@@ -1,41 +1,39 @@
-﻿using log4net;
-using ParameterModel.Attributes;
+﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
+using ParameterModel.Models;
 using System.Reflection;
 
-namespace ParameterModel.Models.Base
+namespace ParameterModel.Factories
 {
-    public class ParameterModelHelper
+    public class ParameterModelFactory
     {
-        private IEvaluationContext _evaluationContext;
-        private ILog _log;
-        public ParameterModelHelper(IEvaluationContext evaluationContext, ILog log) 
+        private IVariablesContext _variablesContext;
+        public ParameterModelFactory(IVariablesContext variablesContext) 
         { 
-            _evaluationContext = evaluationContext ?? throw new ArgumentNullException(nameof(evaluationContext));
-            _log = log ?? throw new ArgumentNullException(nameof(log));
+            _variablesContext = variablesContext ?? throw new ArgumentNullException(nameof(variablesContext));
         }
 
-        public List<IParameterModel> Collect(IImplementsParameterAttribute propertyOwner)
+        public Dictionary<string, IParameterModel> Collect(IImplementsParameterAttribute propertyOwner)
         {
-            Dictionary<PropertyInfo, ParameterAttribute> attributeMap = ParameterAttribute.GetAttributeMap(propertyOwner);
-            List<IParameterModel> ret = new List<IParameterModel>();
+            Dictionary<string, ParameterAttribute> attributeMap = ParameterAttribute.GetAttributeMap(propertyOwner);
+            Dictionary<string, IParameterModel> ret = new Dictionary<string, IParameterModel>();
             foreach (var kvp in attributeMap)
             {
-                PropertyInfo propertyInfo = kvp.Key;
-                ParameterAttribute parameterPromptAttribute = kvp.Value;
+                //PropertyInfo propertyInfo = kvp.Value.PropertyInfo;
+                //ParameterAttribute parameterPromptAttribute = kvp.Value;
                 IParameterModel parameterModel = null;
-                Type type = null;
-                if (parameterPromptAttribute.EvaluateType != null)
-                {
-                    type = parameterPromptAttribute.EvaluateType;
-                }
-                else
-                {
-                    type = propertyInfo.PropertyType;
-                }
+                Type type = kvp.Value.PropertyInfo.PropertyType;
+                //if (kvp.Value.PropertyInfo.PropertyType != null)
+                //{
+                //    type = parameterPromptAttribute.VariableType;
+                //}
+                //else
+                //{
+                //    type = kvp.Value.PropertyInfo.PropertyType;
+                //}
                 if (type == typeof(bool))
                 {
-                    parameterModel = new BoolParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner, _evaluationContext);
+                    parameterModel = new BoolParameterModel(kvp.Value, kvp.Value.PropertyInfo, propertyOwner, _variablesContext);
                 }
 /*                else if (type == typeof(string))
                 {
@@ -73,7 +71,7 @@ namespace ParameterModel.Models.Base
                 {
                     throw new NotSupportedException($"Type {type} is not supported.");
                 }
-                ret.Add(parameterModel);
+                ret.Add(kvp.Value.PropertyInfo.Name, parameterModel);
             }
             return ret;
         }

@@ -64,5 +64,10 @@ namespace ParameterModel.Models.Base
             Variables.Add(variableBase);
             return variableBase;
         }
+
+        public void ClearVariables()
+        {
+            Variables.Clear();
+        }
     }
 }

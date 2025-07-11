@@ -102,7 +102,7 @@ namespace PyWrapperTests
             Log.Debug($"Result: {result}, Error: {error}");
             // Assert
             // You can add assertions here based on the expected output or behavior
-            Assert.AreEqual().Pass("Python code evaluated successfully.");
+            //Assert.AreEqual().Pass("Python code evaluated successfully.");
         }
 
     }

@@ -9,6 +9,15 @@ namespace ParameterModel.Interfaces
     /// </summary>
     public interface IImplementsParameterAttribute
     {
-        //Dictionary<PropertyInfo, ParameterAttribute> GetAttributeMap();
+        /// <summary>
+        /// Used by the ImplementParameterAttributeExtension class to track variable assignments for properties that are 
+        /// attributed with ParameterPromptAttribute and for which IsVariable = true. 
+        /// </summary>
+        Dictionary<string, string> VariableAssignments { get; }
+        /// <summary>
+        /// Initialized and used by the ImplementParameterAttributeExtension class to track errors for properties that are
+        /// attributed with ParameterPromptAttribute.
+        /// </summary>
+        Dictionary<string, ParameterAttribute> AttributeMap { get; }
     }
 }

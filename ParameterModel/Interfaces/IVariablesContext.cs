@@ -69,5 +69,7 @@ namespace ParameterModel.Interfaces
         /// <param name="name"></param>
         /// <returns></returns>
         bool RemoveVariable(VariableBase variableBase);
+
+        void ClearVariables();
     }
 }

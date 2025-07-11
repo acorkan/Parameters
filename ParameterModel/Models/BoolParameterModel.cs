@@ -28,20 +28,24 @@ namespace ParameterModel.Models
 
         public BoolParameterModel(ParameterAttribute parameterPromptAttribute, 
             PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner,
-            IEvaluationContext evaluationContext) : 
+            IVariablesContext evaluationContext) : 
                 base(parameterPromptAttribute, propertyInfo, propertyOwner, evaluationContext)
         {
+            //if (IsVariableAllowed && !TryGetPropertyValue(out bool propertyValue, out string propertyError))
+            //{
+            //    VariableError = propertyError;
+            //}
         }
 
-        public override string ToDisplayString(bool val)
-        {
-            return val.ToString();
-        }
+        //public override string Format(bool val)
+        //{
+        //    return val.ToString();
+        //}
 
-        public override bool GetDefault()
-        {
-            return false;
-        }
+        //public override bool GetDefault()
+        //{
+        //    return false;
+        //}
 
         //protected override bool TryParse(string valueString, out bool value, out string parseError)
         //{
