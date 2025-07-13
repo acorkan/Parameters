@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 
 namespace ParameterModel.Models
 {
-    public class IntParameterModel : ParameterModelBase<int>
+    public class IntParameterModel : ParameterModelBase
     {
-        public IntParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner, IVariablesContext variablesContext) : base(parameterPromptAttribute, propertyInfo, propertyOwner, variablesContext)
+        public IntParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner, 
+                IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, propertyOwner, variablesContext)
         {
             //if (IsVariableAllowed &&  !TryGetPropertyValue(out bool propertyValue, out string propertyError))
             //{
@@ -32,26 +34,26 @@ namespace ParameterModel.Models
 
         //public override string[] GetSelectionItems() => [];
 
-        public override bool TestAttibuteValidation(int val, out string attributeError)
-        {
-            attributeError = "";
-            if (ParameterAttribute.Min != ParameterAttribute.Max)
-            {
-                if (val < (int)ParameterAttribute.Min)
-                {
-                    attributeError = $"Value must be greater than or equal to {(int)ParameterAttribute.Min}";
-                }
-                if (i > (int)ParameterAttribute.Max)
-                {
-                    attributeError = $"Value must be less than or equal to {(int)ParameterAttribute.Max}";
-                }
-            }
-            return string.IsNullOrEmpty(attributeError);
-        }
+        //public override bool TestAttibuteValidation(int val, out string attributeError)
+        //{
+        //    attributeError = "";
+        //    if (ParameterAttribute.Min != ParameterAttribute.Max)
+        //    {
+        //        if (val < (int)ParameterAttribute.Min)
+        //        {
+        //            attributeError = $"Value must be greater than or equal to {(int)ParameterAttribute.Min}";
+        //        }
+        //        if (i > (int)ParameterAttribute.Max)
+        //        {
+        //            attributeError = $"Value must be less than or equal to {(int)ParameterAttribute.Max}";
+        //        }
+        //    }
+        //    return string.IsNullOrEmpty(attributeError);
+        //}
 
-        public override bool TryParse(string valString, out int val)
-        {
-            return int.TryParse(valString, out val);
-        }
+        //public override bool TryParse(string valString, out int val)
+        //{
+        //    return int.TryParse(valString, out val);
+        //}
     }
 }

@@ -1,7 +1,7 @@
 ﻿using ParameterModel.Attributes;
+using ParameterModel.Extensions;
 using ParameterModel.Interfaces;
 using ParameterModel.Models;
-using System.Reflection;
 
 namespace ParameterModel.Factories
 {
@@ -15,7 +15,7 @@ namespace ParameterModel.Factories
 
         public Dictionary<string, IParameterModel> Collect(IImplementsParameterAttribute propertyOwner)
         {
-            Dictionary<string, ParameterAttribute> attributeMap = ParameterAttribute.GetAttributeMap(propertyOwner);
+            Dictionary<string, ParameterAttribute> attributeMap = propertyOwner.GetAttributeMap();
             Dictionary<string, IParameterModel> ret = new Dictionary<string, IParameterModel>();
             foreach (var kvp in attributeMap)
             {
@@ -33,7 +33,7 @@ namespace ParameterModel.Factories
                 //}
                 if (type == typeof(bool))
                 {
-                    parameterModel = new BoolParameterModel(kvp.Value, kvp.Value.PropertyInfo, propertyOwner, _variablesContext);
+                    parameterModel = new BoolParameterModel(kvp.Value, propertyOwner, _variablesContext);
                 }
 /*                else if (type == typeof(string))
                 {

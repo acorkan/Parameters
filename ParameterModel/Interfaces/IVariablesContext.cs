@@ -71,5 +71,11 @@ namespace ParameterModel.Interfaces
         bool RemoveVariable(VariableBase variableBase);
 
         void ClearVariables();
+
+        char VariablePrefix { get; } // = '%'; // Used to indicate a variable in the string value.
+
+        //private static string _varRegexPattern = @"^[A-Za-z_][A-Za-z0-9_]*$";
+        bool IsVariableNameValid(string name);
+        //System.Text.RegularExpressions.Regex VariableNameRegex { get; } // = new System.Text.RegularExpressions.Regex(_varRegexPattern);
     }
 }

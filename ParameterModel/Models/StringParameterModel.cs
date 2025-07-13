@@ -7,37 +7,13 @@ using System.Linq;
 using System.Reflection;
 
 namespace ParameterModel.Models
-{/*
-    public class StringParameterModel : ParameterModelBase<string>
+{
+    public class StringParameterModel : ParameterModelBase
     {
-        public StringParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) 
-            : base(parameterPromptAttribute, propertyInfo, propertyOwner)
+        public StringParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
+            IVariablesContext variablesContext)
+            : base(parameterPromptAttribute, propertyOwner, variablesContext)
         {
         }
-        protected override string GetDefault()
-        {
-            return string.Empty;
-        }
-        public override string[] GetSelectionItems() 
-        {
-            return Array.Empty<string>();
-        }
-        protected override string FormatType(string typeValue)
-        {
-            return typeValue;
-        }
-        protected override bool TryParse(string valueString, out string value)
-        {
-            value = valueString;
-            return true;
-        }
-        protected override string TestAttibuteValidation(string s)
-        {
-            if (!ParameterAttribute.AllowEmptyString && string.IsNullOrEmpty(s))
-            {
-                return "Entry cannot be blank";
-            }
-            return null;
-        }
-    }*/
+    }
 }

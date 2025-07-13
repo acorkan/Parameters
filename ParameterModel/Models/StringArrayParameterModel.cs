@@ -9,43 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParameterModel.Models
-{/*
-    public class StringArrayParameterModel : ParameterModelBase<string[]>
+{
+    public class StringArrayParameterModel : ParameterModelBase
     {
         public static readonly char StrArrayParameterDelimiter = ',';
 
-        public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) : base(parameterPromptAttribute, propertyInfo, propertyOwner)
+        public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
+                IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, propertyOwner, variablesContext)
         {
         }
-
-        protected override string[] GetDefault()
-        {
-            return new string[0];
-        } 
-
-        public override string[] GetSelectionItems()
-        {
-            return Array.Empty<string>(); 
-        }
-
-        protected override string FormatType(string[] typeValue)
-        {
-            return string.Join(StrArrayParameterDelimiter, typeValue);
-        }
-
-        protected override bool TryParse(string valueString, out string[] value)
-        {
-            value = valueString.Split(StrArrayParameterDelimiter, StringSplitOptions.RemoveEmptyEntries);
-            return true;
-        }
-
-        protected override string TestAttibuteValidation(string[] val)
-        {
-            if (ParameterAttribute.AllowEmptyString || (val.Length > 0))
-            {
-                return null;
-            }
-            return "Entry cannot be blank";
-        }
-    }*/
+    }
 }

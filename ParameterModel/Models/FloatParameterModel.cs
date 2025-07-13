@@ -10,47 +10,13 @@ using System.Threading.Tasks;
 
 namespace ParameterModel.Models
 {
-    /*
-    public class FloatParameterModel : ParameterModelBase<float>
+    public class FloatParameterModel : ParameterModelBase
     {
-        public FloatParameterModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) : base(parameterPromptAttribute, propertyInfo, propertyOwner)
+        public FloatParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
+                IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, propertyOwner, variablesContext)
         {
         }
 
-        protected override float GetDefault()
-        {
-            return 0.0F;
-        }
-
-        public override string[] GetSelectionItems() 
-        {
-            return Array.Empty<string>();
-        }
-
-        protected override string FormatType(float typeValue)
-        {
-            return typeValue.ToString("F2");
-        }
-
-        protected override bool TryParse(string valueString, out float value)
-        {
-            return float.TryParse(valueString, out value);
-        }
-
-        protected override string TestAttibuteValidation(float f)
-        {
-            if (ParameterAttribute.Min != ParameterAttribute.Max)
-            {
-                if (f < ParameterAttribute.Min)
-                {
-                    return $"Value must be greater than or equal to {ParameterAttribute.Min}";
-                }
-                if (f > ParameterAttribute.Max)
-                {
-                    return $"Value must be less than or equal to {ParameterAttribute.Max}";
-                }
-            }
-            return null;
-        }
-    }*/
+    }
 }

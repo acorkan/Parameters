@@ -1,4 +1,5 @@
-﻿using ParameterModel.Interfaces;
+﻿using ParameterModel.Extensions;
+using ParameterModel.Interfaces;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -11,9 +12,10 @@ namespace ParameterModel.Attributes
     public sealed class ParameterAttribute : Attribute
     {
         private Array _enumValues;
-        private Dictionary<int, string> _values;
-        public Dictionary<Enum, string> EnumItemsDisplaySource { get; protected set; }
+        public Dictionary<int, string> EnumIntDisplayDict { get; protected set; }
+        public Dictionary<Enum, string> EnumItemsDisplayDict { get; protected set; }
 
+        protected IImplementsParameterAttribute _implementsParameterAttribute;
 
         /// <summary>
         /// Used in a prompt.
@@ -54,11 +56,7 @@ namespace ParameterModel.Attributes
         /// This is used to indicate that the value can be set by a variable in the context of the application.
         /// This meas there will be an entry in a VariableAssignments property to resolve.
         /// </summary>
-        public bool IsVariable { get; set; } = false; 
-        ///// <summary>
-        ///// Applies only to string or string[] inputs
-        ///// </summary>
-        //public bool AllowEmptyString { get; set; } = false;
+        public bool CanBeVariable { get; set; } = false; 
 
         ///// <summary>
         ///// If the value can be a variable, then this is the type of the evaluation result.
@@ -75,11 +73,31 @@ namespace ParameterModel.Attributes
             Label = label;
         }
 
-        public static void SetPropertyInfo(ParameterAttribute parameterAttribute, PropertyInfo propertyInfo)
+        public bool IsVariableSelected { get => _implementsParameterAttribute.VariableAssignments.ContainsKey(PropertyInfo.Name); }
+
+        public bool GetDisplayString(out string displayString, out bool isVariableAssignment)
+        {
+            return _implementsParameterAttribute.GetDisplayString(PropertyInfo.Name, out displayString, out isVariableAssignment);
+        }
+
+        public bool TrySetPropertyValue(string newValue, out string error)
+        {
+            return _implementsParameterAttribute.TrySetPropertyValue(PropertyInfo.Name, newValue, out error);
+        }
+
+        public bool TestPropertyValue(string newValue, out string error)
+        {
+            return _implementsParameterAttribute.TestPropertyValue(PropertyInfo.Name, newValue, out error);
+        }
+
+
+        public static void SetPropertyInfo(ParameterAttribute parameterAttribute, PropertyInfo propertyInfo,
+            IImplementsParameterAttribute implements)
         {
             if(parameterAttribute.PropertyInfo == null)
             {
                 parameterAttribute.PropertyInfo = propertyInfo;
+                parameterAttribute._implementsParameterAttribute = implements;
             }
         }
 
@@ -92,9 +110,10 @@ namespace ParameterModel.Attributes
                 {
                     throw new ArgumentException($"Enum type {parameterAttribute.PropertyInfo.PropertyType} does not contain any values.", nameof(parameterAttribute.PropertyInfo.Name));
                 }
-                parameterAttribute.EnumItemsDisplaySource =
-                   parameterAttribute._enumValues.Cast<Enum>().ToDictionary(s => s, s => EnumToDescriptionOrString(s));
-                parameterAttribute._values = parameterAttribute._enumValues.Cast<Enum>().ToDictionary(e => Convert.ToInt32(e), e => EnumToDescriptionOrString(e));
+                parameterAttribute.EnumItemsDisplayDict =
+                    parameterAttribute._enumValues.Cast<Enum>().ToDictionary(s => s, s => EnumToDescriptionOrString(s));
+                parameterAttribute.EnumIntDisplayDict = 
+                    parameterAttribute._enumValues.Cast<Enum>().ToDictionary(e => Convert.ToInt32(e), e => EnumToDescriptionOrString(e));
             }
         }
 

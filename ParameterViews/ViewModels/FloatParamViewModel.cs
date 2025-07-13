@@ -18,32 +18,32 @@ namespace ParameterViews.ViewModels
             return float.TryParse(UserInput, out result);
         }
 
-        public override void Validate()
-        {
-            if (!TryGetResult(out float f))
-            {
-                IsValid = false;
-                SetErrorMessage($"Invalid value: {UserInput}");
-                return;
-            }
-            if (_parameterPromptAttribute.Min != _parameterPromptAttribute.Max)
-            {
-                if(f < _parameterPromptAttribute.Min)
-                {
-                    IsValid = false;
-                    SetErrorMessage($"Value must be greater than or equal to {_parameterPromptAttribute.Min}");
-                    return;
-                }
-                if (f > _parameterPromptAttribute.Max)
-                {
-                    IsValid = false;
-                    SetErrorMessage($"Value must be less than or equal to {_parameterPromptAttribute.Max}");
-                    return;
-                }
-            }
-            IsValid = true;
-            SetErrorMessage(null);
-        }
+        //public override void Validate()
+        //{
+        //    if (!TryGetResult(out float f))
+        //    {
+        //        IsValid = false;
+        //        SetErrorMessage($"Invalid value: {UserInput}");
+        //        return;
+        //    }
+        //    if (_parameterPromptAttribute.Min != _parameterPromptAttribute.Max)
+        //    {
+        //        if(f < _parameterPromptAttribute.Min)
+        //        {
+        //            IsValid = false;
+        //            SetErrorMessage($"Value must be greater than or equal to {_parameterPromptAttribute.Min}");
+        //            return;
+        //        }
+        //        if (f > _parameterPromptAttribute.Max)
+        //        {
+        //            IsValid = false;
+        //            SetErrorMessage($"Value must be less than or equal to {_parameterPromptAttribute.Max}");
+        //            return;
+        //        }
+        //    }
+        //    IsValid = true;
+        //    SetErrorMessage(null);
+        //}
 
         public override bool IsDirty
         {

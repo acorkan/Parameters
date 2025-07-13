@@ -1,16 +1,11 @@
-﻿using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ParameterModel.Interfaces
+﻿namespace ParameterModel.Interfaces
 {
-    public interface IEvaluationContext : IVariablesContext
+    public interface IEvaluationContext
     {
-        ILog Log { get; }
+        //ILog Log { get; }
         bool IsDebug { get; }
         bool IsSimulation { get; }
+
+        IVariablesContext VariablesContext { get; }
     }
 }

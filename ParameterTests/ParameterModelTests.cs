@@ -27,15 +27,18 @@ namespace ParameterTests
             Option5 = 5
         }
 
-        internal class MockExecutionContext : EvaluationContextBase
-        {
-            public MockExecutionContext() : base(LogManager.GetLogger(typeof(MockExecutionContext)), false, false)
-            {
-            }
-            public MockExecutionContext(ILog log, bool isDebug, bool isSimulation) : base(log, isDebug, isSimulation)
-            {
-            }
-        }
+
+
+        //internal class MockExecutionContext : EvaluationContextBase
+        //{
+        //    IVariablesContext _variablesContext = new VariablesContext(new VariableFactory(), new VariableCollectionFactory(), new VariableValueFactory());
+        //    public MockExecutionContext() : base(_variablesContext, false, false)
+        //    {
+        //    }
+        //    public MockExecutionContext(ILog log, bool isDebug, bool isSimulation) : base(log, isDebug, isSimulation)
+        //    {
+        //    }
+        //}
 
         //internal class ParameterClassSimple : IImplementsParameterAttribute
         //{
@@ -181,17 +184,21 @@ namespace ParameterTests
             [Parameter]
             public bool TestBool2 { get; set; } = false;
             // Should pass.
-            [Parameter(VariableType = typeof(bool))]
-            public string TestBool3 { get; set; } = "True";
+            [Parameter]
+            public bool TestBool3 { get; set; }
             // Should NOT pass for garbage string.
-            [Parameter(VariableType = typeof(bool))]
-            public string TestBool4 { get; set; } = "lfsdl";
+            [Parameter]
+            public bool TestBool4 { get; set; }
             // Should NOT pass for multiple items.
-            [Parameter(VariableType = typeof(bool))]
-            public string TestBool5 { get; set; } = "boolVar foo";
+            [Parameter]
+            public bool TestBool5 { get; set; }
             // Should pass if variables are supplied.
-            [Parameter(VariableType = typeof(bool))]
-            public string TestBool6 { get; set; } = "boolVar";
+            [Parameter]
+            public bool TestBool6 { get; set; }
+
+            public Dictionary<string, string> VariableAssignments { get; } = new Dictionary<string, string>();
+
+            public Dictionary<string, ParameterAttribute> AttributeMap { get; } = new Dictionary<string, ParameterAttribute>();
         }
 
         [Test]
@@ -224,8 +231,9 @@ namespace ParameterTests
             });
             BoolTests test2 = JsonSerializer.Deserialize<BoolTests>(json);
 
-            MockExecutionContext executionContext = new MockExecutionContext();
-            ParameterModelFactory parameterModelHelper = new ParameterModelFactory(executionContext);
+            //MockExecutionContext executionContext = new MockExecutionContext();
+            IVariablesContext variablesContext = new VariablesContext();
+            ParameterModelFactory parameterModelHelper = new ParameterModelFactory(variablesContext);
 
             Dictionary<string, IParameterModel> testModels1 = parameterModelHelper.Collect(test1);
             Dictionary<string, IParameterModel> testModels2 = parameterModelHelper.Collect(test1);
@@ -233,7 +241,7 @@ namespace ParameterTests
             {
                 string paramName = model.Key;
                 IParameterModel model2 = testModels2[paramName];
-                Assert.AreEqual(model.Value.ToDisplayString(), model2.ToDisplayString(), $"Property display string mismatch for {paramName}");
+                Assert.AreEqual(model.Value.GetDisplayString(), model2.GetDisplayString(), $"Property display string mismatch for {paramName}");
             }
         }
 

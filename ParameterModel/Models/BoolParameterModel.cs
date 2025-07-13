@@ -11,7 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParameterModel.Models
 {
-    public class BoolParameterModel : ParameterModelBase<bool>
+    public class BoolParameterModel : ParameterModelBase//<bool>
     {
 
         //protected override bool TryParse(string valueString, out bool value)
@@ -26,16 +26,21 @@ namespace ParameterModel.Models
 
         private readonly string[] _selections = { "True", "False" };
 
-        public BoolParameterModel(ParameterAttribute parameterPromptAttribute, 
-            PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner,
-            IVariablesContext evaluationContext) : 
-                base(parameterPromptAttribute, propertyInfo, propertyOwner, evaluationContext)
+        public BoolParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
+            IVariablesContext variablesContext) : 
+                base(parameterPromptAttribute, propertyOwner, variablesContext)
         {
             //if (IsVariableAllowed && !TryGetPropertyValue(out bool propertyValue, out string propertyError))
             //{
             //    VariableError = propertyError;
             //}
         }
+
+        public override string[] GetSelectionItems()
+        {
+            return _selections;
+        }
+
 
         //public override string Format(bool val)
         //{
@@ -116,16 +121,16 @@ namespace ParameterModel.Models
 
 
 
-        public override bool TryParse(string valString, out bool val)
-        {
-            return bool.TryParse(valString, out val);
-        }
+        //public override bool TryParse(string valString, out bool val)
+        //{
+        //    return bool.TryParse(valString, out val);
+        //}
 
-        public override bool TestAttibuteValidation(bool val, out string attributeError)
-        {
-            attributeError = "";
-            return true; // No specific validation for boolean values, but can be overridden if needed.
-        }
+        //public override bool TestAttibuteValidation(bool val, out string attributeError)
+        //{
+        //    attributeError = "";
+        //    return true; // No specific validation for boolean values, but can be overridden if needed.
+        //}
 
         //public override bool TestAttibuteValidation(bool val, out string attributeError)
         //{
@@ -178,12 +183,5 @@ namespace ParameterModel.Models
         //        throw new ArgumentException($"Property for {PropertyInfo.Name} is not a string type");
         //    }
         //}
-
-
-        public override string[] GetSelectionItems()
-        {
-            return _selections;
-        }
-
     }
 }
