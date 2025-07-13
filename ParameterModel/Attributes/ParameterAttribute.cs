@@ -1,13 +1,13 @@
 ﻿using ParameterModel.Extensions;
 using ParameterModel.Interfaces;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace ParameterModel.Attributes
 {
+    /// <summary>
+    /// Holds PropertyInfo and parent class which implements IImplementsParameterAttribute.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class ParameterAttribute : Attribute
     {
@@ -35,6 +35,7 @@ namespace ParameterModel.Attributes
         /// </summary>
         public int PresentationOrder { get; set; } = 5;
 
+        public List<string> ValidationErrors { get; } = new List<string>();
         ///// <summary>
         ///// Applies only to numeric inputs.
         ///// </summary>
@@ -83,6 +84,11 @@ namespace ParameterModel.Attributes
         public bool TrySetPropertyValue(string newValue, out string error)
         {
             return _implementsParameterAttribute.TrySetPropertyValue(PropertyInfo.Name, newValue, out error);
+        }
+
+        public bool TrySetVariableValue(string newValue, out string error)
+        {
+            return _implementsParameterAttribute.TrySetVariableValue(PropertyInfo.Name, newValue, out error);
         }
 
         public bool TestPropertyValue(string newValue, out string error)

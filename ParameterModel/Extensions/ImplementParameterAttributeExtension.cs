@@ -307,6 +307,13 @@ namespace ParameterModel.Extensions
             return implements.TrySetPropertyValue(propertyName, newValue, out error, true);
         }
 
+        public static bool TrySetVariableValue(this IImplementsParameterAttribute implements,
+            string propertyName, string newValue, out string error)
+        {
+            return implements.TrySetPropertyValue(propertyName, newValue, out error, true);
+        }
+        
+
         public static bool TestPropertyValue(this IImplementsParameterAttribute implements,
             string propertyName, string newValue, out string error)
         {
@@ -314,7 +321,39 @@ namespace ParameterModel.Extensions
         }
 
         /// <summary>
-        /// Apply the user supplied string to the variable or the variable name.
+        /// Sets the variable value for the specified property name.
+        /// Exception if not allowed for property, so be sure CanBeVariable is true.
+        /// </summary>
+        /// <param name="implements"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="newValue"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static void SetVariableValue(this IImplementsParameterAttribute implements,
+            string propertyName, string newValue)
+        {
+            if (!implements.AttributeMap.ContainsKey(propertyName))
+            {
+                throw new ArgumentException($"No property '{propertyName}'.");
+            }
+            if (string.IsNullOrEmpty(newValue))
+            {
+                throw new ArgumentNullException($"No property '{propertyName}'.");
+            }
+            ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propertyName];
+            if(parameterPromptAttribute.CanBeVariable == false)
+            {
+                throw new InvalidOperationException($"Property '{propertyName}' is not marked as a variable assignment.");
+            }
+            // OK to assign variable.
+            implements.VariableAssignments[propertyName] = newValue;
+            // Clear property errors.
+            parameterPromptAttribute.ValidationErrors.Clear();
+        }
+
+        /// <summary>
+        /// Apply the user supplied string to the parameter property and clear the variable assignment if any.
         /// </summary>
         /// <param name="implements"></param>
         /// <param name="setVariable"></param>
@@ -433,13 +472,14 @@ namespace ParameterModel.Extensions
             {
                 throw new NotSupportedException($"Type {type} is not supported.");
             }
-            if (string.IsNullOrEmpty(error))
+            if (string.IsNullOrEmpty(error) && setProperty)
             {
-                //if (!implements.VariableAssignments.ContainsKey(propertyName))
-                //{
-                //    List<string> errors = new List<string>();
-                //    implements.ValidateProperty(parameterPromptAttribute.PropertyInfo, errors);
-                //}
+                if (implements.VariableAssignments.ContainsKey(propertyName))
+                {
+                    implements.VariableAssignments.Remove(propertyName);
+                }
+                ///List<string> errors = new List<string>();
+                implements.ValidateProperty(parameterPromptAttribute.PropertyInfo, parameterPromptAttribute.ValidationErrors);
                 return true;
             }
             return false;

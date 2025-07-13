@@ -13,11 +13,8 @@ namespace ParameterViews.ViewModels
     /// </summary>
     public abstract partial class ParamViewModelNotifyBase : ViewModelBase
     {
-        protected IImplementsParameterAttribute _propertyOwner;
         protected ParameterAttribute _parameterPromptAttribute;
         public event ParamViewModelChangedDelegate OnUserInputChanged;
-
-        public PropertyInfo PropertyInfo { get; protected set; }
 
         public string Prompt { get; }
 
@@ -32,39 +29,16 @@ namespace ParameterViews.ViewModels
             OnUserInputChanged?.Invoke(this, PropertyInfo.Name);
         }
 
-        protected ParamViewModelNotifyBase(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner)
+        protected ParamViewModelNotifyBase(ParameterAttribute parameterPromptAttribute)
         {
             _parameterPromptAttribute = parameterPromptAttribute;
-            PropertyInfo = propertyInfo;
-            _propertyOwner = propertyOwner;
 
             string promptToolTip = null;
-            bool doRange = (propertyInfo.PropertyType == typeof(int)) || (propertyInfo.PropertyType == typeof(int));
             if (!string.IsNullOrEmpty(_parameterPromptAttribute.ToolTipNotes))
             {
                 promptToolTip = _parameterPromptAttribute.ToolTipNotes;
                 if (!promptToolTip.EndsWith("."))
                 {
-                    promptToolTip += $".";
-                }
-                if (doRange)
-                {
-                    string range = (_parameterPromptAttribute.Min == _parameterPromptAttribute.Max) ? 
-                        "" : 
-                        $" {_parameterPromptAttribute.Min.ToString()} .. {_parameterPromptAttribute.Max.ToString()}";
-                    promptToolTip += Environment.NewLine;
-                    if (!string.IsNullOrEmpty(range))
-                    {
-                        promptToolTip += $"Range is{range}";
-                    }
-                    else
-                    {
-                        promptToolTip += $"No range limit,";
-                    }
-                    if (!string.IsNullOrEmpty(_parameterPromptAttribute.Units))
-                    {
-                        promptToolTip += $" {_parameterPromptAttribute.Units}";
-                    }
                     promptToolTip += $".";
                 }
             }
