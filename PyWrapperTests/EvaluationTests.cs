@@ -50,10 +50,10 @@ namespace PyWrapperTests
 
         internal class ExecutionContext : EvaluationContextBase
         {
-            public ExecutionContext() : base(LogManager.GetLogger(typeof(ExecutionContext)), false, false)
+            public ExecutionContext() : base(new VariablesContext(), false, false)
             {
             }
-            public ExecutionContext(ILog log, bool isDebug, bool isSimulation) : base(log, isDebug, isSimulation)
+            public ExecutionContext(bool isDebug, bool isSimulation) : base(new VariablesContext(), isDebug, isSimulation)
             {
             }
         }
@@ -64,9 +64,9 @@ namespace PyWrapperTests
             // Arrange
             var pyEval = new PythonWrapper.PyEval();
             string code = "3 * 4 + 5"; // Example Python code to evaluate
-            var executionContext = new ExecutionContext(); // Assuming you have an appropriate context
+            IVariablesContext variablesContext = new VariablesContext(); // Assuming you have an appropriate context
             // Act
-            pyEval.Eval(code, executionContext, out string result, out string error);
+            pyEval.Eval(code, variablesContext, out string result, out string error);
             Log.Debug($"Result: {result}, Error: {error}");
             // Assert
             // You can add assertions here based on the expected output or behavior
@@ -79,10 +79,10 @@ namespace PyWrapperTests
             // Arrange
             var pyEval = new PythonWrapper.PyEval();
             string code = "3 * X + 5"; // Example Python code to evaluate
-            var executionContext = new ExecutionContext(); // Assuming you have an appropriate context
-            executionContext.AddVariable("X", VariableType.Integer).SetValue(5);
+            var variablesContext = new VariablesContext(); // Assuming you have an appropriate context
+            variablesContext.AddVariable("X", VariableType.Integer).SetValue(5);
             // Act
-            pyEval.Eval(code, executionContext, out string result, out string error);
+            pyEval.Eval(code, variablesContext, out string result, out string error);
             Log.Debug($"Result: {result}, Error: {error}");
             // Assert
             // You can add assertions here based on the expected output or behavior
@@ -95,10 +95,10 @@ namespace PyWrapperTests
             // Arrange
             var pyEval = new PythonWrapper.PyEval();
             string code = "3 * X + 5"; // Example Python code to evaluate
-            var executionContext = new ExecutionContext(); // Assuming you have an appropriate context
-            executionContext.AddVariable("Y", VariableType.Integer).SetValue(5);
+            var variablesContext = new VariablesContext(); // Assuming you have an appropriate context
+            variablesContext.AddVariable("Y", VariableType.Integer).SetValue(5);
             // Act
-            pyEval.Eval(code, executionContext, out string result, out string error);
+            pyEval.Eval(code, variablesContext, out string result, out string error);
             Log.Debug($"Result: {result}, Error: {error}");
             // Assert
             // You can add assertions here based on the expected output or behavior

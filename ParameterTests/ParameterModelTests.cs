@@ -223,20 +223,21 @@ namespace ParameterTests
         [Test]
         public void TestBoolSerialize2()
         {
-            BoolTests test1 = new BoolTests();
-            string json = JsonSerializer.Serialize(test1, new JsonSerializerOptions
+            BoolTests testClass1 = new BoolTests();
+            string json = JsonSerializer.Serialize(testClass1, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
-            BoolTests test2 = JsonSerializer.Deserialize<BoolTests>(json);
+            BoolTests testClass2 = JsonSerializer.Deserialize<BoolTests>(json);
 
             //MockExecutionContext executionContext = new MockExecutionContext();
             IVariablesContext variablesContext = new VariablesContext();
             ParameterModelFactory parameterModelHelper = new ParameterModelFactory(variablesContext);
+            //ParameterViewModelFactory parameterViewModelFactory = new ParameterViewModelFactory(variablesContext, parameterModelHelper);
 
-            Dictionary<string, IParameterModel> testModels1 = parameterModelHelper.CollectModels(test1);
-            Dictionary<string, IParameterModel> testModels2 = parameterModelHelper.CollectModels(test1);
+            Dictionary<string, IParameterModel> testModels1 = parameterModelHelper.GetModels(testClass1);
+            Dictionary<string, IParameterModel> testModels2 = parameterModelHelper.GetModels(testClass1);
             foreach (KeyValuePair<string, IParameterModel> model in testModels1)
             {
                 string paramName = model.Key;

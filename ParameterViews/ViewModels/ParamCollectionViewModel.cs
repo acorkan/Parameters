@@ -11,14 +11,14 @@ namespace ParameterViews.ViewModels
     /// <summary>
     /// View model for a collection of parameters that are implementations of ParamViewModelBase<T>.
     /// </summary>
-    public partial class ParamCollectionViewModel : ViewModelBase<ParameterModelMessage>
+    public partial class ParamPromptViewModel : ViewModelBase<ParameterModelMessage>
     {
         private bool _isReadOnly;
 
         [ObservableProperty]
         private ObservableCollection<ParamViewModelBase> _parameters;
 
-        public ParamCollectionViewModel(List<ParamViewModelBase> parameters, bool isReadOnly)
+        public ParamPromptViewModel(List<ParamViewModelBase> parameters, bool isReadOnly)
         {
             _parameters = new ObservableCollection<ParamViewModelBase>(parameters);
             _isReadOnly = isReadOnly;

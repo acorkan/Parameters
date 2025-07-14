@@ -1,12 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using MileHighWpf.MvvmModelMessaging;
 using ParameterModel.Interfaces;
+using System.Collections.Generic;
 
 namespace ParameterViews.ViewModels
 {
     /// <summary>
     /// View model for the edit parameter dialog.
     /// </summary>
-    public partial class EditParamDialogViewModel : ParamCollectionViewModel, ParameterViews.Interfaces.ICanCloseDialog    //: ViewModelBase, ICanCloseDialog
+    public partial class EditParamDialogViewModel : ParamPromptViewModel, ParameterViews.Interfaces.ICanCloseDialog
     {
         /// <summary>
         /// If set then the dialog is a new object and the OK option should always be set.
@@ -77,8 +79,8 @@ namespace ParameterViews.ViewModels
             return isChanged;
         }
 
-        public EditParamDialogViewModel(string title, IImplementsParameterAttribute model, bool isNew, bool isReadOnly) :
-            base(model, isReadOnly)
+        public EditParamDialogViewModel(string title, List<ParamViewModelBase> parameters, bool isReadOnly, bool isNew) :
+            base(parameters, isReadOnly)
         {
             CanCloseDialog = true;
             Title = title;

@@ -42,7 +42,7 @@ namespace PythonWrapper
         //    }
         //}
 
-        public bool Eval(string code, IVariablesContext variableContext, out string result, out string error)
+        public bool Eval(string code, IVariablesContext variablesContext, out string result, out string error)
         {
             result = string.Empty;
             error = string.Empty;
@@ -52,7 +52,7 @@ namespace PythonWrapper
                 //PyObject locals = null; // new PyObject(PyObject.Null);
                 // Convert C# context dictionary to Python dict
                 using var locals = new PyDict();
-                foreach (var varItem in variableContext.Variables)
+                foreach (var varItem in variablesContext.Variables)
                 {
                     if(varItem.Type == VariableType.Boolean)
                     { 

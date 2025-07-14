@@ -14,7 +14,7 @@ namespace ParameterModel.Factories
             _variablesContext = variablesContext;
         }
 
-        public Dictionary<string, IParameterModel> GetModelsCollection(IImplementsParameterAttribute propertyOwner)
+        public Dictionary<string, IParameterModel> GetModels(IImplementsParameterAttribute propertyOwner)
         {
             Dictionary<string, ParameterAttribute> attributeMap = propertyOwner.GetAttributeMap();
             Dictionary<string, IParameterModel> ret = new Dictionary<string, IParameterModel>();
