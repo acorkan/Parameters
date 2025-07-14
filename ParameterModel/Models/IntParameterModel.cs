@@ -12,9 +12,8 @@ namespace ParameterModel.Models
 {
     public class IntParameterModel : ParameterModelBase
     {
-        public IntParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner, 
-                IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, propertyOwner, variablesContext)
+        public IntParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, variablesContext)
         {
             //if (IsVariableAllowed &&  !TryGetPropertyValue(out bool propertyValue, out string propertyError))
             //{

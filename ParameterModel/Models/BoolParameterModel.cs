@@ -26,9 +26,8 @@ namespace ParameterModel.Models
 
         private readonly string[] _selections = { "True", "False" };
 
-        public BoolParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
-            IVariablesContext variablesContext) : 
-                base(parameterPromptAttribute, propertyOwner, variablesContext)
+        public BoolParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
+                base(parameterPromptAttribute, variablesContext)
         {
             //if (IsVariableAllowed && !TryGetPropertyValue(out bool propertyValue, out string propertyError))
             //{

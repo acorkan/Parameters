@@ -235,8 +235,8 @@ namespace ParameterTests
             IVariablesContext variablesContext = new VariablesContext();
             ParameterModelFactory parameterModelHelper = new ParameterModelFactory(variablesContext);
 
-            Dictionary<string, IParameterModel> testModels1 = parameterModelHelper.Collect(test1);
-            Dictionary<string, IParameterModel> testModels2 = parameterModelHelper.Collect(test1);
+            Dictionary<string, IParameterModel> testModels1 = parameterModelHelper.CollectModels(test1);
+            Dictionary<string, IParameterModel> testModels2 = parameterModelHelper.CollectModels(test1);
             foreach (KeyValuePair<string, IParameterModel> model in testModels1)
             {
                 string paramName = model.Key;

@@ -2,18 +2,19 @@
 using ParameterModel.Extensions;
 using ParameterModel.Interfaces;
 using ParameterModel.Models;
+using System.Reflection;
 
 namespace ParameterModel.Factories
 {
     public class ParameterModelFactory
     {
-        private IVariablesContext _variablesContext;
+        private readonly IVariablesContext _variablesContext;
         public ParameterModelFactory(IVariablesContext variablesContext) 
         { 
-            _variablesContext = variablesContext ?? throw new ArgumentNullException(nameof(variablesContext));
+            _variablesContext = variablesContext;
         }
 
-        public Dictionary<string, IParameterModel> Collect(IImplementsParameterAttribute propertyOwner)
+        public Dictionary<string, IParameterModel> GetModelsCollection(IImplementsParameterAttribute propertyOwner)
         {
             Dictionary<string, ParameterAttribute> attributeMap = propertyOwner.GetAttributeMap();
             Dictionary<string, IParameterModel> ret = new Dictionary<string, IParameterModel>();
@@ -33,40 +34,29 @@ namespace ParameterModel.Factories
                 //}
                 if (type == typeof(bool))
                 {
-                    parameterModel = new BoolParameterModel(kvp.Value, propertyOwner, _variablesContext);
+                    parameterModel = new BoolParameterModel(kvp.Value, _variablesContext);
                 }
-/*                else if (type == typeof(string))
+                else if (type.IsEnum && (type == typeof(Enum)))
                 {
-                    if (parameterPromptAttribute.EnumType != null)
-                    {
-                        // If EnumType is specified, use EnumParameterModel
-                        parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner, _evaluationContext);
-                    }
-                    else
-                    {
-                        parameterModel = new StringParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                    }
+                    // If EnumType is specified, use EnumParameterModel
+                    parameterModel = new EnumParameterModel(kvp.Value, _variablesContext);
+                }
+                else if (type == typeof(string))
+                {
+                    parameterModel = new StringParameterModel(kvp.Value, _variablesContext);
                 }
                 else if (type == typeof(int))
                 {
-                    //if (parameterPromptAttribute.EnumType != null)
-                    //{
-                    //    // If EnumType is specified, use EnumParameterModel
-                    //    parameterModel = new EnumParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                    //}
-                    //else
-                    //{
-                        parameterModel = new IntParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                    //}
+                    parameterModel = new IntParameterModel(kvp.Value, _variablesContext);
                 }
                 else if (type == typeof(float))
                 {
-                    parameterModel = new FloatParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
+                    parameterModel = new FloatParameterModel(kvp.Value, _variablesContext);
                 }
                 else if (type == typeof(string[]))
                 {
-                    parameterModel = new StringArrayParameterModel(parameterPromptAttribute, propertyInfo, propertyOwner);
-                }*/
+                    parameterModel = new StringArrayParameterModel(kvp.Value, _variablesContext);
+                }
                 else
                 {
                     throw new NotSupportedException($"Type {type} is not supported.");

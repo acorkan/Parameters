@@ -22,14 +22,14 @@ namespace ParameterModel.Models.Base
     /// </summary>
     public abstract class ParameterModelBase : ModelBase<ParameterModelMessage>, IParameterModel
     {
-        protected IImplementsParameterAttribute _propertyOwner;
+        //protected IImplementsParameterAttribute _propertyOwner;
 
         public ParameterModelBase(ParameterAttribute parameterPromptAttribute,
-            IImplementsParameterAttribute propertyOwner,
+            //IImplementsParameterAttribute propertyOwner,
             IVariablesContext variablesContext)
         {
             ParameterAttribute = parameterPromptAttribute;
-            _propertyOwner = propertyOwner;
+            //_propertyOwner = propertyOwner;
             VariablesContext = variablesContext;
             if (CanBeVariable && (VariablesContext == null))
             {

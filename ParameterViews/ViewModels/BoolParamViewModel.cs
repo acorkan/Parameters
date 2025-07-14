@@ -1,12 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using ParameterModel.Attributes;
-using ParameterModel.Interfaces;
-using System.Reflection;
+using ParameterModel.Models;
 
 namespace ParameterViews.ViewModels
 {
-    public partial class BoolParamViewModel : ParamViewModelBase<bool>
+    public partial class BoolParamViewModel : ParamViewModelBase
     {
+        /// <summary>
+        /// This is in case we are not implementing a variable option and just want a checkbox.
+        /// </summary>
         [ObservableProperty]
         private bool _isUserInput;
         /// <summary>
@@ -15,28 +16,18 @@ namespace ParameterViews.ViewModels
         /// <param name="value"></param>
         partial void OnIsUserInputChanged(bool value)
         {
-            NotifyUserInputChanged();
+            ApplyUserInputChanged(value.ToString());
         }
 
-        /// <summary>
-        /// Override to tests the InitialValue against UserInput.
-        /// </summary>
-        public override bool IsDirty => InitialValue != IsUserInput;
-
-        public BoolParamViewModel(ParameterAttribute parameterPromptAttribute, PropertyInfo propertyInfo, IImplementsParameterAttribute propertyOwner) : 
-            base(parameterPromptAttribute, propertyInfo, propertyOwner)
+        public BoolParamViewModel(BoolParameterModel parameterPromptAttribute) : 
+            base(parameterPromptAttribute)
         {
-            IsUserInput = (bool)PropertyInfo.GetValue(_propertyOwner);
-            IsValid = true; // No validation needed for bool
+            string display = GetDisplayString(out bool isVariableAssignment);
+            if (!isVariableAssignment)
+            {
+                IsUserInput = bool.Parse(display); // Default value if no variable is assigned.
+            }
         }
-
-        public override bool TryGetResult(out bool result)
-        {
-            result = IsUserInput;
-            return true;
-        }
-
-        public override void Validate() { }
     }
 }
     

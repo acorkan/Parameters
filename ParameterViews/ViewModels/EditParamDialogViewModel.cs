@@ -31,23 +31,23 @@ namespace ParameterViews.ViewModels
         {
             AcceptChanges = false;
             // Check if all parameters are valid, or changed.
-            foreach (ParamViewModelNotifyBase param in Parameters)
+            foreach (ParamViewModelBase param in Parameters)
             {
-                if (param.IsDirty)
-                {
-                    AcceptChanges = true;
-                    break;
-                }
+                //if (param.IsDirty)
+                //{
+                //    AcceptChanges = true;
+                //    break;
+                //}
             }
             if(AcceptChanges)
             {
-                foreach (ParamViewModelNotifyBase param in Parameters)
+                foreach (ParamViewModelBase param in Parameters)
                 {
-                    if (!param.TryApplyChangedValue())
-                    {
-                        AcceptChanges = false;
-                        break;
-                    }
+                    //if (!param.TryApplyChangedValue())
+                    //{
+                    //    AcceptChanges = false;
+                    //    break;
+                    //}
                 }
             }
             CloseDialog?.Invoke();
@@ -63,16 +63,16 @@ namespace ParameterViews.ViewModels
             bool isChanged = false;
             bool isValid = true;
             // Check if all parameters are valid, or changed.
-            foreach (ParamViewModelNotifyBase param in Parameters)
+            foreach (ParamViewModelBase param in Parameters)
             {
-                if (!param.IsValid)
-                {
-                    isValid = false;
-                }
-                if (param.IsDirty)
-                {
-                    isChanged = true;
-                }
+                //if (!param.IsValid)
+                //{
+                //    isValid = false;
+                //}
+                //if (param.IsDirty)
+                //{
+                //    isChanged = true;
+                //}
             }
             return isChanged;
         }

@@ -12,11 +12,9 @@ namespace ParameterModel.Models
 {
     public class FloatParameterModel : ParameterModelBase
     {
-        public FloatParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
-                IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, propertyOwner, variablesContext)
+        public FloatParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, variablesContext)
         {
         }
-
     }
 }

@@ -14,9 +14,8 @@ namespace ParameterModel.Models
     {
         public static readonly char StrArrayParameterDelimiter = ',';
 
-        public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
-                IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, propertyOwner, variablesContext)
+        public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, variablesContext)
         {
         }
     }

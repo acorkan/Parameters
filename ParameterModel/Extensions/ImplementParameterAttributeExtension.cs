@@ -552,7 +552,7 @@ namespace ParameterModel.Extensions
                     return true;
                 }
             }
-            else if (type.IsEnum)
+            else if (type.IsEnum && (type == typeof(Enum)))
             {
 
                 try

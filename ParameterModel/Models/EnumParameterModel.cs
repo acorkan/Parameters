@@ -20,9 +20,8 @@ namespace ParameterModel.Models
 
         private readonly string[] _selections;
 
-        public EnumParameterModel(ParameterAttribute parameterPromptAttribute, IImplementsParameterAttribute propertyOwner,
-                IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, propertyOwner, variablesContext)
+        public EnumParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
+            base(parameterPromptAttribute, variablesContext)
         {
             _selections = parameterPromptAttribute.EnumItemsDisplayDict.Values.ToArray();
         }
