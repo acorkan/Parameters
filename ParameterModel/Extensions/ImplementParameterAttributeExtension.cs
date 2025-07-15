@@ -109,7 +109,7 @@ namespace ParameterModel.Extensions
                     List<string> errors = new List<string>();
                     if (!implements.ValidateProperty(v.Value.PropertyInfo, errors))
                     {
-                        validateErrors[v.Key].AddRange(errors);
+                        validateErrors[v.Key] = new List<string>(errors);
                     }
                 }
             }
