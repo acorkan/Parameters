@@ -1,6 +1,7 @@
 ﻿using ParameterModel.Extensions;
 using ParameterModel.Interfaces;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace ParameterModel.Attributes
@@ -25,10 +26,10 @@ namespace ParameterModel.Attributes
         /// Optional.
         /// </summary>
         public string Units { get; set; } = "";
-        /// <summary>
-        /// If localized application, optional. "" value to be ignorred.
-        /// </summary>
-        public string LanguageKey { get; set; } = "";
+        ///// <summary>
+        ///// If localized application, optional. "" value to be ignorred.
+        ///// </summary>
+        //public string LanguageKey { get; set; } = "";
         /// <summary>
         /// Use ths to implement an order to how these appear in a dialog or form.
         /// Lower numbers appear first, optional;
@@ -36,17 +37,9 @@ namespace ParameterModel.Attributes
         public int PresentationOrder { get; set; } = 5;
 
         public List<string> ValidationErrors { get; } = new List<string>();
-        ///// <summary>
-        ///// Applies only to numeric inputs.
-        ///// </summary>
-        //public float Min { get; set; } = 0.0F;
 
-        ///// <summary>
-        ///// Applies only to numeric inputs.
-        ///// </summary>
-        //public float Max { get; set; } = 0.0F;
+        public bool IsReadOnly { get; protected set; }
 
-        public Type EnumType { get; set; } = null!;
         /// <summary>
         /// Optional.
         /// </summary>
@@ -69,10 +62,10 @@ namespace ParameterModel.Attributes
 
         public ParameterAttribute() { }
 
-        public ParameterAttribute(string label)
-        { 
-            Label = label;
-        }
+        //public ParameterAttribute(string label)
+        //{ 
+        //    Label = label;
+        //}
 
         public bool IsVariableSelected { get => _implementsParameterAttribute.VariableAssignments.ContainsKey(PropertyInfo.Name); }
 
@@ -104,6 +97,10 @@ namespace ParameterModel.Attributes
             {
                 parameterAttribute.PropertyInfo = propertyInfo;
                 parameterAttribute._implementsParameterAttribute = implements;
+                EditableAttribute editableAttribute = parameterAttribute.PropertyInfo.GetCustomAttribute<EditableAttribute>();
+
+                parameterAttribute.IsReadOnly = (editableAttribute != null && !editableAttribute.AllowEdit) ||
+                                                parameterAttribute.PropertyInfo.GetCustomAttribute<ReadOnlyAttribute>()?.IsReadOnly == true;
             }
         }
 

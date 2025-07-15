@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParameterModel.Extensions
 {
@@ -65,82 +66,6 @@ namespace ParameterModel.Extensions
                     Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
                     string error = string.Empty;
                     implements.TrySetPropertyValue(assignment.Key, assignment.Value, out error);
-                    //if (type == typeof(bool))
-                    //{
-                    //    // If the variable is a boolean, try to parse it.
-                    //}
-                    //else if (type == typeof(int))
-                    //{
-                    //    if (int.TryParse(variable.Value, out int i))
-                    //    {
-                    //        parameterPromptAttribute.PropertyInfo.SetValue(implements, i);
-                    //    }
-                    //    else
-                    //    {
-                    //        variableErrors[variable.Key] = $"Variable '{variable.Key}' could not be parsed as an integer.";
-                    //    }
-                    //}
-                    //else if (type == typeof(float))
-                    //{
-                    //    if (float.TryParse(variable.Value, out float f))
-                    //    {
-                    //        parameterPromptAttribute.PropertyInfo.SetValue(implements, f);
-                    //    }
-                    //    else
-                    //    {
-                    //        variableErrors[variable.Key] = $"Variable '{variable.Key}' could not be parsed as a float.";
-                    //    }
-                    //}
-                    //else if (type == typeof(string))
-                    //{
-                    //    parameterPromptAttribute.PropertyInfo.SetValue(implements, variable.Value);
-                    //}
-                    //else if (type == typeof(string[]))
-                    //{
-                    //    // Assuming the string array is comma-separated
-                    //    string[] stringArray = variable.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    //    parameterPromptAttribute.PropertyInfo.SetValue(implements, stringArray);
-                    //}
-                    //else if (type.IsEnum)
-                    //{
-                    //    try
-                    //    {
-                    //        Enum value;
-                    //        string valueString = null;
-                    //        for (int i = 0; i < parameterPromptAttribute.EnumItemsDisplaySource.Count; i++)
-                    //        {
-                    //            if (parameterPromptAttribute.EnumItemsDisplaySource.ElementAt(i).Key.ToString().Equals(valueString, StringComparison.OrdinalIgnoreCase) ||
-                    //                parameterPromptAttribute.EnumItemsDisplaySource.ElementAt(i).Value.Equals(valueString, StringComparison.OrdinalIgnoreCase))
-                    //            {
-                    //                value = parameterPromptAttribute.EnumItemsDisplaySource.ElementAt(i).Key;
-                    //                break;
-                    //            }
-                    //        }
-                    //        if (valueString == null)
-                    //        {
-                    //            variableErrors[variable.Key] = $"Variable '{variable.Key}' could not be resolved for enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
-                    //        }
-                    //        else
-                    //        {
-                    //            if (Enum.TryParse(type, valueString, true, out object e))
-                    //            {
-                    //                parameterPromptAttribute.PropertyInfo.SetValue(implements, e);
-                    //            }
-                    //            else
-                    //            {
-                    //                variableErrors[variable.Key] = $"Variable '{variable.Key}' could not be parsed as enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
-                    //            }
-                    //        }
-                    //    }
-                    //    catch (ArgumentException)
-                    //    {
-                    //        variableErrors[variable.Key] = $"Variable '{variable.Key}' could not be parsed as an enum of type '{type.Name}'.";
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    throw new NotSupportedException($"Type {type} is not supported.");
-                    //}
                     if(!string.IsNullOrEmpty(error))
                     {
                         variableErrors[assignment.Key] = error;
@@ -201,6 +126,7 @@ namespace ParameterModel.Extensions
         private static bool ValidateProperty(this IImplementsParameterAttribute implements,
             PropertyInfo propertyInfo, List<string> errors)
         {
+            implements.UpdateAttributeMap();
             errors.Clear();
             var results = new List<ValidationResult>();
             var context = new ValidationContext(implements) { MemberName = propertyInfo.Name };
@@ -253,43 +179,54 @@ namespace ParameterModel.Extensions
             {
                 throw new ArgumentException("Source and destination must be of the same type.");
             }
-            Dictionary<string, ParameterAttribute> attribMap = source.GetAttributeMap();
-            foreach (var attrib in attribMap)
+            source.UpdateAttributeMap();
+            dest.UpdateAttributeMap();
+            //Dictionary<string, ParameterAttribute> attribMap = source.GetAttributeMap();
+            foreach (var attrib in source.AttributeMap)
             {
                 var sourceValue = attrib.Value.PropertyInfo.GetValue(source);
                 attrib.Value.PropertyInfo.SetValue(dest, sourceValue);
             }
         }
 
-        public static void UpdateFromJson(this IImplementsParameterAttribute dest, JsonNode jsonNode)
+        public static void UpdateFromJson<T>(this IImplementsParameterAttribute dest, string json)
         {
-            Dictionary<string, ParameterAttribute> attribMap = GetAttributeMap(dest);
-            foreach (var prop in attribMap)
-            {
-                // ?? (prop.CanWrite && 
-                if (jsonNode[prop.Key] != null)
-                {
-                    var valueNode = jsonNode[prop.Key];
+            dest.UpdateAttributeMap();
+            var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+            if (dict == null) return;
 
+            var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var prop in props)
+            {
+                if (dest.AttributeMap.ContainsKey(prop.Name) && prop.CanWrite && dict.TryGetValue(prop.Name, out var jsonElement))
+                {
                     try
                     {
-                        object? value = valueNode.Deserialize(prop.Value.PropertyInfo.PropertyType);
-                        prop.Value.PropertyInfo.SetValue(dest, value);
+                        object? value = JsonElementToType(jsonElement, prop.PropertyType);
+                        prop.SetValue(dest, value);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Optionally log or handle deserialization errors
+                        Console.WriteLine($"Failed to set property {prop.Name}: {ex.Message}");
                     }
                 }
             }
         }
 
-        public static string SerializeToJson(IImplementsParameterAttribute source)
+        private static object? JsonElementToType(JsonElement element, Type type)
         {
-            var dict = new Dictionary<string, object>();
-            Dictionary<string, ParameterAttribute> attribMap = GetAttributeMap(source);
+            // If the property is a primitive type or string, try direct deserialization
+            var raw = element.GetRawText();
+            return JsonSerializer.Deserialize(raw, type);
+        }
 
-            foreach (var prop in attribMap)
+        public static string SerializeToJson(this IImplementsParameterAttribute source)
+        {
+            source.UpdateAttributeMap();
+            var dict = new Dictionary<string, object>();
+
+            foreach (var prop in source.AttributeMap)
             {
                 var value = prop.Value.PropertyInfo.GetValue(source);
                 dict[prop.Key] = value;
@@ -310,9 +247,18 @@ namespace ParameterModel.Extensions
         public static bool TrySetVariableValue(this IImplementsParameterAttribute implements,
             string propertyName, string newValue, out string error)
         {
-            return implements.TrySetPropertyValue(propertyName, newValue, out error, true);
+            error = "";
+            try
+            {
+                implements.SetVariableValue(propertyName, newValue);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return false;
+            }
         }
-        
 
         public static bool TestPropertyValue(this IImplementsParameterAttribute implements,
             string propertyName, string newValue, out string error)
@@ -333,18 +279,23 @@ namespace ParameterModel.Extensions
         public static void SetVariableValue(this IImplementsParameterAttribute implements,
             string propertyName, string newValue)
         {
+            implements.UpdateAttributeMap();
             if (!implements.AttributeMap.ContainsKey(propertyName))
             {
                 throw new ArgumentException($"No property '{propertyName}'.");
             }
             if (string.IsNullOrEmpty(newValue))
             {
-                throw new ArgumentNullException($"No property '{propertyName}'.");
+                throw new ArgumentNullException(nameof(newValue), "New variable name cannot be null or empty.");
             }
             ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propertyName];
             if(parameterPromptAttribute.CanBeVariable == false)
             {
                 throw new InvalidOperationException($"Property '{propertyName}' is not marked as a variable assignment.");
+            }
+            if (parameterPromptAttribute.IsReadOnly)
+            {
+                throw new InvalidOperationException($"Parameter {propertyName} is read-only.");
             }
             // OK to assign variable.
             implements.VariableAssignments[propertyName] = newValue;
@@ -364,57 +315,53 @@ namespace ParameterModel.Extensions
         private static bool TrySetPropertyValue(this IImplementsParameterAttribute implements,
             string propertyName, string newValue, out string error, bool setProperty)
         {
+            implements.UpdateAttributeMap();
             error = "";
             if (!implements.AttributeMap.ContainsKey(propertyName))
             {
                 throw new ArgumentException($"No property '{propertyName}'.");
             }
             ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propertyName];
+            if(parameterPromptAttribute.IsReadOnly)
+            {
+                error = $"Parameter {propertyName} is read only";
+                return false;
+            }
             Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
+            bool parsedOK = false;
             if (type == typeof(bool))
             {
-                if (bool.TryParse(newValue, out bool b))
+                if (parsedOK = bool.TryParse(newValue, out bool b))
                 {
                     if (setProperty)
                     {
                         parameterPromptAttribute.PropertyInfo.SetValue(implements, b);
                     }
                 }
-                else
-                {
-                    error = $"Variable '{propertyName}' could not be parsed as a boolean.";
-                }
             }
             else if (type == typeof(int))
             {
-                if (int.TryParse(newValue, out int i))
+                if (parsedOK = int.TryParse(newValue, out int i))
                 {
                     if (setProperty)
                     {
                         parameterPromptAttribute.PropertyInfo.SetValue(implements, i);
                     }
                 }
-                else
-                {
-                    error = $"Variable '{propertyName}' could not be parsed as an integer.";
-                }
             }
             else if (type == typeof(float))
             {
-                if (float.TryParse(newValue, out float f))
+                if (parsedOK = float.TryParse(newValue, out float f))
                 {
                     if (setProperty)
                     {
                         parameterPromptAttribute.PropertyInfo.SetValue(implements, f);
                     }
                 }
-                else
-                {
-                    error = $"Variable '{propertyName}' could not be parsed as a float.";
-                }
             }
             else if (type == typeof(string))
             {
+                parsedOK = true;
                 if (setProperty)
                 {
                     parameterPromptAttribute.PropertyInfo.SetValue(implements, newValue);
@@ -422,6 +369,7 @@ namespace ParameterModel.Extensions
             }
             else if (type == typeof(string[]))
             {
+                parsedOK = true;
                 // Assuming the string array is comma-separated
                 if (setProperty)
                 {
@@ -446,7 +394,7 @@ namespace ParameterModel.Extensions
                     }
                     if (valueString == null)
                     {
-                        error = $"Variable '{propertyName}' could not be resolved for enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
+                        error = $"Parameter '{propertyName}' could not be resolved for enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
                     }
                     else
                     {
@@ -456,33 +404,37 @@ namespace ParameterModel.Extensions
                             {
                                 parameterPromptAttribute.PropertyInfo.SetValue(implements, e);
                             }
+                            parsedOK = true;
                         }
                         else
                         {
-                            error = $"Variable '{propertyName}' could not be parsed as enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
+                            error = $"Parameter '{propertyName}' could not be parsed as enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
                         }
                     }
                 }
                 catch (ArgumentException)
                 {
-                    error = $"Variable '{propertyName}' could not be parsed as an enum of type '{type.Name}'.";
+                    error = $"Parameter '{propertyName}' could not be parsed as an enum of type '{type.Name}'.";
                 }
             }
             else
             {
                 throw new NotSupportedException($"Type {type} is not supported.");
             }
-            if (string.IsNullOrEmpty(error) && setProperty)
+            // Update the error message if parsing failed and not already updated.
+            if (!parsedOK && string.IsNullOrEmpty(error))
+            {
+                error = $"Parameter '{propertyName}' of {type} could not be assigned from '{newValue}'.";
+            }
+            else if (parsedOK && setProperty)
             {
                 if (implements.VariableAssignments.ContainsKey(propertyName))
                 {
                     implements.VariableAssignments.Remove(propertyName);
                 }
-                ///List<string> errors = new List<string>();
                 implements.ValidateProperty(parameterPromptAttribute.PropertyInfo, parameterPromptAttribute.ValidationErrors);
-                return true;
             }
-            return false;
+            return parsedOK;
         }
 
         /// <summary>
