@@ -34,6 +34,22 @@ namespace ParameterTests
             public Dictionary<string, ParameterAttribute> AttributeMap { get; } = new Dictionary<string, ParameterAttribute>();
         }
 
+        private ParameterModelFactory _parameterModelFactory;
+        private IVariablesContext _variablesContext;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            _variablesContext = new VariablesContext();
+            _parameterModelFactory = new ParameterModelFactory(_variablesContext);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            _variablesContext.ClearVariables();
+        }
+
         #region Boolean tests
         internal class BoolTestClass : ImplementsParametersBase
         {
@@ -121,8 +137,6 @@ namespace ParameterTests
             testClass1.TestBool1 = false;
             testClass1.TestBool3 = false;
             testClass1.TestBool5 = false;
-            IVariablesContext variablesContext = new VariablesContext();
-            ParameterModelFactory parameterModelFactory = new ParameterModelFactory(variablesContext);
 
             bool testResult = testClass1.TestPropertyValue("TestBool1", "true", out string error);
             Assert.IsTrue(testResult, "TestPropertyValue should return true for valid boolean assignment.");
@@ -160,16 +174,16 @@ namespace ParameterTests
             variablesContext.AddVariable("intVar1", VariableType.Integer, VariableSource.UserDefined);
             ParameterModelFactory parameterModelFactory = new ParameterModelFactory(variablesContext);
 
-            bool testResult = testClass1.TrySetVariableValue("TestBool1", "boolVar1", out string error);
+            bool testResult = testClass1.TryAssignVariable("TestBool1", "boolVar1", out string error);
             Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestBool1' can not be set to a variable.");
 
-            testResult = testClass1.TrySetVariableValue("TestBool2", "boolVar1", out error);
+            testResult = testClass1.TryAssignVariable("TestBool2", "boolVar1", out error);
             Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestBool2' can be set to a variable.");
 
-            testResult = testClass1.TrySetVariableValue("TestBool2", "sdfsdf", out error);
+            testResult = testClass1.TryAssignVariable("TestBool2", "sdfsdf", out error);
             Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
 
-            testResult = testClass1.TrySetVariableValue("TestBool2", "intVar1", out error);
+            testResult = testClass1.TryAssignVariable("TestBool2", "intVar1", out error);
             Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
 
             Dictionary<string, string> resolveErrors = new Dictionary<string, string>();
@@ -286,8 +300,7 @@ namespace ParameterTests
         {
             IntAndFloatTestRangeAttribute testClass1 = new IntAndFloatTestRangeAttribute();
             testClass1.SerializeToJson();
-            ParameterModelFactory parameterModelFactory = new ParameterModelFactory(new VariablesContext());
-            Assert.DoesNotThrow(() => parameterModelFactory.GetModels(testClass1), "No Range exception for int or float property.");
+            Assert.DoesNotThrow(() => _parameterModelFactory.GetModels(testClass1), "No Range exception for int or float property.");
         }
 
         [Test]
@@ -304,48 +317,72 @@ namespace ParameterTests
         [Test]
         public void TestIntAndFloatAssignment()
         {
-            //IntAndFloatTestClass testClass1 = new IntAndFloatTestClass();
-            //testClass1.TestBool1 = false;
-            //IVariablesContext variablesContext = new VariablesContext();
-            //ParameterModelFactory parameterModelFactory = new ParameterModelFactory(variablesContext);
+            IntAndFloatTestClass testClass1 = new IntAndFloatTestClass();
 
-            //bool testResult = testClass1.TestPropertyValue("TestBool1", "true", out string error);
-            //Assert.IsTrue(testResult, "TestPropertyValue should return true for valid boolean assignment.");
+            testClass1.TestInt1 = 10;
+            bool testResult = testClass1.TestPropertyValue("TestInt1", "12", out string error);
+            Assert.IsTrue(testResult, "TestPropertyValue should return true for valid int assignment.");
 
-            //testResult = testClass1.TrySetPropertyValue("TestBool1", "true", out error);
-            //Assert.IsTrue(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
-            //Assert.IsTrue(testClass1.TestBool1, "TestBool1 should be true after assignment.");
+            testResult = testClass1.TestPropertyValue("TestInt1", "10.0", out error);
+            Assert.IsFalse(testResult, "TestPropertyValue should return true for valid int assignment.");
 
-            //testResult = testClass1.TestPropertyValue("TestBool1", "dsdfg", out error);
-            //Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid boolean assignment.");
+            testClass1.TestInt3 = 10;
+            testResult = testClass1.TestPropertyValue("TestInt3", "14", out error);
+            Assert.IsFalse(testResult, "TestPropertyValue should return false for read-only property.");
+
+            testClass1.TestFloat1 = 88.4F;
+            testResult = testClass1.TestPropertyValue("TestFloat1", "77", out error);
+            Assert.IsTrue(testResult, "TestPropertyValue should return true for valid float assignment.");
+
+            testResult = testClass1.TestPropertyValue("TestFloat1", "909.9", out error);
+            Assert.IsTrue(testResult, "TestPropertyValue should return true for valid float assignment.");
         }
 
         [Test]
         public void TestIntAndFloatVariableImplementation()
         {
-            //IntAndFloatTestClass testClass1 = new IntAndFloatTestClass();
-            //IVariablesContext variablesContext = new VariablesContext();
-            //variablesContext.AddVariable("boolVar1", VariableType.Boolean, VariableSource.UserDefined);
-            //variablesContext.AddVariable("boolVar2", VariableType.Boolean, VariableSource.UserDefined);
-            //variablesContext.AddVariable("intVar1", VariableType.Integer, VariableSource.UserDefined);
-            //ParameterModelFactory parameterModelFactory = new ParameterModelFactory(variablesContext);
+            IntAndFloatTestClass testClass1 = new IntAndFloatTestClass();
+            _variablesContext.AddVariable("intVar1", VariableType.Integer, VariableSource.UserDefined).SetValue(11);
+            //_variablesContext.AddVariable("intVar2", VariableType.Integer, VariableSource.UserDefined).SetValue(22);
 
-            //bool testResult = testClass1.TrySetVariableValue("TestBool1", "boolVar1", out string error);
-            //Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestBool1' can not be set to a variable.");
+            _variablesContext.AddVariable("floatVar1", VariableType.Float, VariableSource.UserDefined).SetValue(33.3F);
+            //_variablesContext.AddVariable("floatVar2", VariableType.Float, VariableSource.UserDefined).SetValue(44.4F);
 
-            //testResult = testClass1.TrySetVariableValue("TestBool2", "boolVar1", out error);
-            //Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestBool2' can be set to a variable.");
+            bool testResult = testClass1.TryAssignVariable("TestInt1", "intVar1", out string error);
+            Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestInt1' can not be set to a variable.");
 
-            //testResult = testClass1.TrySetVariableValue("TestBool2", "sdfsdf", out error);
+            testResult = testClass1.TryAssignVariable("TestInt3", "intVar1", out error);
+            Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestInt5' is read-only.");
+
+            testResult = testClass1.TryAssignVariable("TestInt2", "intVar1", out error);
+            Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestInt2' can be set to a variable.");
+
+
+            testResult = testClass1.TryAssignVariable("TestFloat1", "floatVar1", out error);
+            Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestFloat1' can not be set to a variable.");
+
+            testResult = testClass1.TryAssignVariable("TestFloat3", "floatVar1", out error);
+            Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestFloat3' is read-only.");
+
+            testResult = testClass1.TryAssignVariable("TestFloat2", "floatVar1", out error);
+            Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestFloat2' can be set to a variable.");
+
+            Dictionary<string, string> resolveErrors = new Dictionary<string, string>();
+            testResult = testClass1.TryResolveVariables(_variablesContext, resolveErrors);
+            Assert.IsTrue(testResult, "TryResolveVariables should return true because no violations.");
+
+            testResult = testClass1.TryAssignVariable("TestInt2", "floatVar1", out error);
+            Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestInt2' can be assigned to a float variable.");
+
+            //testResult = testClass1.TryAssignVariable("TestBool2", "sdfsdf", out error);
             //Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
 
-            //testResult = testClass1.TrySetVariableValue("TestBool2", "intVar1", out error);
+            //testResult = testClass1.TryAssignVariable("TestBool2", "intVar1", out error);
             //Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
 
-            //Dictionary<string, string> resolveErrors = new Dictionary<string, string>();
-            //testResult = testClass1.TryResolveVariables(variablesContext, resolveErrors);
-            //Assert.IsFalse(testResult, "TryResolveVariables should return false because 'TestBool2' can not be assigned 'intVar1'.");
-            //Assert.IsTrue(resolveErrors.ContainsKey("TestBool2"), "Resolve errors should contain 'TestBool2'.");
+            testResult = testClass1.TryResolveVariables(_variablesContext, resolveErrors);
+            Assert.IsFalse(testResult, "TryResolveVariables should return false because 'TestInt2' can not be resolved to 'floatVar1'.");
+            Assert.IsTrue(resolveErrors.ContainsKey("TestInt2"), "Resolve errors should contain 'TestBool2'.");
         }
         #endregion Integer and float tests
 
@@ -456,10 +493,6 @@ namespace ParameterTests
         //    "TestStringArray2, System.String[], , TestStringArray2, True, , ",
         //};
 
-        //[SetUp]
-        //public void Setup()
-        //{
-        //}
 
         ////[Test]
         ////public void Test1()

@@ -81,7 +81,7 @@ namespace ParameterModel.Attributes
 
         public bool TrySetVariableValue(string newValue, out string error)
         {
-            return _implementsParameterAttribute.TrySetVariableValue(PropertyInfo.Name, newValue, out error);
+            return _implementsParameterAttribute.TryAssignVariable(PropertyInfo.Name, newValue, out error);
         }
 
         public bool TestPropertyValue(string newValue, out string error)

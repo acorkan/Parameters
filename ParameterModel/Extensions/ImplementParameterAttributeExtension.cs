@@ -1,6 +1,7 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
 using ParameterModel.Models.Base;
+using ParameterModel.Variables;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
@@ -62,10 +63,16 @@ namespace ParameterModel.Extensions
                         variableErrors[assignment.Key] = $"Variable assignment '{assignment.Key}' is null.";
                         continue;
                     }
+                    VariableBase variableBase = variablesContext.GetVariable(assignment.Value);
+                    if (variableBase == null)
+                    {
+                        variableErrors[assignment.Key] = $"Variable assignment '{assignment.Key}' does bot exist.";
+                        continue;
+                    }
                     ParameterAttribute parameterPromptAttribute = implements.AttributeMap[assignment.Key];
                     Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
                     string error = string.Empty;
-                    implements.TrySetPropertyValue(assignment.Key, assignment.Value, out error);
+                    implements.TrySetPropertyValue(assignment.Key, variableBase.GetValueAsString(), out error);
                     if(!string.IsNullOrEmpty(error))
                     {
                         variableErrors[assignment.Key] = error;
@@ -244,7 +251,7 @@ namespace ParameterModel.Extensions
             return implements.TrySetPropertyValue(propertyName, newValue, out error, true);
         }
 
-        public static bool TrySetVariableValue(this IImplementsParameterAttribute implements,
+        public static bool TryAssignVariable(this IImplementsParameterAttribute implements,
             string propertyName, string newValue, out string error)
         {
             error = "";
