@@ -8,44 +8,31 @@ using ParameterModel.Models.Base;
 
 namespace PyWrapperTests
 {
+    [TestFixture]
     public class EvaluationTests
     {
-        private static ILog Log { get; } = LogManager.GetLogger(typeof(EvaluationTests));
 
-        //static EvaluationTests()
-        //{
-        //    ConfigureLogging();
+        private IVariablesContext _variablesContext;
+        private PythonWrapper.PyEval _pyEval;
 
-        //    log.Debug("This is a DEBUG message");
-        //    log.Info("This is an INFO message");
-        //    log.Warn("This is a WARN message");
-        //    log.Error("This is an ERROR message");
-        //    log.Fatal("This is a FATAL message");
-
-        //    Console.ReadLine();
-        //}
-
-        private static void ConfigureLogging()
+        [OneTimeSetUp]
+        public void OneTimeSetup()
         {
-            PatternLayout layout = new PatternLayout
-            {
-                ConversionPattern = "%date %-5level - %message%newline"
-            };
-            layout.ActivateOptions();
-
-            ConsoleAppender consoleAppender = new ConsoleAppender
-            {
-                Layout = layout
-            };
-            consoleAppender.ActivateOptions();
-
-            BasicConfigurator.Configure(consoleAppender);
+            _variablesContext = new VariablesContext();
+            _pyEval = new PythonWrapper.PyEval();
         }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _pyEval.Dispose();
+        }
+
 
         [SetUp]
         public void Setup()
         {
-            ConfigureLogging();
+            _variablesContext.ClearVariables();
         }
 
         internal class ExecutionContext : EvaluationContextBase
@@ -59,51 +46,51 @@ namespace PyWrapperTests
         }
 
         [Test]
-        public void EvalTest()
+        public void StaticEvalTest()
         {
-            // Arrange
-            var pyEval = new PythonWrapper.PyEval();
             string code = "3 * 4 + 5"; // Example Python code to evaluate
-            IVariablesContext variablesContext = new VariablesContext(); // Assuming you have an appropriate context
             // Act
-            pyEval.Eval(code, variablesContext, out string result, out string error);
-            Log.Debug($"Result: {result}, Error: {error}");
-            // Assert
-            // You can add assertions here based on the expected output or behavior
-            Assert.Pass("Python code evaluated successfully.");
-        }
-
-        [Test]
-        public void EvalVariableTest()
-        {
-            // Arrange
-            var pyEval = new PythonWrapper.PyEval();
-            string code = "3 * X + 5"; // Example Python code to evaluate
-            var variablesContext = new VariablesContext(); // Assuming you have an appropriate context
-            variablesContext.AddVariable("X", VariableType.Integer).SetValue(5);
-            // Act
-            pyEval.Eval(code, variablesContext, out string result, out string error);
-            Log.Debug($"Result: {result}, Error: {error}");
-            // Assert
-            // You can add assertions here based on the expected output or behavior
-            Assert.Pass("Python code evaluated successfully.");
+            bool result = _pyEval.Eval(code, _variablesContext, out string eval, out string error);
+            Assert.IsTrue(result, $"Python code evaluation failed: {error}.");
+            Assert.AreEqual("17", eval, "The evaluation result is not as expected.");
         }
 
         [Test]
         public void EvalMissingVariableTest()
         {
-            // Arrange
-            var pyEval = new PythonWrapper.PyEval();
             string code = "3 * X + 5"; // Example Python code to evaluate
-            var variablesContext = new VariablesContext(); // Assuming you have an appropriate context
-            variablesContext.AddVariable("Y", VariableType.Integer).SetValue(5);
+            _variablesContext.AddVariable("Y", VariableType.Integer).SetValue(5);
             // Act
-            pyEval.Eval(code, variablesContext, out string result, out string error);
-            Log.Debug($"Result: {result}, Error: {error}");
+            bool result = _pyEval.Eval(code, _variablesContext, out string eval, out string error);
+            Assert.IsFalse(result, $"Variable X does not exist.");
             // Assert
             // You can add assertions here based on the expected output or behavior
             //Assert.AreEqual().Pass("Python code evaluated successfully.");
         }
 
+        [Test]
+        public void EvalMathTest()
+        {
+            string code = "3 * X + 5"; // Example Python code to evaluate
+            _variablesContext.AddVariable("X", VariableType.Integer).SetValue(5);
+            bool result = _pyEval.Eval(code, _variablesContext, out string eval, out string error);
+            Assert.IsTrue(result, $"Python code evaluation failed: {error}.");
+            Assert.AreEqual("20", eval, "The evaluation result is not as expected.");
+        }
+
+        [Test]
+        public void EvalBoolTest()
+        {
+            string code = "X == 5"; // Example Python code to evaluate
+            _variablesContext.AddVariable("X", VariableType.Integer).SetValue(5);
+            bool result = _pyEval.Eval(code, _variablesContext, out string eval, out string error);
+            Assert.IsTrue(result, $"Python code evaluation failed: {error}.");
+            Assert.AreEqual("True", eval, "The evaluation result is not as expected.");
+
+            _variablesContext.GetVariable("X").SetValue(6);
+            result = _pyEval.Eval(code, _variablesContext, out eval, out error);
+            Assert.IsTrue(result, $"Python code evaluation failed: {error}.");
+            Assert.AreEqual("False", eval, "The evaluation result is not as expected.");
+        }
     }
 }
