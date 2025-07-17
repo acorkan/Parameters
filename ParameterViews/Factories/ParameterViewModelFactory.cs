@@ -1,6 +1,7 @@
 ﻿using ParameterModel.Factories;
 using ParameterModel.Interfaces;
 using ParameterModel.Models;
+using ParameterModel.Variables;
 using ParameterViews.ViewModels;
 
 namespace ParameterViews.Factories
@@ -48,6 +49,10 @@ namespace ParameterViews.Factories
                 else if (kvp.Value.ParameterType == typeof(string[]))
                 {
                     paramViewModel = new StrArrayParamViewModel(kvp.Value as StringArrayParameterModel);
+                }
+                else if (kvp.Value.ParameterType == typeof(Variable))
+                {
+                    paramViewModel = new VariableParamViewModel(kvp.Value as VariableParameterModel);
                 }
                 else if (kvp.Value.ParameterType.IsEnum)
                 {

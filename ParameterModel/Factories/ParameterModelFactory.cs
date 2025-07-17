@@ -3,6 +3,7 @@ using ParameterModel.Extensions;
 using ParameterModel.Interfaces;
 using ParameterModel.Models;
 using ParameterModel.Models.Base;
+using ParameterModel.Variables;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -42,6 +43,10 @@ namespace ParameterModel.Factories
                 else if (type == typeof(string))
                 {
                     parameterModel = new StringParameterModel(kvp.Value, _variablesContext);
+                }
+                else if (type == typeof(Variable))
+                {
+                    parameterModel = new VariableParameterModel(kvp.Value, _variablesContext);
                 }
                 else if (type == typeof(int))
                 {

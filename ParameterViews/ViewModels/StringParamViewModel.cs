@@ -6,8 +6,6 @@ namespace ParameterViews.ViewModels
     {
         public StringParamViewModel(StringParameterModel stringParameterModel) : 
             base(stringParameterModel) 
-        {
-            //UserInput = PropertyInfo.GetValue(_propertyOwner).ToString();
-        }
+        { }
     }
 }
