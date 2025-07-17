@@ -64,6 +64,10 @@ namespace ParameterModel.Variables
             throw new InvalidOperationException("Variable type is not String.");
         }
 
+        public override string ToString()
+        {
+            return GetValueAsString();
+        }
         public string GetValueAsJson() 
         {
             if (Type == VariableType.JSON)

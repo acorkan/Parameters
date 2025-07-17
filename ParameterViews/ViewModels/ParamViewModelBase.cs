@@ -115,9 +115,9 @@ namespace ParameterViews.ViewModels
             _parameterPromptAttribute = model.ParameterAttribute;
 
             string promptToolTip = null;
-            if (!string.IsNullOrEmpty(_parameterPromptAttribute.ToolTipNotes))
+            if (!string.IsNullOrEmpty(_parameterPromptAttribute.Description))
             {
-                promptToolTip = _parameterPromptAttribute.ToolTipNotes;
+                promptToolTip = _parameterPromptAttribute.Description;
                 if (!promptToolTip.EndsWith("."))
                 {
                     promptToolTip += $".";
@@ -125,11 +125,7 @@ namespace ParameterViews.ViewModels
             }
             PromptToolTip = promptToolTip;
 
-            string prompt = _parameterPromptAttribute.Label;
-            if (!string.IsNullOrEmpty(_parameterPromptAttribute.Units))
-            {
-                prompt += $" ({_parameterPromptAttribute.Units})";
-            }
+            string prompt = _parameterPromptAttribute.Prompt;
             prompt += ":";
             Prompt = prompt;
 

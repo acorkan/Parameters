@@ -12,6 +12,7 @@ namespace ParameterModel.Interfaces
         /// <summary>
         /// Used by the ImplementParameterAttributeExtension class to track variable assignments for properties that are 
         /// attributed with ParameterPromptAttribute and for which IsVariable = true. 
+        /// POroiperty name is Key, and variable name is Value.
         /// </summary>
         Dictionary<string, string> VariableAssignments { get; }
         /// <summary>

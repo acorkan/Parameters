@@ -1,5 +1,6 @@
 ﻿using ParameterModel.Extensions;
 using ParameterModel.Interfaces;
+using ParameterModel.Variables;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -10,26 +11,35 @@ namespace ParameterModel.Attributes
     /// Holds PropertyInfo and parent class which implements IImplementsParameterAttribute.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class ParameterAttribute : Attribute
+    public class ParameterAttribute : Attribute
     {
         private Array _enumValues;
-        public Dictionary<int, string> EnumIntDisplayDict { get; protected set; }
-        public Dictionary<Enum, string> EnumItemsDisplayDict { get; protected set; }
-
+        protected Dictionary<int, string> _enumIntDisplayDict;
+        protected Dictionary<Enum, string> _enumItemsDisplayDict;
         protected IImplementsParameterAttribute _implementsParameterAttribute;
 
         /// <summary>
         /// Used in a prompt.
         /// </summary>
-        public string Label { get; set; } = "";
+        public string Prompt { get; protected set; } = "";
+
         /// <summary>
         /// Optional.
         /// </summary>
-        public string Units { get; set; } = "";
+        public string Description { get; protected set; } = "";
+
         ///// <summary>
-        ///// If localized application, optional. "" value to be ignorred.
+        ///// Optional.
         ///// </summary>
-        //public string LanguageKey { get; set; } = "";
+        //public string Units { get; set; } = "";
+
+        /// <summary>
+        /// If true, then this property can be a variable. 
+        /// This is used to indicate that the value can be set by a variable in the context of the application.
+        /// This meas there will be an entry in a VariableAssignments property to resolve.
+        /// </summary>
+        public bool CanBeVariable { get; protected set; } = false;
+
         /// <summary>
         /// Use ths to implement an order to how these appear in a dialog or form.
         /// Lower numbers appear first, optional;
@@ -40,18 +50,6 @@ namespace ParameterModel.Attributes
 
         public bool IsReadOnly { get; protected set; }
 
-        /// <summary>
-        /// Optional.
-        /// </summary>
-        public string ToolTipNotes { get; set; } = "";
-
-        /// <summary>
-        /// If true, then this property can be a variable. 
-        /// This is used to indicate that the value can be set by a variable in the context of the application.
-        /// This meas there will be an entry in a VariableAssignments property to resolve.
-        /// </summary>
-        public bool CanBeVariable { get; set; } = false; 
-
         ///// <summary>
         ///// If the value can be a variable, then this is the type of the evaluation result.
         ///// This can only ever be applied to a property type of string.
@@ -60,13 +58,22 @@ namespace ParameterModel.Attributes
 
         public PropertyInfo PropertyInfo { get; protected set; }
 
-        public ParameterAttribute() { }
+        public ParameterAttribute(bool canBeVariable) 
+        {
+            CanBeVariable = canBeVariable;
+        }
+
+        public ParameterAttribute() : this(false) { }
 
         //public ParameterAttribute(string label)
         //{ 
         //    Label = label;
         //}
 
+        public Dictionary<Enum, string> GetEnumItemsDisplay()
+        {
+            return _enumItemsDisplayDict;
+        }
         public bool IsVariableSelected { get => _implementsParameterAttribute.VariableAssignments.ContainsKey(PropertyInfo.Name); }
 
         public bool GetDisplayString(out string displayString, out bool isVariableAssignment)
@@ -89,6 +96,21 @@ namespace ParameterModel.Attributes
             return _implementsParameterAttribute.TestPropertyValue(PropertyInfo.Name, newValue, out error);
         }
 
+        public static bool TestAllowedValidationAttributes(PropertyInfo propertyInfo, List<string> invalidAttributeNames)
+        {
+            invalidAttributeNames.Clear();
+            Type type = propertyInfo.PropertyType;
+            List<Type> atts = propertyInfo.GetCustomAttributes<ValidationAttribute>().Select(s => s.GetType()).ToList();
+            List<Type> allowed = ParameterAttribute.AllowedValidationAttributes[type];
+            foreach (var attribute in atts)
+            {
+                if (!allowed.Contains(attribute))
+                {
+                    invalidAttributeNames.Add(attribute.Name);
+                }
+            }
+            return invalidAttributeNames.Count == 0;
+        }
 
         public static void SetPropertyInfo(ParameterAttribute parameterAttribute, PropertyInfo propertyInfo,
             IImplementsParameterAttribute implements)
@@ -98,9 +120,21 @@ namespace ParameterModel.Attributes
                 parameterAttribute.PropertyInfo = propertyInfo;
                 parameterAttribute._implementsParameterAttribute = implements;
                 EditableAttribute editableAttribute = parameterAttribute.PropertyInfo.GetCustomAttribute<EditableAttribute>();
-
                 parameterAttribute.IsReadOnly = (editableAttribute != null && !editableAttribute.AllowEdit) ||
                                                 parameterAttribute.PropertyInfo.GetCustomAttribute<ReadOnlyAttribute>()?.IsReadOnly == true;
+                DisplayAttribute displayAttribute = parameterAttribute.PropertyInfo.GetCustomAttribute<DisplayAttribute>();
+                if(displayAttribute != null)
+                {
+                    parameterAttribute.Prompt = displayAttribute.Prompt;
+                    parameterAttribute.PresentationOrder = displayAttribute.GetOrder() ?? 5; // Default to 5 if not set
+                    parameterAttribute.Description = displayAttribute.Description ?? ""; // Default to empty if not set
+                }
+                else
+                {
+                    parameterAttribute.Prompt = propertyInfo.Name; // Default label to property name if not set
+                    parameterAttribute.PresentationOrder = 5; // Default order
+                    parameterAttribute.Description = null; // Default to empty if not set
+                }
             }
         }
 
@@ -113,9 +147,9 @@ namespace ParameterModel.Attributes
                 {
                     throw new ArgumentException($"Enum type {parameterAttribute.PropertyInfo.PropertyType} does not contain any values.", nameof(parameterAttribute.PropertyInfo.Name));
                 }
-                parameterAttribute.EnumItemsDisplayDict =
+                parameterAttribute._enumItemsDisplayDict =
                     parameterAttribute._enumValues.Cast<Enum>().ToDictionary(s => s, s => EnumToDescriptionOrString(s));
-                parameterAttribute.EnumIntDisplayDict = 
+                parameterAttribute._enumIntDisplayDict = 
                     parameterAttribute._enumValues.Cast<Enum>().ToDictionary(e => Convert.ToInt32(e), e => EnumToDescriptionOrString(e));
             }
         }
@@ -128,21 +162,117 @@ namespace ParameterModel.Attributes
                        .FirstOrDefault()?.Description ?? value.ToString();
         }
 
-        //#region 
-        //protected RequiredAttribute _requiredAttribute; //Ensures that a property cannot be null or empty.It's commonly used to indicate mandatory fields. 
-        //protected StringLengthAttribute _stringLengthAttribute; //Specifies the minimum and maximum length of a string property. 
-        //protected RangeAttribute _rangeAttribute; //Limits a numeric property to a specific range of values. 
-        //protected EmailAddressAttribute _emailAddressAttribute; //Validates that a string property is a valid email address. 
-        //protected PhoneAttribute _phoneAttribute; //Validates that a string property is a valid phone number. 
-        //protected UrlAttribute _urlAttribute; //Validates that a string property is a valid URL.
-        //protected DataTypeAttribute _dataTypeAttribute; //Provides metadata about the data type of a property, such as Date, Time, PhoneNumber, Currency, etc.
-        //protected EnumDataTypeAttribute _enumDataTypeAttribute; //Links an enum to a data column, ensuring the property's value is within the enum's range.
-        //protected FileExtensionsAttribute _fileExtensionsAttribute; //Validates that a file name extension is valid.
-        //protected CustomValidationAttribute _customValidationAttribute; //Allows for custom validation logic to be applied to a property.
-        //protected DisplayAttribute _displayAttribute; // Specifies localizable strings for display purposes, such as the field's name, description, or prompt.
-        //protected DisplayFormatAttribute _displayFormatAttribute; // Controls how data fields are displayed and formatted in user interfaces.
-        //protected EditableAttribute _editableAttribute; // Indicates whether a property is editable or read-only
-        //#endregion
-
+        public static Dictionary<Type, List<Type>> AllowedValidationAttributes { get; } = new Dictionary<Type, List<Type>>()
+        {
+            { 
+                typeof(int), new List<Type>()
+                {
+                    //typeof(RequiredAttribute),
+                    //typeof(StringLengthAttribute),
+                    typeof(RangeAttribute),
+                    //typeof(EmailAddressAttribute),
+                    //typeof(PhoneAttribute),
+                    //typeof(UrlAttribute),
+                    //typeof(DataTypeAttribute),
+                    //typeof(FileExtensionsAttribute),
+                    typeof(DisplayAttribute),
+                    typeof(DisplayFormatAttribute),
+                    typeof(EditableAttribute),
+                }
+            },
+            { 
+                typeof(float), new List<Type>()
+                {
+                    //typeof(RequiredAttribute),
+                    //typeof(StringLengthAttribute),
+                    typeof(RangeAttribute),
+                    //typeof(EmailAddressAttribute),
+                    //typeof(PhoneAttribute),
+                    //typeof(UrlAttribute),
+                    //typeof(DataTypeAttribute),
+                    //typeof(FileExtensionsAttribute),
+                    //typeof(CustomValidationAttribute),
+                    typeof(DisplayAttribute),
+                    typeof(DisplayFormatAttribute),
+                    typeof(EditableAttribute),
+                }
+            },
+            { 
+                typeof(string), new List<Type>()
+                {
+                    typeof(RequiredAttribute),
+                    typeof(StringLengthAttribute),
+                    //typeof(RangeAttribute),
+                    typeof(EmailAddressAttribute),
+                    typeof(PhoneAttribute),
+                    typeof(UrlAttribute),
+                    //typeof(DataTypeAttribute),
+                    typeof(FileExtensionsAttribute),
+                    //typeof(CustomValidationAttribute),
+                    typeof(DisplayAttribute),
+                    //typeof(DisplayFormatAttribute),
+                    typeof(EditableAttribute),
+                }
+            },
+            { 
+                typeof(Enum), new List<Type>()
+                {
+                    //typeof(RequiredAttribute),
+                    //typeof(StringLengthAttribute),
+                    //typeof(RangeAttribute),
+                    //typeof(EmailAddressAttribute),
+                    //typeof(PhoneAttribute),
+                    //typeof(UrlAttribute),
+                    //typeof(DataTypeAttribute),
+                    //typeof(FileExtensionsAttribute),
+                    //typeof(CustomValidationAttribute),
+                    typeof(DisplayAttribute),
+                    //typeof(DisplayFormatAttribute),
+                    typeof(EditableAttribute),
+                }
+            },
+            {
+                typeof(string[]), new List<Type>()
+                {
+                    typeof(RequiredAttribute),
+                    //typeof(StringLengthAttribute),
+                    //typeof(RangeAttribute),
+                    //typeof(EmailAddressAttribute),
+                    //typeof(PhoneAttribute),
+                    //typeof(UrlAttribute),
+                    //typeof(DataTypeAttribute),
+                    //typeof(FileExtensionsAttribute),
+                    //typeof(CustomValidationAttribute),
+                    typeof(DisplayAttribute),
+                    //typeof(DisplayFormatAttribute),
+                    typeof(EditableAttribute),
+                }
+            },
+            { 
+                typeof(bool), new List<Type>()
+                {
+                    //typeof(RequiredAttribute),
+                    //typeof(StringLengthAttribute),
+                    //typeof(RangeAttribute),
+                    //typeof(EmailAddressAttribute),
+                    //typeof(PhoneAttribute),
+                    //typeof(UrlAttribute),
+                    //typeof(DataTypeAttribute),
+                    //typeof(FileExtensionsAttribute),
+                    //typeof(CustomValidationAttribute),
+                    typeof(DisplayAttribute),
+                    //typeof(DisplayFormatAttribute),
+                    typeof(EditableAttribute),
+                }
+            },
+            {
+                typeof(Variable), new List<Type>()
+                {
+                    typeof(RequiredAttribute),
+                    typeof(DisplayAttribute),
+                    typeof(EditableAttribute),
+                }
+            }
+        };
     }
 }

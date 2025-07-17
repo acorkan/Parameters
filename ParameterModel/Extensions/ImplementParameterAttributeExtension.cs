@@ -50,32 +50,34 @@ namespace ParameterModel.Extensions
             variableErrors.Clear();
             if ((variablesContext != null) && (implements.VariableAssignments.Count != 0))
             {
-                foreach (var assignment in implements.VariableAssignments)
+                List<string> propertyNames = implements.VariableAssignments.Keys.ToList();
+                foreach (var propName in propertyNames)
                 {
+                    string varName = implements.VariableAssignments[propName];
                     // Test if some disconnect with the variables map.
-                    if (!implements.AttributeMap.ContainsKey(assignment.Key))
+                    if (!implements.AttributeMap.ContainsKey(propName))
                     {
-                        throw new InvalidOperationException($"Variable '{assignment.Key}' not found in attribute map.");
+                        throw new InvalidOperationException($"Property '{propName}' not found in attribute map.");
                     }
                     // null variable assignment should not happen
-                    if (assignment.Value == null)
+                    if (varName == null)
                     {
-                        variableErrors[assignment.Key] = $"Variable assignment '{assignment.Key}' is null.";
+                        variableErrors[propName] = $"Variable assignment for '{propName}' is null.";
                         continue;
                     }
-                    VariableBase variableBase = variablesContext.GetVariable(assignment.Value);
+                    VariableBase variableBase = variablesContext.GetVariable(varName);
                     if (variableBase == null)
                     {
-                        variableErrors[assignment.Key] = $"Variable assignment '{assignment.Key}' does bot exist.";
+                        variableErrors[propName] = $"Variable '{varName}' assignment for '{propName}' does not exist.";
                         continue;
                     }
-                    ParameterAttribute parameterPromptAttribute = implements.AttributeMap[assignment.Key];
+                    ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propName];
                     Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
                     string error = string.Empty;
-                    implements.TrySetPropertyValue(assignment.Key, variableBase.GetValueAsString(), out error);
+                    implements.TrySetPropertyValue(propName, variableBase.GetValueAsString(), out error);
                     if(!string.IsNullOrEmpty(error))
                     {
-                        variableErrors[assignment.Key] = error;
+                        variableErrors[propName] = error;
                     }
                 }
             }
@@ -159,16 +161,17 @@ namespace ParameterModel.Extensions
             foreach (var vmProp in props)
             {
                 var allCustomAttributes = vmProp.GetCustomAttributes();
-                //ParameterAttribute? parameterPromptAttribute = vmProp.GetCustomAttribute(typeof(ParameterAttribute)) as ParameterAttribute;
                 ParameterAttribute? parameterAttr = allCustomAttributes.OfType<ParameterAttribute>().FirstOrDefault();
                 if (parameterAttr != null)
                 {
+                    List<string> invalidAttributeNames = new List<string>();
+                    if (!ParameterAttribute.TestAllowedValidationAttributes(vmProp, invalidAttributeNames))
+                    {
+                        throw new NotSupportedException($"Parameter named '{vmProp.Name}' of type {vmProp.PropertyType} does not support these attribute(s): " + string.Join(", ", invalidAttributeNames));
+                    }
+
                     ParameterAttribute.SetPropertyInfo(parameterAttr, vmProp, implements); // Set the PropertyInfo on the attribute
                     ret.Add(vmProp.Name, parameterAttr);
-                    if (string.IsNullOrEmpty(parameterAttr.Label))
-                    {
-                        parameterAttr.Label = vmProp.Name; // Default label to property name if not set
-                    }
 
                     if (vmProp.PropertyType.IsEnum)
                     {
@@ -202,20 +205,24 @@ namespace ParameterModel.Extensions
             var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
             if (dict == null) return;
 
+            // Get all properties.
             var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
             foreach (var prop in props)
             {
+                // Ignore the non-PArameterAttribute properties.
                 if (dest.AttributeMap.ContainsKey(prop.Name) && prop.CanWrite && dict.TryGetValue(prop.Name, out var jsonElement))
                 {
-                    try
+                    if (prop.PropertyType == typeof(Variable))
+                    {
+                        // Special case for Variable type, we need to deserialize it differently.
+                        var variable = JsonSerializer.Deserialize<Variable>(jsonElement.GetRawText());
+                        ((Variable)prop.GetValue(dest)).Assignment = variable.Assignment;
+                        ///prop.SetValue(dest, variable);
+                    }
+                    else
                     {
                         object? value = JsonElementToType(jsonElement, prop.PropertyType);
                         prop.SetValue(dest, value);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to set property {prop.Name}: {ex.Message}");
                     }
                 }
             }
@@ -241,9 +248,6 @@ namespace ParameterModel.Extensions
             return JsonSerializer.Serialize(dict);
         }
 
-        //private static string _varRegexPattern = @"^[A-Za-z_][A-Za-z0-9_]*$";
-
-        //private static System.Text.RegularExpressions.Regex _varNameRegex = new System.Text.RegularExpressions.Regex(_varRegexPattern);
 
         public static bool TrySetPropertyValue(this IImplementsParameterAttribute implements,
             string propertyName, string newValue, out string error)
@@ -374,6 +378,15 @@ namespace ParameterModel.Extensions
                     parameterPromptAttribute.PropertyInfo.SetValue(implements, newValue);
                 }
             }
+            else if (type == typeof(Variable))
+            {
+                parsedOK = true;
+                if (setProperty)
+                {
+                    ((Variable)parameterPromptAttribute.PropertyInfo.GetValue(implements)).Assignment = newValue;
+                    //parameterPromptAttribute.PropertyInfo.SetValue(implements, newValue);
+                }
+            }
             else if (type == typeof(string[]))
             {
                 parsedOK = true;
@@ -390,12 +403,13 @@ namespace ParameterModel.Extensions
                 {
                     Enum value;
                     string valueString = null;
-                    for (int i = 0; i < parameterPromptAttribute.EnumItemsDisplayDict.Count; i++)
+                    Dictionary<Enum, string> enumItemsDisplayDict = parameterPromptAttribute.GetEnumItemsDisplay();
+                    for (int i = 0; i < enumItemsDisplayDict.Count; i++)
                     {
-                        if (parameterPromptAttribute.EnumItemsDisplayDict.ElementAt(i).Key.ToString().Equals(valueString, StringComparison.OrdinalIgnoreCase) ||
-                            parameterPromptAttribute.EnumItemsDisplayDict.ElementAt(i).Value.Equals(valueString, StringComparison.OrdinalIgnoreCase))
+                        if (enumItemsDisplayDict.ElementAt(i).Key.ToString().Equals(valueString, StringComparison.OrdinalIgnoreCase) ||
+                            enumItemsDisplayDict.ElementAt(i).Value.Equals(valueString, StringComparison.OrdinalIgnoreCase))
                         {
-                            value = parameterPromptAttribute.EnumItemsDisplayDict.ElementAt(i).Key;
+                            value = enumItemsDisplayDict.ElementAt(i).Key;
                             break;
                         }
                     }
@@ -503,6 +517,14 @@ namespace ParameterModel.Extensions
                     return true;
                 }
             }
+            else if (type == typeof(Variable))
+            {
+                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is Variable v)
+                {
+                    displayString = v.Assignment;
+                    return true;
+                }
+            }
             else if (type == typeof(string[]))
             {
                 if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is string[] stringArray)
@@ -518,9 +540,10 @@ namespace ParameterModel.Extensions
                 {
                     if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is Enum typeValue)
                     {
-                        if (parameterPromptAttribute.EnumItemsDisplayDict.ContainsKey(typeValue))
+                        Dictionary<Enum, string> enumItemsDisplayDict = parameterPromptAttribute.GetEnumItemsDisplay();
+                        if (enumItemsDisplayDict.ContainsKey(typeValue))
                         {
-                            displayString = parameterPromptAttribute.EnumItemsDisplayDict[typeValue];
+                            displayString = enumItemsDisplayDict[typeValue];
                         }
                         else
                         {
