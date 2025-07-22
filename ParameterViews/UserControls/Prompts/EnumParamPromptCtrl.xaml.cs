@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace ParameterViews.UserControls
+namespace ParameterViews.UserControls.Prompts
 {
     /// <summary>
     /// Interaction logic for EnumParamPromptCtrl.xaml

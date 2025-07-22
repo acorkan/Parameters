@@ -13,7 +13,7 @@ namespace ParameterViews.ViewModels
     /// </summary>
     public abstract partial class ParamViewModelBase : ViewModelBase<ParameterModelMessage> // ParamViewModelNotifyBase : ViewModelBase<ParameterModelMessage>
     {
-        protected ParameterAttribute _parameterPromptAttribute;
+        protected ParameterModelBase _model;
         //public event ParamViewModelChangedDelegate OnUserInputChanged;
 
         /// <summary>
@@ -21,8 +21,11 @@ namespace ParameterViews.ViewModels
         /// </summary>
         public string Prompt { get; }
 
+        public bool ShowPrompt { get; }
+
         /// <summary>
         /// Tooltip for the prompt.
+        /// Same as Prompt but applied to the user input control.
         /// </summary>
         public string PromptToolTip { get; }
 
@@ -39,7 +42,7 @@ namespace ParameterViews.ViewModels
         /// <summary>
         /// Use this to control whgether the user sees a simple edit option or the option to select a variable.
         /// </summary>
-        public bool IsVariableOption => _parameterPromptAttribute.CanBeVariable;
+        public bool IsVariableOption => _model.ParameterAttribute.CanBeVariable;
 
         [ObservableProperty]
         private string _errorMsgToolTip;
@@ -67,6 +70,8 @@ namespace ParameterViews.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _selectionItems;
 
+        [ObservableProperty]
+        private string _selectedItem;
 
         /// <summary>
         /// Try to update the property and then echo what errors result from that
@@ -76,14 +81,14 @@ namespace ParameterViews.ViewModels
         {
             // If the new value can be used then set it.
             // Does not mean that it passed validations!
-            if (_parameterPromptAttribute.TestPropertyValue(newInput, out string errorMessage) &&
-                _parameterPromptAttribute.TrySetVariableValue(newInput, out errorMessage))
+            if (_model.ParameterAttribute.TestPropertyValue(newInput, out string errorMessage) &&
+                _model.ParameterAttribute.TrySetVariableValue(newInput, out errorMessage))
             {
                 //OnUserInputChanged?.Invoke(this, _parameterPromptAttribute.PropertyInfo.Name);
-                if(_parameterPromptAttribute.ValidationErrors.Count > 0)
+                if(_model.ParameterAttribute.ValidationErrors.Count > 0)
                 {
                     // If there are validation errors then set the error message.
-                    SetErrorMessage(string.Join(Environment.NewLine, _parameterPromptAttribute.ValidationErrors));
+                    SetErrorMessage(string.Join(Environment.NewLine, _model.ParameterAttribute.ValidationErrors));
                 }
                 else
                 {
@@ -110,35 +115,32 @@ namespace ParameterViews.ViewModels
 
         //public abstract bool IsDirty { get; }
 
-        protected ParamViewModelBase(ParameterModelBase model)// ParameterAttribute parameterPromptAttribute)
+        protected ParamViewModelBase(ParameterModelBase model, bool showPrompt)
         {
-            _parameterPromptAttribute = model.ParameterAttribute;
+            _model = model;
+            ShowPrompt = ShowPrompt;
+            ParameterAttribute parameterAttribute = model.ParameterAttribute;
 
-            string promptToolTip = null;
-            if (!string.IsNullOrEmpty(_parameterPromptAttribute.Description))
-            {
-                promptToolTip = _parameterPromptAttribute.Description;
-                if (!promptToolTip.EndsWith("."))
-                {
-                    promptToolTip += $".";
-                }
-            }
-            PromptToolTip = promptToolTip;
+            PromptToolTip = parameterAttribute.Description;
 
-            string prompt = _parameterPromptAttribute.Prompt;
+            string prompt = parameterAttribute.Prompt;
             prompt += ":";
             Prompt = prompt;
 
+            // Get initial value
             if (IsVariableOption)
             {
                 SelectionItems = new ObservableCollection<string>(model.GetSelectionItems());
             }
-            UserInput = GetDisplayString(out bool isVariableAssignment);
+            else 
+            {
+                UserInput = GetDisplayString(out bool isVariableAssignment);
+            }
         }
 
         protected string GetDisplayString(out bool isVariableAssignment)
         {
-            _parameterPromptAttribute.GetDisplayString(out string displayString, out isVariableAssignment);
+            _model.ParameterAttribute.GetDisplayString(out string displayString, out isVariableAssignment);
             return displayString;
         }
 

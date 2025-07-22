@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Docs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MvvmModelMessaging\MileHighWpf.MvvmModelMessaging\MileHighWpf.MvvmModelMessaging.csproj" />
+    <ProjectReference Include="..\ParameterModel\ParameterModel.csproj" />
+    <ProjectReference Include="..\ParameterViews\ParameterViews.csproj" />
+    <ProjectReference Include="..\PythonWrapper\PythonWrapper.csproj" />
+  </ItemGroup>
+
+</Project>

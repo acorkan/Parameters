@@ -3,6 +3,7 @@ using ParameterModel.Interfaces;
 using ParameterModel.Models;
 using ParameterModel.Variables;
 using ParameterViews.ViewModels;
+using ParameterViews.ViewModels.Prompts;
 
 namespace ParameterViews.Factories
 {
@@ -17,11 +18,14 @@ namespace ParameterViews.Factories
 
         /// <summary>
         /// Build a collection of ViewModels from the property owner that implements IImplementsParameterAttribute.
+        /// The showPrompt property controls if the left side test is shown or not. Typically for a dialog prompt it would be.
         /// </summary>
         /// <param name="propertyOwner"></param>
+        /// <param name="showPrompt"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public List<ParamViewModelBase> GetParameterViewModels(IImplementsParameterAttribute propertyOwner)
+        public List<ParamViewModelBase> GetParameterViewModels(IImplementsParameterAttribute propertyOwner,
+            bool showPrompt = true)
         {
             Dictionary<string, IParameterModel> models = _parameterModelFactory.GetModels(propertyOwner);
 
@@ -32,31 +36,31 @@ namespace ParameterViews.Factories
                 // Get the property name and value
                 if (kvp.Value.ParameterType == typeof(string))
                 {
-                    paramViewModel = new StringParamViewModel(kvp.Value as StringParameterModel);
+                    paramViewModel = new StringParamViewModel(kvp.Value as StringParameterModel, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(int))
                 {
-                    paramViewModel = new IntParamViewModel(kvp.Value as IntParameterModel);
+                    paramViewModel = new IntParamViewModel(kvp.Value as IntParameterModel, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(float))
                 {
-                    paramViewModel = new FloatParamViewModel(kvp.Value as FloatParameterModel);
+                    paramViewModel = new FloatParamViewModel(kvp.Value as FloatParameterModel, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(bool))
                 {
-                    paramViewModel = new BoolParamViewModel(kvp.Value as BoolParameterModel);
+                    paramViewModel = new BoolParamViewModel(kvp.Value as BoolParameterModel, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(string[]))
                 {
-                    paramViewModel = new StrArrayParamViewModel(kvp.Value as StringArrayParameterModel);
+                    paramViewModel = new StrArrayParamViewModel(kvp.Value as StringArrayParameterModel, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(Variable))
                 {
-                    paramViewModel = new VariableParamViewModel(kvp.Value as VariableParameterModel);
+                    paramViewModel = new VariableParamViewModel(kvp.Value as VariableParameterModel, showPrompt);
                 }
                 else if (kvp.Value.ParameterType.IsEnum)
                 {
-                    paramViewModel = new EnumParamViewModel(kvp.Value as EnumParameterModel);
+                    paramViewModel = new EnumParamViewModel(kvp.Value as EnumParameterModel, showPrompt);
                 }
                 else
                 {

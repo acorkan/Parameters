@@ -1,11 +1,12 @@
 ﻿using ParameterModel.Models;
 using ParameterModel.Models.Base;
 
-namespace ParameterViews.ViewModels
+namespace ParameterViews.ViewModels.Prompts
 {
     public partial class VariableParamViewModel : ParamViewModelBase
     {
-        public VariableParamViewModel(VariableParameterModel model) : base(model)
+        public VariableParamViewModel(VariableParameterModel model, bool showPrompt) : 
+            base(model, showPrompt)
         {
         }
     }

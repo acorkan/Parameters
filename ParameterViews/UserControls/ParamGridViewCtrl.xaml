@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ParameterViews.UserControls"
-            xmlns:promptCtrls="clr-namespace:ParameterViews.UserControls"
-            xmlns:vms="clr-namespace:ParameterViews.ViewModels"
+            xmlns:promptCtrls="clr-namespace:ParameterViews.UserControls.Prompts"
+            xmlns:vms="clr-namespace:ParameterViews.ViewModels.Prompts"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Name="theCtrl">

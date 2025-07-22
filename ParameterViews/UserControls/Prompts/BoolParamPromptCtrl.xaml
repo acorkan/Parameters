@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="ParameterViews.UserControls.Prompts.BoolParamPromptCtrl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:convs="clr-namespace:ParameterViews.Converters"
+             xmlns:local="clr-namespace:ParameterViews.UserControls.Prompts"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <convs:BooleanToVisibilityConverter
+            x:Key="booleanToVisibilityConverter" 
+            True="Visible" 
+            False="Collapsed"/>
+        <convs:BooleanToVisibilityConverter
+            x:Key="inverseBooleanToVisibilityConverter" 
+            True="Collapsed" 
+            False="Visible"/>
+        <convs:BooleanToVisibilityConverter
+            x:Key="booleanToHiddenConverter" 
+            True="Visible" 
+            False="Hidden"/>
+    </UserControl.Resources>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Name="promptText" Grid.Column="0" Text="{Binding Prompt}" 
+                   d:Text="String Parameter Prompt" FontSize="12" HorizontalAlignment="Left"
+                   ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
+                   Visibility="{Binding ShowPrompt, Converter={StaticResource booleanToVisibilityConverter}}"/>
+        <TextBlock Name="errorNotice" Grid.Column="1" Text="!" Foreground="Red" Margin="10,0,4,0"
+            FontWeight="Bold" FontSize="14"
+            ToolTip="{Binding ErrorMsgToolTip}" ToolTipService.ShowOnDisabled="True"
+            Visibility="{Binding IsError, Converter={StaticResource booleanToHiddenConverter}}"/>
+        <!-- Show either checkbox or combo -->
+        <CheckBox Grid.Column="2" IsChecked="{Binding IsUserInput}" 
+                  VerticalAlignment="Center" 
+                  IsEnabled="{Binding IsEnabled}"
+                  Visibility="{Binding IsVariableOption, Converter={StaticResource inverseBooleanToVisibilityConverter}}"/>
+        <ComboBox Grid.Column="2" 
+                  IsEditable="True"
+                  ItemsSource="{Binding SelectionItems}"
+                  SelectedItem="{Binding SelectedItem}"
+                  Text="{Binding UserInput}"
+                  VerticalAlignment="Center" 
+                  ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
+                  Visibility="{Binding IsVariableOption, Converter={StaticResource booleanToVisibilityConverter}}"/>
+    </Grid>
+</UserControl>

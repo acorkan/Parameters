@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ParameterModel.Models;
 
-namespace ParameterViews.ViewModels
+namespace ParameterViews.ViewModels.Prompts
 {
     public partial class BoolParamViewModel : ParamViewModelBase
     {
@@ -19,8 +19,8 @@ namespace ParameterViews.ViewModels
             ApplyUserInputChanged(value.ToString());
         }
 
-        public BoolParamViewModel(BoolParameterModel parameterPromptAttribute) : 
-            base(parameterPromptAttribute)
+        public BoolParamViewModel(BoolParameterModel parameterPromptAttribute, bool showPrompt) : 
+            base(parameterPromptAttribute, showPrompt)
         {
             string display = GetDisplayString(out bool isVariableAssignment);
             if (!isVariableAssignment)
