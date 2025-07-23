@@ -467,11 +467,12 @@ namespace ParameterModel.Extensions
         /// <param name="newValue"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public static bool GetDisplayString(this IImplementsParameterAttribute implements,
+        private static bool GetDisplayString(this IImplementsParameterAttribute implements,
             string propertyName, out string displayString, out bool isVariableAssignment)
         {
             displayString = "";
             isVariableAssignment = false;
+            implements.UpdateAttributeMap();
             if (!implements.AttributeMap.ContainsKey(propertyName))
             {
                 throw new ArgumentException($"No property '{propertyName}'.");

@@ -1,7 +1,10 @@
 ﻿using MileHighWpf.MvvmModelMessaging;
 using ParameterModel.Attributes;
+using ParameterModel.Factories;
 using ParameterModel.Interfaces;
 using ParameterModel.Models.Base;
+using ParameterViews.Factories;
+using ParameterViews.ViewModels;
 using System;
 using System.Configuration;
 using System.Data;
@@ -26,16 +29,25 @@ namespace ParametersDemo
         {
             ViewModelBase.TraceMessagesOn = true;
 
+            IVariablesContext _variablesContext = new VariablesContext();
+
+            ParameterModelFactory modelFactory = new ParameterModelFactory(_variablesContext);
+
+            ParameterViewModelFactory viewModelFactory = new ParameterViewModelFactory(modelFactory);
+
+            List<ParamViewModelBase> parameters = viewModelFactory.GetParameterViewModels(new TestBoolean(), true);
+
             //ParameterModels parameterModels = new ParameterModels();
             // Create parameter class.
             // Process throught factory to get prompt models.
             // Create promt view models for each parameter using factory. This becomes List<ParamViewModelBase> parameters
-            MainViewModel mainViewModel = new MainViewModel(parameterModels); // List<ParamViewModelBase> parameters, bool isReadOnly
+            MainViewModel mainViewModel = new MainViewModel(parameters, false); // List<ParamViewModelBase> parameters, bool isReadOnly
             MainWindow mainWindow = new MainWindow
             {
                 DataContext = mainViewModel
             };
 
+            MainWindow.Show();
         }
     }
 

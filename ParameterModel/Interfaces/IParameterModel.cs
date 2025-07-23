@@ -45,18 +45,11 @@ namespace ParameterModel.Interfaces
         bool IsVariableSelected { get; }
 
         /// <summary>
-        /// If IsPropertyTypeString is set then returns the property value, 
-        /// otherwise returns the formatted property value in the correct string format.
-        /// This is the initial display in a prompt.
+        /// Get the display string for the property and a flag indicating if this is just avariable name.
         /// </summary>
+        /// <param name="isVariableAssignment"></param>
         /// <returns></returns>
-        bool GetDisplayString(out string displayString, out bool isVariableAssignment);
-
-        /// <summary>
-        /// Get the display string ignoring errors.
-        /// </summary>
-        /// <returns></returns>
-        string GetDisplayString();
+        string GetDisplayString(out bool isVariableAssignment);
 
         /// <summary>
         /// Returns true if the string can be assigned to the property type (apply a TryParse() method)
@@ -88,5 +81,9 @@ namespace ParameterModel.Interfaces
         /// </summary>
         /// <returns></returns>
         string[] GetSelectionItems();
+
+        bool TestOrSetVariableValue(string varName, bool setVarValue);
+
+        bool TestOrSetSetPropertyValue(string newValue, bool setProperty);
     }
 }

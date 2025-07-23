@@ -12,11 +12,34 @@ namespace ParameterModel.Models
 {
     public class StringArrayParameterModel : ParameterModelBase
     {
-        public static readonly char StrArrayParameterDelimiter = ',';
+        public static readonly char StrArrayParameterDelimiter = ' ';
+        private readonly char[] _delimiter = [StrArrayParameterDelimiter];
 
         public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
             base(parameterPromptAttribute, variablesContext)
         {
+        }
+
+        public override VariableType[] AllowedVariableTypes => [VariableType.String];
+
+        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        {
+            if (newValue == null)
+            {
+                return false;
+            }
+            if (setProperty)
+            {
+                string[] stringArray = newValue.Split(_delimiter, StringSplitOptions.RemoveEmptyEntries);
+                ParameterAttribute.PropertyInfo.SetValue(ParameterAttribute.ImplementsParameterAttributes, stringArray);
+            }
+            return true;
+        }
+
+        protected override string GetDisplayString()
+        {
+            string[] stringArray = (string[])ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
+            return string.Join(StrArrayParameterDelimiter, stringArray);
         }
     }
 }

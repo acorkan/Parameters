@@ -10,5 +10,17 @@ namespace ParameterModel.Models
             base(parameterPromptAttribute, variablesContext)
         {
         }
+
+        public override VariableType[] AllowedVariableTypes => throw new NotImplementedException();
+
+        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override string GetDisplayString()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

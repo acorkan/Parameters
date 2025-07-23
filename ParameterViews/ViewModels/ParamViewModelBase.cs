@@ -70,8 +70,6 @@ namespace ParameterViews.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _selectionItems;
 
-        [ObservableProperty]
-        private string _selectedItem;
 
         /// <summary>
         /// Try to update the property and then echo what errors result from that
@@ -81,8 +79,12 @@ namespace ParameterViews.ViewModels
         {
             // If the new value can be used then set it.
             // Does not mean that it passed validations!
-            if (_model.ParameterAttribute.TestPropertyValue(newInput, out string errorMessage) &&
-                _model.ParameterAttribute.TrySetVariableValue(newInput, out errorMessage))
+            bool assignmentOk = _model.ParameterAttribute.TestPropertyValue(newInput, out string errorMessage);
+            if (!assignmentOk && IsVariableOption)
+            {
+                assignmentOk = _model.ParameterAttribute.TrySetVariableValue(newInput, out errorMessage);
+            }
+            if(assignmentOk)
             {
                 //OnUserInputChanged?.Invoke(this, _parameterPromptAttribute.PropertyInfo.Name);
                 if(_model.ParameterAttribute.ValidationErrors.Count > 0)
@@ -118,7 +120,7 @@ namespace ParameterViews.ViewModels
         protected ParamViewModelBase(ParameterModelBase model, bool showPrompt)
         {
             _model = model;
-            ShowPrompt = ShowPrompt;
+            ShowPrompt = showPrompt;
             ParameterAttribute parameterAttribute = model.ParameterAttribute;
 
             PromptToolTip = parameterAttribute.Description;
@@ -131,6 +133,7 @@ namespace ParameterViews.ViewModels
             if (IsVariableOption)
             {
                 SelectionItems = new ObservableCollection<string>(model.GetSelectionItems());
+                UserInput = SelectionItems[0];
             }
             else 
             {

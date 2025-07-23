@@ -59,22 +59,82 @@ namespace ParameterModel.Models.Base
             ParameterAttribute.TrySetVariableValue(valueString, out string errorMessage);
         }
 
-        public bool GetDisplayString(out string displayString, out bool isVariableAssignment)
-        {
-            return ParameterAttribute.GetDisplayString(out displayString, out isVariableAssignment);
-        }
-
-        public string GetDisplayString()
-        {
-            ParameterAttribute.GetDisplayString(out string displayString, out bool isVariableAssignment);
-            return displayString;
-        }
-
         /// <summary>
         /// This returns selections that can be used in a combobox.
         /// </summary>
         /// <returns></returns>
         public virtual string[] GetSelectionItems() => Array.Empty<string>(); // Default implementation returns an empty array.
+
+        /// <summary>
+        /// Return true if the variable assingment can be made.
+        /// If implements is not null then the variable will be set to the value if valid.
+        /// </summary>
+        /// <param name="varName"></param>
+        /// <param name="errorMessage"></param>
+        /// <param name="setVarValue"></param>
+        /// <returns></returns>
+        public virtual bool TestOrSetVariableValue(string varName, bool setVarValue)
+        {
+            if (!ParameterAttribute.CanBeVariable)
+            {
+                throw new InvalidOperationException($"Property '{ParameterName}' is not marked as a variable assignment.");
+            }
+            if (ParameterAttribute.IsReadOnly)
+            {
+                throw new InvalidOperationException($"Parameter {ParameterName} is read-only.");
+            }
+
+            if (string.IsNullOrEmpty(varName))
+            {
+                throw new ArgumentNullException("Variable name cannot be null or empty.");
+            }
+
+            VariableBase variable = VariablesContext.GetVariable(varName);
+            if ((variable == null) || !AllowedVariableTypes.Contains(variable.Type))
+            {
+                return false;
+            }
+
+            if (setVarValue)
+            {
+                // OK to assign variable.
+                ParameterAttribute.ImplementsParameterAttributes.VariableAssignments[ParameterName] = varName;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Return true if the property value can be set from the newValue string.
+        /// If implements is not null then the property will be set to the newValue if valid.
+        /// </summary>
+        /// <param name="newValue"></param>
+        /// <param name="errorMessage"></param>
+        /// <param name="implements"></param>
+        /// <returns></returns>
+        public abstract bool TestOrSetSetPropertyValue(string newValue, bool setProperty);
+
+        public string GetDisplayString(out bool isVariableAssignment)
+        {
+            //return ParameterAttribute.GetDisplayString(out displayString, out isVariableAssignment);
+            isVariableAssignment = false;
+            if (ParameterAttribute.ImplementsParameterAttributes.VariableAssignments.ContainsKey(ParameterName))
+            {
+                // If the variable is set, then return that value.
+                isVariableAssignment = true;
+                return ParameterAttribute.ImplementsParameterAttributes.VariableAssignments[ParameterName];
+            }
+            return GetDisplayString();
+        }
+
+        /// <summary>
+        /// Just format and return the proeprty value as a string.
+        /// Ignore any possible variable assignment.
+        /// </summary>
+        /// <param name="implements"></param>
+        /// <returns></returns>
+        protected abstract string GetDisplayString();
+
+        public abstract VariableType[] AllowedVariableTypes { get; }
         #endregion IParameterModel
     }
 

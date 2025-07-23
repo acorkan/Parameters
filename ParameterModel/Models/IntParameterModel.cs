@@ -1,12 +1,6 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
 using ParameterModel.Models.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ParameterModel.Models
 {
@@ -15,44 +9,27 @@ namespace ParameterModel.Models
         public IntParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
             base(parameterPromptAttribute, variablesContext)
         {
-            //if (IsVariableAllowed &&  !TryGetPropertyValue(out bool propertyValue, out string propertyError))
-            //{
-            //    VariableError = propertyError;
-            //}
         }
 
-        //public override string Format(int val)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public override VariableType[] AllowedVariableTypes => [VariableType.Integer];
 
-        //public override int GetDefault()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        protected override string GetDisplayString()
+        {
+            int i = (int)ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
+            return i.ToString();
+        }
 
-        //public override string[] GetSelectionItems() => [];
-
-        //public override bool TestAttibuteValidation(int val, out string attributeError)
-        //{
-        //    attributeError = "";
-        //    if (ParameterAttribute.Min != ParameterAttribute.Max)
-        //    {
-        //        if (val < (int)ParameterAttribute.Min)
-        //        {
-        //            attributeError = $"Value must be greater than or equal to {(int)ParameterAttribute.Min}";
-        //        }
-        //        if (i > (int)ParameterAttribute.Max)
-        //        {
-        //            attributeError = $"Value must be less than or equal to {(int)ParameterAttribute.Max}";
-        //        }
-        //    }
-        //    return string.IsNullOrEmpty(attributeError);
-        //}
-
-        //public override bool TryParse(string valString, out int val)
-        //{
-        //    return int.TryParse(valString, out val);
-        //}
+        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        {
+            if (int.TryParse(newValue, out int i))
+            {
+                if (setProperty)
+                {
+                    ParameterAttribute.PropertyInfo.SetValue(ParameterAttribute.ImplementsParameterAttributes, i);
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }

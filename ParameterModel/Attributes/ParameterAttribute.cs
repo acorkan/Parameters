@@ -16,7 +16,7 @@ namespace ParameterModel.Attributes
         private Array _enumValues;
         protected Dictionary<int, string> _enumIntDisplayDict;
         protected Dictionary<Enum, string> _enumItemsDisplayDict;
-        protected IImplementsParameterAttribute _implementsParameterAttribute;
+        public IImplementsParameterAttribute ImplementsParameterAttributes { get; protected set; }
 
         /// <summary>
         /// Used in a prompt.
@@ -74,26 +74,26 @@ namespace ParameterModel.Attributes
         {
             return _enumItemsDisplayDict;
         }
-        public bool IsVariableSelected { get => _implementsParameterAttribute.VariableAssignments.ContainsKey(PropertyInfo.Name); }
+        public bool IsVariableSelected { get => ImplementsParameterAttributes.VariableAssignments.ContainsKey(PropertyInfo.Name); }
 
         public bool GetDisplayString(out string displayString, out bool isVariableAssignment)
         {
-            return _implementsParameterAttribute.GetDisplayString(PropertyInfo.Name, out displayString, out isVariableAssignment);
+            return ImplementsParameterAttributes.GetDisplayString(PropertyInfo.Name, out displayString, out isVariableAssignment);
         }
 
         public bool TrySetPropertyValue(string newValue, out string error)
         {
-            return _implementsParameterAttribute.TrySetPropertyValue(PropertyInfo.Name, newValue, out error);
+            return ImplementsParameterAttributes.TrySetPropertyValue(PropertyInfo.Name, newValue, out error);
         }
 
         public bool TrySetVariableValue(string newValue, out string error)
         {
-            return _implementsParameterAttribute.TryAssignVariable(PropertyInfo.Name, newValue, out error);
+            return ImplementsParameterAttributes.TryAssignVariable(PropertyInfo.Name, newValue, out error);
         }
 
         public bool TestPropertyValue(string newValue, out string error)
         {
-            return _implementsParameterAttribute.TestPropertyValue(PropertyInfo.Name, newValue, out error);
+            return ImplementsParameterAttributes.TestPropertyValue(PropertyInfo.Name, newValue, out error);
         }
 
         public static bool TestAllowedValidationAttributes(PropertyInfo propertyInfo, List<string> invalidAttributeNames)
@@ -118,7 +118,7 @@ namespace ParameterModel.Attributes
             if(parameterAttribute.PropertyInfo == null)
             {
                 parameterAttribute.PropertyInfo = propertyInfo;
-                parameterAttribute._implementsParameterAttribute = implements;
+                parameterAttribute.ImplementsParameterAttributes = implements;
                 EditableAttribute editableAttribute = parameterAttribute.PropertyInfo.GetCustomAttribute<EditableAttribute>();
                 parameterAttribute.IsReadOnly = (editableAttribute != null && !editableAttribute.AllowEdit) ||
                                                 parameterAttribute.PropertyInfo.GetCustomAttribute<ReadOnlyAttribute>()?.IsReadOnly == true;
