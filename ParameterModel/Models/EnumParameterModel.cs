@@ -9,8 +9,8 @@ namespace ParameterModel.Models
     {
         private readonly string[] _selections;
 
-        public EnumParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, variablesContext)
+        public EnumParameterModel(ParameterAttribute parameterPromptAttribute) : 
+            base(parameterPromptAttribute)
         {
 
             _selections = parameterPromptAttribute.GetEnumItemsDisplay().Values.ToArray();
@@ -23,7 +23,7 @@ namespace ParameterModel.Models
 
         public override VariableType[] AllowedVariableTypes => [VariableType.String];
 
-        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
             Enum value = null;
             string valueString = null;
@@ -49,7 +49,7 @@ namespace ParameterModel.Models
                 }
                 throw new InvalidOperationException($"Parameter '{ParameterName}' could not be parsed as enum '{ParameterAttribute.PropertyInfo.PropertyType}'.");
             }
-            throw new InvalidOperationException($"Can not resolve property {ParameterName} from enum type {ParameterAttribute.PropertyInfo.PropertyType}");
+            throw new InvalidOperationException($"Can not resolve parameter {ParameterName} from enum type {ParameterAttribute.PropertyInfo.PropertyType}");
         }
 
         protected override string GetDisplayString()

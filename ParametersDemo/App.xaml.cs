@@ -31,11 +31,11 @@ namespace ParametersDemo
 
             IVariablesContext _variablesContext = new VariablesContext();
 
-            ParameterModelFactory modelFactory = new ParameterModelFactory(_variablesContext);
+            ParameterModelFactory modelFactory = new ParameterModelFactory();
 
             ParameterViewModelFactory viewModelFactory = new ParameterViewModelFactory(modelFactory);
 
-            List<ParamViewModelBase> parameters = viewModelFactory.GetParameterViewModels(new TestBoolean(), true);
+            List<ParamViewModelBase> parameters = viewModelFactory.GetParameterViewModels(new TestBoolean(), _variablesContext, true);
 
             //ParameterModels parameterModels = new ParameterModels();
             // Create parameter class.

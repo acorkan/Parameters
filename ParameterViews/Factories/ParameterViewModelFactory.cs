@@ -1,6 +1,7 @@
 ﻿using ParameterModel.Factories;
 using ParameterModel.Interfaces;
 using ParameterModel.Models;
+using ParameterModel.Models.Base;
 using ParameterModel.Variables;
 using ParameterViews.ViewModels;
 using ParameterViews.ViewModels.Prompts;
@@ -24,8 +25,8 @@ namespace ParameterViews.Factories
         /// <param name="showPrompt"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public List<ParamViewModelBase> GetParameterViewModels(IImplementsParameterAttribute propertyOwner,
-            bool showPrompt = true)
+        public List<ParamViewModelBase> GetParameterViewModels(IImplementsParameterAttribute propertyOwner, 
+            IVariablesContext variablesContext, bool showPrompt = true)
         {
             Dictionary<string, IParameterModel> models = _parameterModelFactory.GetModels(propertyOwner);
 
@@ -36,31 +37,31 @@ namespace ParameterViews.Factories
                 // Get the property name and value
                 if (kvp.Value.ParameterType == typeof(string))
                 {
-                    paramViewModel = new StringParamViewModel(kvp.Value as StringParameterModel, showPrompt);
+                    paramViewModel = new StringParamViewModel(kvp.Value as StringParameterModel, variablesContext, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(int))
                 {
-                    paramViewModel = new IntParamViewModel(kvp.Value as IntParameterModel, showPrompt);
+                    paramViewModel = new IntParamViewModel(kvp.Value as IntParameterModel, variablesContext, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(float))
                 {
-                    paramViewModel = new FloatParamViewModel(kvp.Value as FloatParameterModel, showPrompt);
+                    paramViewModel = new FloatParamViewModel(kvp.Value as FloatParameterModel, variablesContext, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(bool))
                 {
-                    paramViewModel = new BoolParamViewModel(kvp.Value as BoolParameterModel, showPrompt);
+                    paramViewModel = new BoolParamViewModel(kvp.Value as BoolParameterModel, variablesContext, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(string[]))
                 {
-                    paramViewModel = new StrArrayParamViewModel(kvp.Value as StringArrayParameterModel, showPrompt);
+                    paramViewModel = new StrArrayParamViewModel(kvp.Value as StringArrayParameterModel, variablesContext, showPrompt);
                 }
                 else if (kvp.Value.ParameterType == typeof(Variable))
                 {
-                    paramViewModel = new VariableParamViewModel(kvp.Value as VariableParameterModel, showPrompt);
+                    paramViewModel = new VariableParamViewModel(kvp.Value as VariableParameterModel, variablesContext, showPrompt);
                 }
                 else if (kvp.Value.ParameterType.IsEnum)
                 {
-                    paramViewModel = new EnumParamViewModel(kvp.Value as EnumParameterModel, showPrompt);
+                    paramViewModel = new EnumParamViewModel(kvp.Value as EnumParameterModel, variablesContext, showPrompt);
                 }
                 else
                 {
@@ -78,14 +79,14 @@ namespace ParameterViews.Factories
         /// <param name="propertyOwner"></param>
         /// <param name="isReadOnly"></param>
         /// <returns></returns>
-        public ParamPromptViewModel GetParamPromptViewModel(IImplementsParameterAttribute propertyOwner, bool isReadOnly)
+        public ParamPromptViewModel GetParamPromptViewModel(IImplementsParameterAttribute propertyOwner, IVariablesContext variablesContext, bool isReadOnly)
         {
-            return new ParamPromptViewModel(GetParameterViewModels(propertyOwner), isReadOnly);
+            return new ParamPromptViewModel(GetParameterViewModels(propertyOwner, variablesContext), isReadOnly);
         }
 
-        public EditParamDialogViewModel GetParamCollectionViewModel(string title, IImplementsParameterAttribute propertyOwner, bool isReadOnly, bool isNew)
+        public EditParamDialogViewModel GetParamCollectionViewModel(string title, IImplementsParameterAttribute propertyOwner, IVariablesContext variablesContext, bool isReadOnly, bool isNew)
         {
-            return new EditParamDialogViewModel(title, GetParameterViewModels(propertyOwner), isReadOnly, isNew);
+            return new EditParamDialogViewModel(title, GetParameterViewModels(propertyOwner, variablesContext), isReadOnly, isNew);
         }
     }
 }

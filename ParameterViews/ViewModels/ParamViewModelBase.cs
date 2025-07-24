@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MileHighWpf.MvvmModelMessaging;
 using ParameterModel.Attributes;
+using ParameterModel.Interfaces;
 using ParameterModel.Models.Base;
 using System.Collections.ObjectModel;
 
@@ -13,7 +14,8 @@ namespace ParameterViews.ViewModels
     /// </summary>
     public abstract partial class ParamViewModelBase : ViewModelBase<ParameterModelMessage> // ParamViewModelNotifyBase : ViewModelBase<ParameterModelMessage>
     {
-        protected ParameterModelBase _model;
+        protected readonly IVariablesContext _variablesContext;
+        protected readonly ParameterModelBase _model;
         //public event ParamViewModelChangedDelegate OnUserInputChanged;
 
         /// <summary>
@@ -79,18 +81,26 @@ namespace ParameterViews.ViewModels
         {
             // If the new value can be used then set it.
             // Does not mean that it passed validations!
-            bool assignmentOk = _model.ParameterAttribute.TestPropertyValue(newInput, out string errorMessage);
-            if (!assignmentOk && IsVariableOption)
+            bool varAssignOk = false;
+            bool paramAssignOk = _model.TestOrSetParameter(newInput, false);
+            if (!paramAssignOk && IsVariableOption)
             {
-                assignmentOk = _model.ParameterAttribute.TrySetVariableValue(newInput, out errorMessage);
+                varAssignOk = _model.TestOrAssignVariable(_variablesContext, newInput, true);
             }
-            if(assignmentOk)
+            if (varAssignOk)
             {
-                //OnUserInputChanged?.Invoke(this, _parameterPromptAttribute.PropertyInfo.Name);
-                if(_model.ParameterAttribute.ValidationErrors.Count > 0)
+                // Clear errors because as long as the variable is valid for the parameter we are OK.
+                SetErrorMessage(null);
+            }
+            else if (paramAssignOk)
+            {
+                // A parameter assignment was successful, so we can validate it.
+                List<string> errorMessage = new List<string>();
+                _model.ValidateParameter(errorMessage);
+                if (errorMessage.Count > 0)
                 {
                     // If there are validation errors then set the error message.
-                    SetErrorMessage(string.Join(Environment.NewLine, _model.ParameterAttribute.ValidationErrors));
+                    SetErrorMessage(string.Join(Environment.NewLine, errorMessage));
                 }
                 else
                 {
@@ -101,7 +111,7 @@ namespace ParameterViews.ViewModels
             else
             {
                 // If the new value cannot be used then set the error message.
-                SetErrorMessage(errorMessage);
+                SetErrorMessage($"Input {newInput} is not a valid variable or value.");
             }
         }
 
@@ -117,9 +127,10 @@ namespace ParameterViews.ViewModels
 
         //public abstract bool IsDirty { get; }
 
-        protected ParamViewModelBase(ParameterModelBase model, bool showPrompt)
+        protected ParamViewModelBase(ParameterModelBase model, IVariablesContext variablesContext, bool showPrompt)
         {
             _model = model;
+            _variablesContext = variablesContext;
             ShowPrompt = showPrompt;
             ParameterAttribute parameterAttribute = model.ParameterAttribute;
 
@@ -143,7 +154,7 @@ namespace ParameterViews.ViewModels
 
         protected string GetDisplayString(out bool isVariableAssignment)
         {
-            _model.ParameterAttribute.GetDisplayString(out string displayString, out isVariableAssignment);
+            string displayString = _model.GetDisplayString(out isVariableAssignment);
             return displayString;
         }
 

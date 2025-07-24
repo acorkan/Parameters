@@ -2,16 +2,8 @@
 using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
 using ParameterModel.Variables;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace ParameterModel.Models.Base
 {
@@ -22,42 +14,21 @@ namespace ParameterModel.Models.Base
     /// </summary>
     public abstract class ParameterModelBase : ModelBase<ParameterModelMessage>, IParameterModel
     {
-        public ParameterModelBase(ParameterAttribute parameterPromptAttribute,
-            IVariablesContext variablesContext)
+        public ParameterModelBase(ParameterAttribute parameterPromptAttribute)
         {
             ParameterAttribute = parameterPromptAttribute;
-            VariablesContext = variablesContext;
-            if (CanBeVariable && (VariablesContext == null))
-            {
-                throw new InvalidOperationException($"VariablesContext cannot be null because property {ParameterAttribute.PropertyInfo.Name} has CanBeVariable set.");
-            }
         }
 
 
         #region IParameterModel
         public ParameterAttribute ParameterAttribute { get; }
-        public IVariablesContext VariablesContext { get; }
         public bool CanBeVariable { get => ParameterAttribute.CanBeVariable; }
+        public bool IsReadOnly { get => ParameterAttribute.IsReadOnly; }
         public bool HasError { get => Errors.Count != 0; }
         public Type ParameterType { get => ParameterAttribute.PropertyInfo.PropertyType; }
         public string ParameterName { get => ParameterAttribute.PropertyInfo.Name; }
         public List<string> Errors { get; } = new List<string>();
         public bool IsVariableSelected { get => ParameterAttribute.IsVariableSelected; }
-
-        public bool TestValueString(string valueString)
-        {
-            return ParameterAttribute.TestPropertyValue(valueString, out string errorMessage);
-        }
-
-        public void AssignValueStringToProperty(string valueString)
-        {
-            ParameterAttribute.TrySetPropertyValue(valueString, out string errorMessage);
-        }
-
-        public void AssignVaribleToProperty(string valueString)
-        {
-            ParameterAttribute.TrySetVariableValue(valueString, out string errorMessage);
-        }
 
         /// <summary>
         /// This returns selections that can be used in a combobox.
@@ -73,12 +44,17 @@ namespace ParameterModel.Models.Base
         /// <param name="errorMessage"></param>
         /// <param name="setVarValue"></param>
         /// <returns></returns>
-        public virtual bool TestOrSetVariableValue(string varName, bool setVarValue)
+        public virtual bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue)
         {
             if (!ParameterAttribute.CanBeVariable)
             {
                 throw new InvalidOperationException($"Property '{ParameterName}' is not marked as a variable assignment.");
             }
+            else if (variablesContext == null)
+            {
+                throw new InvalidOperationException($"VariablesContext cannot be null because property {ParameterAttribute.PropertyInfo.Name} has CanBeVariable set.");
+            }
+
             if (ParameterAttribute.IsReadOnly)
             {
                 throw new InvalidOperationException($"Parameter {ParameterName} is read-only.");
@@ -89,7 +65,7 @@ namespace ParameterModel.Models.Base
                 throw new ArgumentNullException("Variable name cannot be null or empty.");
             }
 
-            VariableBase variable = VariablesContext.GetVariable(varName);
+            VariableBase variable = variablesContext.GetVariable(varName);
             if ((variable == null) || !AllowedVariableTypes.Contains(variable.Type))
             {
                 return false;
@@ -111,7 +87,7 @@ namespace ParameterModel.Models.Base
         /// <param name="errorMessage"></param>
         /// <param name="implements"></param>
         /// <returns></returns>
-        public abstract bool TestOrSetSetPropertyValue(string newValue, bool setProperty);
+        public abstract bool TestOrSetParameter(string newValue, bool setProperty);
 
         public string GetDisplayString(out bool isVariableAssignment)
         {
@@ -135,6 +111,22 @@ namespace ParameterModel.Models.Base
         protected abstract string GetDisplayString();
 
         public abstract VariableType[] AllowedVariableTypes { get; }
+
+        public bool ValidateParameter(List<string> errors)
+        {
+            errors.Clear();
+            PropertyInfo propertyInfo = ParameterAttribute.PropertyInfo;
+            var results = new List<ValidationResult>();
+            var context = new ValidationContext(ParameterAttribute.ImplementsParameterAttributes) { MemberName = propertyInfo.Name };
+            object value = propertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
+            Validator.TryValidateProperty(value, context, results);
+            if (results.Any())
+            {
+                errors.AddRange(results.Select(r => r.ErrorMessage));
+            }
+            return !errors.Any();
+        }
+
         #endregion IParameterModel
     }
 

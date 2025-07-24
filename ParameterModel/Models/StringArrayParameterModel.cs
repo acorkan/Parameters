@@ -15,14 +15,14 @@ namespace ParameterModel.Models
         public static readonly char StrArrayParameterDelimiter = ' ';
         private readonly char[] _delimiter = [StrArrayParameterDelimiter];
 
-        public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, variablesContext)
+        public StringArrayParameterModel(ParameterAttribute parameterPromptAttribute) : 
+            base(parameterPromptAttribute)
         {
         }
 
         public override VariableType[] AllowedVariableTypes => [VariableType.String];
 
-        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
             if (newValue == null)
             {

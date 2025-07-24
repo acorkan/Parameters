@@ -9,8 +9,8 @@ namespace ParameterModel.Models
     public class FloatParameterModel : ParameterModelBase
     {
         protected readonly string _displayFormat;
-        public FloatParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) :
-            base(parameterPromptAttribute, variablesContext)
+        public FloatParameterModel(ParameterAttribute parameterPromptAttribute) :
+            base(parameterPromptAttribute)
         {
             // Access the display format if provided.
             DisplayFormatAttribute formatAttribute = ParameterAttribute.PropertyInfo.GetCustomAttribute<DisplayFormatAttribute>();
@@ -22,7 +22,7 @@ namespace ParameterModel.Models
 
         public override VariableType[] AllowedVariableTypes => [VariableType.Integer, VariableType.Float];
 
-        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
             throw new NotImplementedException();
         }

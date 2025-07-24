@@ -6,14 +6,14 @@ namespace ParameterModel.Models
 {
     public class StringParameterModel : ParameterModelBase
     {
-        public StringParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext)
-            : base(parameterPromptAttribute, variablesContext)
+        public StringParameterModel(ParameterAttribute parameterPromptAttribute)
+            : base(parameterPromptAttribute)
         {
         }
 
         public override VariableType[] AllowedVariableTypes => [VariableType.String, VariableType.JSON];
 
-        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
             if(newValue == null)
             {

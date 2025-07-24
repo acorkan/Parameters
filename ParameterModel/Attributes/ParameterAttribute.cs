@@ -46,15 +46,7 @@ namespace ParameterModel.Attributes
         /// </summary>
         public int PresentationOrder { get; set; } = 5;
 
-        public List<string> ValidationErrors { get; } = new List<string>();
-
         public bool IsReadOnly { get; protected set; }
-
-        ///// <summary>
-        ///// If the value can be a variable, then this is the type of the evaluation result.
-        ///// This can only ever be applied to a property type of string.
-        ///// </summary>
-        //public Type VariableType { get; set; }
 
         public PropertyInfo PropertyInfo { get; protected set; }
 
@@ -65,10 +57,6 @@ namespace ParameterModel.Attributes
 
         public ParameterAttribute() : this(false) { }
 
-        //public ParameterAttribute(string label)
-        //{ 
-        //    Label = label;
-        //}
 
         public Dictionary<Enum, string> GetEnumItemsDisplay()
         {
@@ -76,25 +64,6 @@ namespace ParameterModel.Attributes
         }
         public bool IsVariableSelected { get => ImplementsParameterAttributes.VariableAssignments.ContainsKey(PropertyInfo.Name); }
 
-        public bool GetDisplayString(out string displayString, out bool isVariableAssignment)
-        {
-            return ImplementsParameterAttributes.GetDisplayString(PropertyInfo.Name, out displayString, out isVariableAssignment);
-        }
-
-        public bool TrySetPropertyValue(string newValue, out string error)
-        {
-            return ImplementsParameterAttributes.TrySetPropertyValue(PropertyInfo.Name, newValue, out error);
-        }
-
-        public bool TrySetVariableValue(string newValue, out string error)
-        {
-            return ImplementsParameterAttributes.TryAssignVariable(PropertyInfo.Name, newValue, out error);
-        }
-
-        public bool TestPropertyValue(string newValue, out string error)
-        {
-            return ImplementsParameterAttributes.TestPropertyValue(PropertyInfo.Name, newValue, out error);
-        }
 
         public static bool TestAllowedValidationAttributes(PropertyInfo propertyInfo, List<string> invalidAttributeNames)
         {

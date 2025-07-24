@@ -1,31 +1,16 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
-using ParameterModel.Models.Base;
 using ParameterModel.Variables;
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParameterModel.Extensions
 {
     public static class ImplementParameterAttributeExtension
     {
-        private static void UpdateAttributeMap(this IImplementsParameterAttribute implements)
-        {
-            if (implements.AttributeMap.Count == 0)
-            {
-                foreach (var attrib in implements.GetAttributeMap())
-                {
-                    implements.AttributeMap.Add(attrib.Key, attrib.Value);
-                }
-            }
-        }
-
         public static bool IsVariableSelected(this IImplementsParameterAttribute implements, string propertyName)
         {
-            return implements.VariableAssignments.ContainsKey(propertyName);
+            return implements.AttributeMap[propertyName].IsVariableSelected;
         }
 
         /// <summary>
@@ -43,11 +28,15 @@ namespace ParameterModel.Extensions
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="NotSupportedException"></exception>
-        public static bool TryResolveVariables(this IImplementsParameterAttribute implements,
+        public static bool ResolveVariables(this IImplementsParameterAttribute implements,
             IVariablesContext variablesContext, Dictionary<string, string> variableErrors)
         {
-            implements.UpdateAttributeMap();
             variableErrors.Clear();
+            // Nothing to test means nothing to fail.
+            if ((implements.AttributeMap == null) || (implements.AttributeMap.Count == 0))
+            {
+                return true;
+            }
             if ((variablesContext != null) && (implements.VariableAssignments.Count != 0))
             {
                 List<string> propertyNames = implements.VariableAssignments.Keys.ToList();
@@ -71,13 +60,12 @@ namespace ParameterModel.Extensions
                         variableErrors[propName] = $"Variable '{varName}' assignment for '{propName}' does not exist.";
                         continue;
                     }
-                    ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propName];
-                    Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
-                    string error = string.Empty;
-                    implements.TrySetPropertyValue(propName, variableBase.GetValueAsString(), out error);
-                    if(!string.IsNullOrEmpty(error))
+                    IParameterModel parameterPromptAttribute = implements.AttributeMap[propName];
+                    Type type = parameterPromptAttribute.ParameterAttribute.PropertyInfo.PropertyType;
+                    string assignValue = variableBase.GetValueAsString();
+                    if (!parameterPromptAttribute.TestOrSetParameter(assignValue, true))
                     {
-                        variableErrors[propName] = error;
+                        variableErrors[propName] = $"Parameter '{propName}' of {type} could not be assigned from variable '{varName}' with value '{assignValue}'."; ;
                     }
                 }
             }
@@ -94,15 +82,19 @@ namespace ParameterModel.Extensions
         /// </summary>
         /// <param name="validateErrors"></param>
         /// <returns></returns>
-        public static bool TryValidateParameters(this IImplementsParameterAttribute implements,
+        public static bool ValidateParameters(this IImplementsParameterAttribute implements,
             IVariablesContext variablesContext, Dictionary<string, List<string>> validateErrors)
         {
-            implements.UpdateAttributeMap();
             validateErrors.Clear();
+            // Nothing to test means nothing to fail.
+            if (implements.AttributeMap.Count == 0)
+            {
+                return true;
+            }
             Dictionary<string, string> variableErrors = new Dictionary<string, string>();
             if (variablesContext != null)
             {
-                implements.TryResolveVariables(variablesContext, variableErrors);
+                implements.ResolveVariables(variablesContext, variableErrors);
             }
 
             foreach (var v in implements.AttributeMap)
@@ -116,7 +108,7 @@ namespace ParameterModel.Extensions
                 else // If no variable errors then validate the property.
                 {
                     List<string> errors = new List<string>();
-                    if (!implements.ValidateProperty(v.Value.PropertyInfo, errors))
+                    if (!implements.ValidateParameter(v.Key, errors))
                     {
                         validateErrors[v.Key] = new List<string>(errors);
                     }
@@ -132,21 +124,17 @@ namespace ParameterModel.Extensions
         /// <param name="propertyInfo"></param>
         /// <param name="errors"></param>
         /// <returns></returns>
-        private static bool ValidateProperty(this IImplementsParameterAttribute implements,
-            PropertyInfo propertyInfo, List<string> errors)
+        private static bool ValidateParameter(this IImplementsParameterAttribute implements,
+            string paramName, List<string> errors)
         {
-            implements.UpdateAttributeMap();
             errors.Clear();
-            var results = new List<ValidationResult>();
-            var context = new ValidationContext(implements) { MemberName = propertyInfo.Name };
-            object value = propertyInfo.GetValue(implements);
-            Validator.TryValidateProperty(value, context, results);
-
-            if (results.Any())
+            // Nothing to test means nothing to fail.
+            if (implements.AttributeMap.Count == 0)
             {
-                errors.AddRange(results.Select(r => r.ErrorMessage));
+                return true;
             }
-            return !errors.Any();
+            implements.AttributeMap[paramName].ValidateParameter(errors);
+            return errors.Count == 0;
         }
 
         /// <summary>
@@ -154,7 +142,7 @@ namespace ParameterModel.Extensions
         /// </summary>
         /// <param name="implements"></param>
         /// <returns></returns>
-        public static Dictionary<string, ParameterAttribute> GetAttributeMap(this IImplementsParameterAttribute implements)
+        public static Dictionary<string, ParameterAttribute> GetParametersMap(this IImplementsParameterAttribute implements)
         {
             Dictionary<string, ParameterAttribute> ret = new Dictionary<string, ParameterAttribute>();
             var props = implements.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance); // | BindingFlags.NonPublic 
@@ -189,19 +177,16 @@ namespace ParameterModel.Extensions
             {
                 throw new ArgumentException("Source and destination must be of the same type.");
             }
-            source.UpdateAttributeMap();
-            dest.UpdateAttributeMap();
-            //Dictionary<string, ParameterAttribute> attribMap = source.GetAttributeMap();
             foreach (var attrib in source.AttributeMap)
             {
-                var sourceValue = attrib.Value.PropertyInfo.GetValue(source);
-                attrib.Value.PropertyInfo.SetValue(dest, sourceValue);
+                var sourceValue = attrib.Value.ParameterAttribute.PropertyInfo.GetValue(source);
+                attrib.Value.ParameterAttribute.PropertyInfo.SetValue(dest, sourceValue);
             }
         }
 
-        public static void UpdateFromJson<T>(this IImplementsParameterAttribute dest, string json)
+        public static void UpdateParametersFromJson<T>(this IImplementsParameterAttribute dest, string json)
         {
-            dest.UpdateAttributeMap();
+            //dest.UpdateAttributeMap();
             var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
             if (dict == null) return;
 
@@ -235,46 +220,29 @@ namespace ParameterModel.Extensions
             return JsonSerializer.Deserialize(raw, type);
         }
 
-        public static string SerializeToJson(this IImplementsParameterAttribute source)
+        public static string SerializeParametersToJson(this IImplementsParameterAttribute source)
         {
-            source.UpdateAttributeMap();
+            //source.UpdateAttributeMap();
             var dict = new Dictionary<string, object>();
 
             foreach (var prop in source.AttributeMap)
             {
-                var value = prop.Value.PropertyInfo.GetValue(source);
+                var value = prop.Value.ParameterAttribute.PropertyInfo.GetValue(source);
                 dict[prop.Key] = value;
             }
             return JsonSerializer.Serialize(dict);
         }
 
-
-        public static bool TrySetPropertyValue(this IImplementsParameterAttribute implements,
-            string propertyName, string newValue, out string error)
+        private static bool TestOrAssignVariable(this IImplementsParameterAttribute implements, string paramName,
+            IVariablesContext variablesContext, string varName, bool setVarValue)
         {
-            return implements.TrySetPropertyValue(propertyName, newValue, out error, true);
+            return implements.AttributeMap[paramName].TestOrAssignVariable(variablesContext, varName, setVarValue);
         }
 
-        public static bool TryAssignVariable(this IImplementsParameterAttribute implements,
-            string propertyName, string newValue, out string error)
+        private static bool TestOrSetParameter(this IImplementsParameterAttribute implements, string paramName,
+            string newValue, bool setProperty)
         {
-            error = "";
-            try
-            {
-                implements.SetVariableValue(propertyName, newValue);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return false;
-            }
-        }
-
-        public static bool TestPropertyValue(this IImplementsParameterAttribute implements,
-            string propertyName, string newValue, out string error)
-        {
-            return implements.TrySetPropertyValue(propertyName, newValue, out error, false);
+            return implements.AttributeMap[paramName].TestOrSetParameter(newValue, setProperty);
         }
 
         /// <summary>
@@ -287,282 +255,32 @@ namespace ParameterModel.Extensions
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public static void SetVariableValue(this IImplementsParameterAttribute implements,
+        public static bool TryAssignVariable(this IImplementsParameterAttribute implements,
+            IVariablesContext variablesContext,
             string propertyName, string newValue)
         {
-            implements.UpdateAttributeMap();
-            if (!implements.AttributeMap.ContainsKey(propertyName))
-            {
-                throw new ArgumentException($"No property '{propertyName}'.");
-            }
-            if (string.IsNullOrEmpty(newValue))
-            {
-                throw new ArgumentNullException(nameof(newValue), "New variable name cannot be null or empty.");
-            }
-            ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propertyName];
-            if(parameterPromptAttribute.CanBeVariable == false)
-            {
-                throw new InvalidOperationException($"Property '{propertyName}' is not marked as a variable assignment.");
-            }
-            if (parameterPromptAttribute.IsReadOnly)
-            {
-                throw new InvalidOperationException($"Parameter {propertyName} is read-only.");
-            }
-            // OK to assign variable.
-            implements.VariableAssignments[propertyName] = newValue;
-            // Clear property errors.
-            parameterPromptAttribute.ValidationErrors.Clear();
+            return implements.TestOrAssignVariable(propertyName,
+                variablesContext, newValue, true);
         }
 
-        /// <summary>
-        /// Apply the user supplied string to the parameter property and clear the variable assignment if any.
-        /// </summary>
-        /// <param name="implements"></param>
-        /// <param name="setVariable"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="newValue"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        private static bool TrySetPropertyValue(this IImplementsParameterAttribute implements,
-            string propertyName, string newValue, out string error, bool setProperty)
+        public static bool TrySetParameter(this IImplementsParameterAttribute implements,
+            string propertyName, string newValue)
         {
-            implements.UpdateAttributeMap();
-            error = "";
-            if (!implements.AttributeMap.ContainsKey(propertyName))
-            {
-                throw new ArgumentException($"No property '{propertyName}'.");
-            }
-            ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propertyName];
-            if(parameterPromptAttribute.IsReadOnly)
-            {
-                error = $"Parameter {propertyName} is read only";
-                return false;
-            }
-            Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
-            bool parsedOK = false;
-            if (type == typeof(bool))
-            {
-                if (parsedOK = bool.TryParse(newValue, out bool b))
-                {
-                    if (setProperty)
-                    {
-                        parameterPromptAttribute.PropertyInfo.SetValue(implements, b);
-                    }
-                }
-            }
-            else if (type == typeof(int))
-            {
-                if (parsedOK = int.TryParse(newValue, out int i))
-                {
-                    if (setProperty)
-                    {
-                        parameterPromptAttribute.PropertyInfo.SetValue(implements, i);
-                    }
-                }
-            }
-            else if (type == typeof(float))
-            {
-                if (parsedOK = float.TryParse(newValue, out float f))
-                {
-                    if (setProperty)
-                    {
-                        parameterPromptAttribute.PropertyInfo.SetValue(implements, f);
-                    }
-                }
-            }
-            else if (type == typeof(string))
-            {
-                parsedOK = true;
-                if (setProperty)
-                {
-                    parameterPromptAttribute.PropertyInfo.SetValue(implements, newValue);
-                }
-            }
-            else if (type == typeof(Variable))
-            {
-                parsedOK = true;
-                if (setProperty)
-                {
-                    ((Variable)parameterPromptAttribute.PropertyInfo.GetValue(implements)).Assignment = newValue;
-                    //parameterPromptAttribute.PropertyInfo.SetValue(implements, newValue);
-                }
-            }
-            else if (type == typeof(string[]))
-            {
-                parsedOK = true;
-                // Assuming the string array is comma-separated
-                if (setProperty)
-                {
-                    string[] stringArray = newValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    parameterPromptAttribute.PropertyInfo.SetValue(implements, stringArray);
-                }
-            }
-            else if (type.IsEnum)
-            {
-                try
-                {
-                    Enum value;
-                    string valueString = null;
-                    Dictionary<Enum, string> enumItemsDisplayDict = parameterPromptAttribute.GetEnumItemsDisplay();
-                    for (int i = 0; i < enumItemsDisplayDict.Count; i++)
-                    {
-                        if (enumItemsDisplayDict.ElementAt(i).Key.ToString().Equals(valueString, StringComparison.OrdinalIgnoreCase) ||
-                            enumItemsDisplayDict.ElementAt(i).Value.Equals(valueString, StringComparison.OrdinalIgnoreCase))
-                        {
-                            value = enumItemsDisplayDict.ElementAt(i).Key;
-                            break;
-                        }
-                    }
-                    if (valueString == null)
-                    {
-                        error = $"Parameter '{propertyName}' could not be resolved for enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
-                    }
-                    else
-                    {
-                        if (Enum.TryParse(type, valueString, true, out object e))
-                        {
-                            if (setProperty)
-                            {
-                                parameterPromptAttribute.PropertyInfo.SetValue(implements, e);
-                            }
-                            parsedOK = true;
-                        }
-                        else
-                        {
-                            error = $"Parameter '{propertyName}' could not be parsed as enum '{parameterPromptAttribute.PropertyInfo.PropertyType}'.";
-                        }
-                    }
-                }
-                catch (ArgumentException)
-                {
-                    error = $"Parameter '{propertyName}' could not be parsed as an enum of type '{type.Name}'.";
-                }
-            }
-            else
-            {
-                throw new NotSupportedException($"Type {type} is not supported.");
-            }
-            // Update the error message if parsing failed and not already updated.
-            if (!parsedOK && string.IsNullOrEmpty(error))
-            {
-                error = $"Parameter '{propertyName}' of {type} could not be assigned from '{newValue}'.";
-            }
-            else if (parsedOK && setProperty)
-            {
-                if (implements.VariableAssignments.ContainsKey(propertyName))
-                {
-                    implements.VariableAssignments.Remove(propertyName);
-                }
-                implements.ValidateProperty(parameterPromptAttribute.PropertyInfo, parameterPromptAttribute.ValidationErrors);
-            }
-            return parsedOK;
+            return implements.AttributeMap[propertyName].TestOrSetParameter(newValue, true);
         }
 
-        /// <summary>
-        /// Apply the user supplied string to the variable or the variable name.
-        /// </summary>
-        /// <param name="implements"></param>
-        /// <param name="setVariable"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="newValue"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        private static bool GetDisplayString(this IImplementsParameterAttribute implements,
-            string propertyName, out string displayString, out bool isVariableAssignment)
+        public static bool TestAssignVariable(this IImplementsParameterAttribute implements,
+            IVariablesContext variablesContext,
+            string propertyName, string newValue)
         {
-            displayString = "";
-            isVariableAssignment = false;
-            implements.UpdateAttributeMap();
-            if (!implements.AttributeMap.ContainsKey(propertyName))
-            {
-                throw new ArgumentException($"No property '{propertyName}'.");
-            }
-            ParameterAttribute parameterPromptAttribute = implements.AttributeMap[propertyName];
-            if(implements.VariableAssignments.ContainsKey(propertyName))
-            {
-                // If the variable is set, then return that value.
-                displayString = implements.VariableAssignments[propertyName];
-                isVariableAssignment = true;
-                return true;
-            }
-            Type type = parameterPromptAttribute.PropertyInfo.PropertyType;
-            if (type == typeof(bool))
-            {
-                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is bool b)
-                {
-                    displayString = b.ToString();
-                    return true;
-                }
-            }
-            else if (type == typeof(int))
-            {
-                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is int i)
-                {
-                    displayString = i.ToString();
-                    return true;
-                }
-            }
-            else if (type == typeof(float))
-            {
-                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is float f)
-                {
-                    displayString = f.ToString();
-                    return true;
-                }
-            }
-            else if (type == typeof(string))
-            {
-                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is string s)
-                {
-                    displayString = s;
-                    return true;
-                }
-            }
-            else if (type == typeof(Variable))
-            {
-                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is Variable v)
-                {
-                    displayString = v.Assignment;
-                    return true;
-                }
-            }
-            else if (type == typeof(string[]))
-            {
-                if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is string[] stringArray)
-                {
-                    displayString = string.Join(" ", stringArray);
-                    return true;
-                }
-            }
-            else if (type.IsEnum && (type == typeof(Enum)))
-            {
+            return implements.TestOrAssignVariable(propertyName,
+                variablesContext, newValue, false);
+        }
 
-                try
-                {
-                    if (parameterPromptAttribute.PropertyInfo.GetValue(implements) is Enum typeValue)
-                    {
-                        Dictionary<Enum, string> enumItemsDisplayDict = parameterPromptAttribute.GetEnumItemsDisplay();
-                        if (enumItemsDisplayDict.ContainsKey(typeValue))
-                        {
-                            displayString = enumItemsDisplayDict[typeValue];
-                        }
-                        else
-                        {
-                            displayString = typeValue.ToString();// _values.Values.FirstOrDefault(v => v.Equals(typeValue, StringComparison.OrdinalIgnoreCase)) ?? typeValue;
-                        }
-                        return true;
-                    }
-                }
-                catch (ArgumentException)
-                {
-                    displayString = $"Variable '{propertyName}' could not be parsed as an enum of type '{type.Name}'.";
-                }
-            }
-            else
-            {
-                throw new NotSupportedException($"Type {type} is not supported.");
-            }
-            return false;
+        public static bool TestSetParameter(this IImplementsParameterAttribute implements,
+            string propertyName, string newValue)
+        {
+            return implements.AttributeMap[propertyName].TestOrSetParameter(newValue, false);
         }
     }
 }

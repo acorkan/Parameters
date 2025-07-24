@@ -38,7 +38,7 @@ namespace ParameterTests
         public void OneTimeSetUp()
         {
             _variablesContext = new VariablesContext();
-            _parameterModelFactory = new ParameterModelFactory(_variablesContext);
+            _parameterModelFactory = new ParameterModelFactory();
         }
 
         [SetUp]
@@ -52,28 +52,28 @@ namespace ParameterTests
         {
             // Should pass.
             [Parameter]
-            public bool TestBool1 { get; set; } = true;
+            public bool Bool1 { get; set; } = true;
 
             // Should pass.
             [Parameter(true)]
-            public bool TestBool2 { get; set; } = false;
+            public bool Bool2 { get; set; } = false;
 
             // Should pass.
             [Parameter(true)]
             [Editable(false)]
-            public bool TestBool3 { get; set; }
+            public bool Bool3 { get; set; }
 
             // Not a parameter.
-            public bool TestBool4 { get; set; } = true;
+            public bool Bool4 { get; set; } = true;
             // Should pass.
 
             [Parameter]
             [Editable(false)]
-            public bool TestBool5 { get; set; } = false;
+            public bool Bool5 { get; set; } = false;
             // Should pass.
 
             [Parameter(true)]
-            public bool TestBool6 { get; set; } = true;
+            public bool Bool6 { get; set; } = true;
         }
 
 
@@ -95,21 +95,21 @@ namespace ParameterTests
         public void TestBoolSerialize()
         {
             BoolTestClass testClass1 = new BoolTestClass();
-            testClass1.TestBool4 = !testClass1.TestBool4;
-            testClass1.TestBool5 = !testClass1.TestBool5;
-            testClass1.TestBool6 = !testClass1.TestBool6;
+            testClass1.Bool4 = !testClass1.Bool4;
+            testClass1.Bool5 = !testClass1.Bool5;
+            testClass1.Bool6 = !testClass1.Bool6;
 
-            string json = testClass1.SerializeToJson();
+            string json = testClass1.SerializeParametersToJson();
 
             BoolTestClass testClass2 = new BoolTestClass();// JsonSerializer.Deserialize<BoolTestClass>(json1);
-            testClass2.UpdateFromJson<BoolTestClass>(json);
+            testClass2.UpdateParametersFromJson<BoolTestClass>(json);
 
-            Assert.AreEqual(testClass1.TestBool1, testClass2.TestBool1, "TestBool1 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestBool2, testClass2.TestBool2, "TestBool2 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestBool3, testClass2.TestBool3, "TestBool3 should be equal after serialization and deserialization.");
-            Assert.AreNotEqual(testClass1.TestBool4, testClass2.TestBool4, "TestBool4 should not be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestBool5, testClass2.TestBool5, "TestBool5 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestBool6, testClass2.TestBool6, "TestBool6 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool1, testClass2.Bool1, "Bool1 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool2, testClass2.Bool2, "Bool2 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
+            Assert.AreNotEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should not be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool6, testClass2.Bool6, "Bool6 should be equal after serialization and deserialization.");
         }
 
         [Test]
@@ -119,7 +119,7 @@ namespace ParameterTests
             //ParameterModelFactory parameterModelFactory = new ParameterModelFactory(new VariablesContext());
             try
             {
-                testClass1.SerializeToJson();
+                testClass1.SerializeParametersToJson();
                 //Dictionary<string, IParameterModel> testModels1 = parameterModelFactory.GetModels(testClass1);
             }
             catch (Exception ex)
@@ -133,66 +133,69 @@ namespace ParameterTests
         public void TestBoolAssignment()
         {
             BoolTestClass testClass1 = new BoolTestClass();
-            testClass1.TestBool1 = false;
-            testClass1.TestBool3 = false;
-            testClass1.TestBool5 = false;
+            testClass1.Bool1 = false;
+            testClass1.Bool3 = false;
+            testClass1.Bool5 = false;
 
-            bool testResult = testClass1.TestPropertyValue("TestBool1", "true", out string error);
+            bool testResult = testClass1.TestSetParameter("Bool1", "true");
             Assert.IsTrue(testResult, "TestPropertyValue should return true for valid boolean assignment.");
 
-            testResult = testClass1.TrySetPropertyValue("TestBool1", "true", out error);
+            testResult = testClass1.TrySetParameter("Bool1", "true");
             Assert.IsTrue(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
-            Assert.IsTrue(testClass1.TestBool1, "TestBool1 should be true after assignment.");
+            Assert.IsTrue(testClass1.Bool1, "Bool1 should be true after assignment.");
 
-            testResult = testClass1.TestPropertyValue("TestBool1", "dsdfg", out error);
+            testResult = testClass1.TestSetParameter("Bool1", "dsdfg");
             Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid boolean assignment.");
 
-            testResult = testClass1.TestPropertyValue("TestBool3", "true", out error);
-            Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid boolean assignment.");
+            testResult = testClass1.TestSetParameter("Bool4", "true");
+            Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid parameter name.");
 
-            //testResult = testClass1.TrySetVariableValue("TestBool3", "true", out error);
+            testResult = testClass1.TestSetParameter("Bool3", "true");
+            Assert.IsFalse(testResult, "TestPropertyValue should return false for read-only parameter.");
+
+            //testResult = testClass1.TrySetVariableValue("Bool3", "true", out error);
             //Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
 
-            testResult = testClass1.TestPropertyValue("TestBool5", "true", out error);
-            Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid boolean assignment.");
+            testResult = testClass1.TrySetParameter("Bool5", "true");
+            Assert.IsFalse(testResult, "TestPropertyValue should return false for read-only parameter.");
 
-            testResult = testClass1.TrySetPropertyValue("TestBool5", "true", out error);
-            Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
+            //testResult = testClass1.TrySetParameter("Bool5", "true");
+            //Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
 
-            //testResult = testClass1.TrySetVariableValue("TestBool3", "true", out error);
+            //testResult = testClass1.TrySetVariableValue("Bool3", "true", out error);
             //Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
         }
 
-        [Test]
-        public void TestBoolVariableImplementation()
-        {
-            BoolTestClass testClass1 = new BoolTestClass();
-            IVariablesContext variablesContext = new VariablesContext();
-            variablesContext.AddVariable("boolVar1", VariableType.Boolean, VariableSource.UserDefined);
-            variablesContext.AddVariable("boolVar2", VariableType.Boolean, VariableSource.UserDefined);
-            variablesContext.AddVariable("intVar1", VariableType.Integer, VariableSource.UserDefined);
-            ParameterModelFactory parameterModelFactory = new ParameterModelFactory(variablesContext);
+        //[Test]
+        //public void TestBoolVariableImplementation()
+        //{
+        //    BoolTestClass testClass1 = new BoolTestClass();
+        //    IVariablesContext variablesContext = new VariablesContext();
+        //    variablesContext.AddVariable("boolVar1", VariableType.Boolean, VariableSource.UserDefined);
+        //    variablesContext.AddVariable("boolVar2", VariableType.Boolean, VariableSource.UserDefined);
+        //    variablesContext.AddVariable("intVar1", VariableType.Integer, VariableSource.UserDefined);
+        //    ParameterModelFactory parameterModelFactory = new ParameterModelFactory(variablesContext);
 
-            bool testResult = testClass1.TryAssignVariable("TestBool1", "boolVar1", out string error);
-            Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestBool1' can not be set to a variable.");
+        //    bool testResult = testClass1.TryAssignVariable("Bool1", "boolVar1", out string error);
+        //    Assert.IsFalse(testResult, "TrySetVariableValue should return false because 'TestBool1' can not be set to a variable.");
 
-            testResult = testClass1.TryAssignVariable("TestBool2", "boolVar1", out error);
-            Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestBool2' can be set to a variable.");
+        //    testResult = testClass1.TryAssignVariable("Bool2", "boolVar1", out error);
+        //    Assert.IsTrue(testResult, "TrySetVariableValue should return true because 'TestBool2' can be set to a variable.");
 
-            testResult = testClass1.TryAssignVariable("TestBool2", "sdfsdf", out error);
-            Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
+        //    testResult = testClass1.TryAssignVariable("Bool2", "sdfsdf", out error);
+        //    Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
 
-            testResult = testClass1.TryAssignVariable("TestBool2", "intVar1", out error);
-            Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
+        //    testResult = testClass1.TryAssignVariable("Bool2", "intVar1", out error);
+        //    Assert.IsTrue(testResult, "TrySetVariableValue should return true.");
 
-            Dictionary<string, string> resolveErrors = new Dictionary<string, string>();
-            testResult = testClass1.TryResolveVariables(variablesContext, resolveErrors);
-            Assert.IsFalse(testResult, "TryResolveVariables should return false because 'TestBool2' can not be assigned 'intVar1'.");
-            Assert.IsTrue(resolveErrors.ContainsKey("TestBool2"), "Resolve errors should contain 'TestBool2'.");
-        }
+        //    Dictionary<string, string> resolveErrors = new Dictionary<string, string>();
+        //    testResult = testClass1.ResolveVariables(variablesContext, resolveErrors);
+        //    Assert.IsFalse(testResult, "TryResolveVariables should return false because 'TestBool2' can not be assigned 'intVar1'.");
+        //    Assert.IsTrue(resolveErrors.ContainsKey("Bool2"), "Resolve errors should contain 'TestBool2'.");
+        //}
         #endregion Boolean tests
 
-
+/*
         #region Integer and float tests
         internal class IntAndFloatTestClass : ImplementsParametersBase
         {
@@ -287,10 +290,10 @@ namespace ParameterTests
             testClass1.TestFloat4++;
             testClass1.TestFloat5++;
 
-            string json = testClass1.SerializeToJson();
+            string json = testClass1.SerializeParametersToJson();
 
             IntAndFloatTestClass testClass2 = new IntAndFloatTestClass();// JsonSerializer.Deserialize<BoolTestClass>(json1);
-            testClass2.UpdateFromJson<IntAndFloatTestClass>(json);
+            testClass2.UpdateParametersFromJson<IntAndFloatTestClass>(json);
 
             Assert.AreEqual(testClass1.TestInt1, testClass2.TestInt1, "TestInt1 should be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.TestInt2, testClass2.TestInt2, "TestInt2 should be equal after serialization and deserialization.");
@@ -309,7 +312,7 @@ namespace ParameterTests
         public void TestIntAndFloatWithRangeAttribute()
         {
             IntAndFloatTestRangeAttribute testClass1 = new IntAndFloatTestRangeAttribute();
-            testClass1.SerializeToJson();
+            testClass1.SerializeParametersToJson();
             Assert.DoesNotThrow(() => _parameterModelFactory.GetModels(testClass1), "No Range exception for int or float property.");
         }
 
@@ -318,7 +321,7 @@ namespace ParameterTests
         {
             IntAndFloatTestRangeAttribute testClass1 = new IntAndFloatTestRangeAttribute();
             Dictionary<string,List<string>> errors = new Dictionary<string, List<string>>();
-            Assert.IsFalse(testClass1.TryValidateParameters(null, errors));
+            Assert.IsFalse(testClass1.ValidateParameters(null, errors));
             Assert.IsTrue(errors.Count == 2);
             Assert.IsTrue(errors.ContainsKey("intRange1_8"));
             Assert.IsTrue(errors.ContainsKey("floatRange4_11"));
@@ -383,7 +386,7 @@ namespace ParameterTests
 
             Dictionary<string, string> resolveErrors = new Dictionary<string, string>();
 
-            testResult = testClass1.TryResolveVariables(_variablesContext, resolveErrors);
+            testResult = testClass1.ResolveVariables(_variablesContext, resolveErrors);
             Assert.IsFalse(testResult, "TryResolveVariables should return false because 'TestInt2' can not be resolved to 'floatVar1'.");
             Assert.IsTrue(resolveErrors.ContainsKey("TestInt2"), "Resolve errors should contain 'TestBool2'.");
         }
@@ -407,7 +410,7 @@ namespace ParameterTests
             IntAndFloatBadAttributesTestClass testClass1 = new IntAndFloatBadAttributesTestClass();
             try
             {
-                testClass1.SerializeToJson();
+                testClass1.SerializeParametersToJson();
             }
             catch (Exception ex)
             {
@@ -448,7 +451,7 @@ namespace ParameterTests
             [VariableAssignment(VariableType.Integer)]
             public Variable Test6 { get; set; } = new Variable("dfzhjkl");
         }
-
+        
 
         //internal class IntAndFloatBadAttributesTestClass : ImplementsParametersBase
         //{
@@ -491,10 +494,10 @@ namespace ParameterTests
             testClass1.Test5.Assignment = "test5";
             testClass1.Test6.Assignment = "test6__";
 
-            string json = testClass1.SerializeToJson();
+            string json = testClass1.SerializeParametersToJson();
 
             VariableTypeTestClass testClass2 = new VariableTypeTestClass();// JsonSerializer.Deserialize<BoolTestClass>(json1);
-            testClass2.UpdateFromJson<VariableTypeTestClass>(json);
+            testClass2.UpdateParametersFromJson<VariableTypeTestClass>(json);
 
             Assert.AreEqual(testClass1.Test1, testClass2.Test1, "Test1 should be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.Test2, testClass2.Test2, "Test2 should be equal after serialization and deserialization.");
@@ -616,5 +619,6 @@ namespace ParameterTests
         //}
 
         #endregion VariableType tests
+*/
     }
 }

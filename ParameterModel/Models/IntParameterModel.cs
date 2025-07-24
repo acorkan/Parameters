@@ -6,8 +6,8 @@ namespace ParameterModel.Models
 {
     public class IntParameterModel : ParameterModelBase
     {
-        public IntParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
-            base(parameterPromptAttribute, variablesContext)
+        public IntParameterModel(ParameterAttribute parameterPromptAttribute) : 
+            base(parameterPromptAttribute)
         {
         }
 
@@ -19,7 +19,7 @@ namespace ParameterModel.Models
             return i.ToString();
         }
 
-        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
             if (int.TryParse(newValue, out int i))
             {

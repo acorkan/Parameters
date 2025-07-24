@@ -1,5 +1,6 @@
 ﻿using ParameterModel.Attributes;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace ParameterModel.Interfaces
 {
@@ -10,15 +11,13 @@ namespace ParameterModel.Interfaces
     public interface IImplementsParameterAttribute
     {
         /// <summary>
-        /// Used by the ImplementParameterAttributeExtension class to track variable assignments for properties that are 
-        /// attributed with ParameterPromptAttribute and for which IsVariable = true. 
-        /// POroiperty name is Key, and variable name is Value.
+        /// Maps the variable assignments to the property names.
         /// </summary>
         Dictionary<string, string> VariableAssignments { get; }
         /// <summary>
-        /// Initialized and used by the ImplementParameterAttributeExtension class to track errors for properties that are
-        /// attributed with ParameterPromptAttribute.
+        /// Holds a map of models for each property with a ParameterAttribute.
         /// </summary>
-        Dictionary<string, ParameterAttribute> AttributeMap { get; }
+        [JsonIgnore]
+        Dictionary<string, IParameterModel> AttributeMap { get; }
     }
 }

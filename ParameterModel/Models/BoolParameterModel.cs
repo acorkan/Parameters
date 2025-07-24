@@ -8,8 +8,8 @@ namespace ParameterModel.Models
     {
         private readonly string[] _selections = { "False", "True" };
 
-        public BoolParameterModel(ParameterAttribute parameterPromptAttribute, IVariablesContext variablesContext) : 
-                base(parameterPromptAttribute, variablesContext)
+        public BoolParameterModel(ParameterAttribute parameterPromptAttribute) : 
+                base(parameterPromptAttribute)
         { }
 
         public override string[] GetSelectionItems()
@@ -17,7 +17,7 @@ namespace ParameterModel.Models
             return _selections;
         }
 
-        public override bool TestOrSetSetPropertyValue(string newValue, bool setProperty)
+        public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
             if (bool.TryParse(newValue, out bool b))
             {
