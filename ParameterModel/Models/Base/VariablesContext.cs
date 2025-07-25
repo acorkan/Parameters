@@ -51,7 +51,7 @@ namespace ParameterModel.Models.Base
             Variables.Clear();
         }
 
-        public VariableBase DeleteVariable(string name)
+        public VariableBase RemoveVariable(string name)
         {
             VariableBase variableBase = GetVariable(name);
             if (variableBase != null)

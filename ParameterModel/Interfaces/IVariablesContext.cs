@@ -61,7 +61,7 @@ namespace ParameterModel.Interfaces
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        VariableBase DeleteVariable(string name);
+        VariableBase RemoveVariable(string name);
 
         /// <summary>
         /// Delete by case-sensitive name. If found return value or return null if not found.

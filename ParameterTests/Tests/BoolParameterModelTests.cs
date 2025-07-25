@@ -111,5 +111,36 @@ namespace ParameterTests.Tests
             Assert.IsFalse(testResult, "TestSetParameter should return false for invalid variable type.");
             Assert.Throws<InvalidOperationException>(() => testClass1.TryAssignVariable(_variablesContext, "Bool2", "FloatVar2"), "TryAssignVariable should throw an exception for invalid variable type.");
         }
+
+        [Test]
+        public void TestBoolValidations()
+        {
+            _variablesContext.AddVariable("BoolVar1", VariableType.Boolean).SetValue(true);
+
+            BoolTestClass testClass1 = new BoolTestClass();
+            testClass1.Bool1 = false;
+            testClass1.Bool3 = false;
+            testClass1.Bool5 = false;
+
+            bool testResult;
+
+            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+            Assert.IsTrue(testResult, "TryAssignVariable should return true for valid variable assignment.");
+
+            Dictionary<string, string> variableErrors = new Dictionary<string, string>();
+            testResult = testClass1.ResolveVariables(_variablesContext, variableErrors);
+            Assert.IsTrue(testResult, "ResolveVariables should return true for resolve variables.");
+            Assert.That(0, Is.EqualTo(variableErrors.Count), "ResolveVariables should not have any errors.");
+
+            Dictionary<string, List<string>> validateErrors = new Dictionary<string, List<string>>();
+            testResult = testClass1.ValidateParameters(_variablesContext, validateErrors);
+
+            _variablesContext.RemoveVariable("BoolVar1");
+            testResult = testClass1.ResolveVariables(_variablesContext, variableErrors);
+            Assert.IsFalse(testResult, "ResolveVariables should return false for resolve variables.");
+            Assert.That(1, Is.EqualTo(variableErrors.Count), "ResolveVariables should have 1 errors.");
+            Assert.IsTrue(variableErrors.Values.First().Contains("BoolVar1"), "ResolveVariables should have an error including the string 'BoolVar1'.");
+            Assert.IsTrue(variableErrors.Keys.First().Contains("Bool2"), "ResolveVariables should have an error including the string 'BoolVar1'.");
+        }
     }
 }
