@@ -18,6 +18,6 @@ namespace ParameterModel.Interfaces
         /// Holds a map of models for each property with a ParameterAttribute.
         /// </summary>
         [JsonIgnore]
-        Dictionary<string, IParameterModel> AttributeMap { get; }
+        Dictionary<string, IParameterModel> ParameterMap { get; }
     }
 }

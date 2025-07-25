@@ -4,6 +4,7 @@ using ParameterModel.Factories;
 using ParameterModel.Interfaces;
 using ParameterModel.Models.Base;
 using ParameterModel.Variables;
+using ParameterTests.TestClasses;
 using System.ComponentModel.DataAnnotations;
 using Windows.Foundation.Metadata;
 using RangeAttribute = System.ComponentModel.DataAnnotations.RangeAttribute;
@@ -13,17 +14,17 @@ namespace ParameterTests
     [TestFixture]
     public class ParameterModelTests
     {
-        internal enum OptionEnum
-        {
-            [System.ComponentModel.Description("Option 1 Description")]
-            Option1 = 1,
-            [System.ComponentModel.Description("Option 2 Description")]
-            Option2 = 2,
-            [System.ComponentModel.Description("Option 3 Description")]
-            Option3 = 3,
-            Option4 = 4,
-            Option5 = 5
-        }
+        //internal enum OptionEnum
+        //{
+        //    [System.ComponentModel.Description("Option 1 Description")]
+        //    Option1 = 1,
+        //    [System.ComponentModel.Description("Option 2 Description")]
+        //    Option2 = 2,
+        //    [System.ComponentModel.Description("Option 3 Description")]
+        //    Option3 = 3,
+        //    Option4 = 4,
+        //    Option5 = 5
+        //}
 
         //internal class ImplementsParametersBase : IImplementsParameterAttribute
         //{
@@ -48,123 +49,9 @@ namespace ParameterTests
         }
 
         #region Boolean tests
-        internal class BoolTestClass : ImplementsParametersBase
-        {
-            // Should pass.
-            [Parameter]
-            public bool Bool1 { get; set; } = true;
-
-            // Should pass.
-            [Parameter(true)]
-            public bool Bool2 { get; set; } = false;
-
-            // Should pass.
-            [Parameter(true)]
-            [Editable(false)]
-            public bool Bool3 { get; set; }
-
-            // Not a parameter.
-            public bool Bool4 { get; set; } = true;
-            // Should pass.
-
-            [Parameter]
-            [Editable(false)]
-            public bool Bool5 { get; set; } = false;
-            // Should pass.
-
-            [Parameter(true)]
-            public bool Bool6 { get; set; } = true;
-        }
 
 
-        internal class BoolTestBadAttribute : BoolTestClass
-        {
-            // Should pass.
-            [Parameter]
-            [Range(2, 4)]
-            [StringLength(3)]
-            public bool HasRange { get; set; }
-            // Should pass.
-            [Parameter]
-            [Range(4, 2)]
-            public bool HasReversedRange { get; set; }
-        }
-
-
-        [Test]
-        public void TestBoolSerialize()
-        {
-            BoolTestClass testClass1 = new BoolTestClass();
-            testClass1.Bool4 = !testClass1.Bool4;
-            testClass1.Bool5 = !testClass1.Bool5;
-            testClass1.Bool6 = !testClass1.Bool6;
-
-            string json = testClass1.SerializeParametersToJson();
-
-            BoolTestClass testClass2 = new BoolTestClass();// JsonSerializer.Deserialize<BoolTestClass>(json1);
-            testClass2.UpdateParametersFromJson<BoolTestClass>(json);
-
-            Assert.AreEqual(testClass1.Bool1, testClass2.Bool1, "Bool1 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.Bool2, testClass2.Bool2, "Bool2 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
-            Assert.AreNotEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should not be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.Bool6, testClass2.Bool6, "Bool6 should be equal after serialization and deserialization.");
-        }
-
-        [Test]
-        public void TestBoolWithRangeAttribute()
-        {
-            BoolTestBadAttribute testClass1 = new BoolTestBadAttribute();
-            //ParameterModelFactory parameterModelFactory = new ParameterModelFactory(new VariablesContext());
-            try
-            {
-                testClass1.SerializeParametersToJson();
-                //Dictionary<string, IParameterModel> testModels1 = parameterModelFactory.GetModels(testClass1);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsTrue(ex.Message.Contains("Range"), "Expected Range exception for bool property.");
-                Assert.IsTrue(ex.Message.Contains("StringLength"), "Expected StringLength exception for bool property.");
-            }
-        }
-
-        [Test]
-        public void TestBoolAssignment()
-        {
-            BoolTestClass testClass1 = new BoolTestClass();
-            testClass1.Bool1 = false;
-            testClass1.Bool3 = false;
-            testClass1.Bool5 = false;
-
-            bool testResult = testClass1.TestSetParameter("Bool1", "true");
-            Assert.IsTrue(testResult, "TestPropertyValue should return true for valid boolean assignment.");
-
-            testResult = testClass1.TrySetParameter("Bool1", "true");
-            Assert.IsTrue(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
-            Assert.IsTrue(testClass1.Bool1, "Bool1 should be true after assignment.");
-
-            testResult = testClass1.TestSetParameter("Bool1", "dsdfg");
-            Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid boolean assignment.");
-
-            testResult = testClass1.TestSetParameter("Bool4", "true");
-            Assert.IsFalse(testResult, "TestPropertyValue should return false for invalid parameter name.");
-
-            testResult = testClass1.TestSetParameter("Bool3", "true");
-            Assert.IsFalse(testResult, "TestPropertyValue should return false for read-only parameter.");
-
-            //testResult = testClass1.TrySetVariableValue("Bool3", "true", out error);
-            //Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
-
-            testResult = testClass1.TrySetParameter("Bool5", "true");
-            Assert.IsFalse(testResult, "TestPropertyValue should return false for read-only parameter.");
-
-            //testResult = testClass1.TrySetParameter("Bool5", "true");
-            //Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
-
-            //testResult = testClass1.TrySetVariableValue("Bool3", "true", out error);
-            //Assert.IsFalse(testResult, "TrySetVariableValue should return true for valid boolean assignment.");
-        }
+     
 
         //[Test]
         //public void TestBoolVariableImplementation()

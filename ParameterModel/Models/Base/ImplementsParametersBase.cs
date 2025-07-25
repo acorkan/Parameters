@@ -21,7 +21,7 @@ namespace ParameterModel.Models.Base
         /// Map of the names of properties that are attributed as Parameter to their corresponding IParameterModel instances.
         /// </summary>
         [JsonIgnore]
-        public Dictionary<string, IParameterModel> AttributeMap { get; } = new Dictionary<string, IParameterModel>();
+        public Dictionary<string, IParameterModel> ParameterMap { get; } = new Dictionary<string, IParameterModel>();
 
         /// <summary>
         /// Call this if you do not implement the protected ctor.
@@ -29,12 +29,12 @@ namespace ParameterModel.Models.Base
         /// <param name="parameterModelFactory"></param>
         public void InitializeAttributeMap(IParameterModelFactory parameterModelFactory)
         {
-            if (AttributeMap.Count == 0)
+            if (ParameterMap.Count == 0)
             {
                 Dictionary<string, IParameterModel> models = parameterModelFactory.GetModels(this);
                 foreach (var model in models)
                 {
-                    AttributeMap.Add(model.Key, model.Value);
+                    ParameterMap.Add(model.Key, model.Value);
                 }
             }
         }

@@ -55,10 +55,11 @@ namespace ParameterModel.Models.Base
                 throw new InvalidOperationException($"VariablesContext cannot be null because property {ParameterAttribute.PropertyInfo.Name} has CanBeVariable set.");
             }
 
-            if (ParameterAttribute.IsReadOnly)
-            {
-                throw new InvalidOperationException($"Parameter {ParameterName} is read-only.");
-            }
+            // Alow code to change the variable assignment.
+            //if (ParameterAttribute.IsReadOnly)
+            //{
+            //    throw new InvalidOperationException($"Parameter {ParameterName} is read-only.");
+            //}
 
             if (string.IsNullOrEmpty(varName))
             {

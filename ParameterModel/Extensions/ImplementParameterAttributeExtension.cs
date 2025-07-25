@@ -8,9 +8,9 @@ namespace ParameterModel.Extensions
 {
     public static class ImplementParameterAttributeExtension
     {
-        public static bool IsVariableSelected(this IImplementsParameterAttribute implements, string propertyName)
+        public static bool IsVariableSelected(this IImplementsParameterAttribute implements, string parameterName)
         {
-            return implements.AttributeMap[propertyName].IsVariableSelected;
+            return implements.ParameterMap[parameterName].IsVariableSelected;
         }
 
         /// <summary>
@@ -33,18 +33,18 @@ namespace ParameterModel.Extensions
         {
             variableErrors.Clear();
             // Nothing to test means nothing to fail.
-            if ((implements.AttributeMap == null) || (implements.AttributeMap.Count == 0))
+            if ((implements.ParameterMap == null) || (implements.ParameterMap.Count == 0))
             {
                 return true;
             }
             if ((variablesContext != null) && (implements.VariableAssignments.Count != 0))
             {
-                List<string> propertyNames = implements.VariableAssignments.Keys.ToList();
-                foreach (var propName in propertyNames)
+                List<string> parameterNames = implements.VariableAssignments.Keys.ToList();
+                foreach (var propName in parameterNames)
                 {
                     string varName = implements.VariableAssignments[propName];
                     // Test if some disconnect with the variables map.
-                    if (!implements.AttributeMap.ContainsKey(propName))
+                    if (!implements.ParameterMap.ContainsKey(propName))
                     {
                         throw new InvalidOperationException($"Property '{propName}' not found in attribute map.");
                     }
@@ -60,7 +60,7 @@ namespace ParameterModel.Extensions
                         variableErrors[propName] = $"Variable '{varName}' assignment for '{propName}' does not exist.";
                         continue;
                     }
-                    IParameterModel parameterPromptAttribute = implements.AttributeMap[propName];
+                    IParameterModel parameterPromptAttribute = implements.ParameterMap[propName];
                     Type type = parameterPromptAttribute.ParameterAttribute.PropertyInfo.PropertyType;
                     string assignValue = variableBase.GetValueAsString();
                     if (!parameterPromptAttribute.TestOrSetParameter(assignValue, true))
@@ -87,7 +87,7 @@ namespace ParameterModel.Extensions
         {
             validateErrors.Clear();
             // Nothing to test means nothing to fail.
-            if (implements.AttributeMap.Count == 0)
+            if (implements.ParameterMap.Count == 0)
             {
                 return true;
             }
@@ -96,8 +96,7 @@ namespace ParameterModel.Extensions
             {
                 implements.ResolveVariables(variablesContext, variableErrors);
             }
-
-            foreach (var v in implements.AttributeMap)
+            foreach (var v in implements.ParameterMap)
             {
                 // If we resolved variables and this variable has an error, then skip validation
                 // for it but add to error list.
@@ -129,11 +128,11 @@ namespace ParameterModel.Extensions
         {
             errors.Clear();
             // Nothing to test means nothing to fail.
-            if (implements.AttributeMap.Count == 0)
+            if (implements.ParameterMap.Count == 0)
             {
                 return true;
             }
-            implements.AttributeMap[paramName].ValidateParameter(errors);
+            implements.ParameterMap[paramName].ValidateParameter(errors);
             return errors.Count == 0;
         }
 
@@ -177,7 +176,7 @@ namespace ParameterModel.Extensions
             {
                 throw new ArgumentException("Source and destination must be of the same type.");
             }
-            foreach (var attrib in source.AttributeMap)
+            foreach (var attrib in source.ParameterMap)
             {
                 var sourceValue = attrib.Value.ParameterAttribute.PropertyInfo.GetValue(source);
                 attrib.Value.ParameterAttribute.PropertyInfo.SetValue(dest, sourceValue);
@@ -186,7 +185,6 @@ namespace ParameterModel.Extensions
 
         public static void UpdateParametersFromJson<T>(this IImplementsParameterAttribute dest, string json)
         {
-            //dest.UpdateAttributeMap();
             var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
             if (dict == null) return;
 
@@ -195,14 +193,13 @@ namespace ParameterModel.Extensions
             foreach (var prop in props)
             {
                 // Ignore the non-PArameterAttribute properties.
-                if (dest.AttributeMap.ContainsKey(prop.Name) && prop.CanWrite && dict.TryGetValue(prop.Name, out var jsonElement))
+                if (dest.ParameterMap.ContainsKey(prop.Name) && prop.CanWrite && dict.TryGetValue(prop.Name, out var jsonElement))
                 {
                     if (prop.PropertyType == typeof(Variable))
                     {
                         // Special case for Variable type, we need to deserialize it differently.
                         var variable = JsonSerializer.Deserialize<Variable>(jsonElement.GetRawText());
                         ((Variable)prop.GetValue(dest)).Assignment = variable.Assignment;
-                        ///prop.SetValue(dest, variable);
                     }
                     else
                     {
@@ -222,10 +219,9 @@ namespace ParameterModel.Extensions
 
         public static string SerializeParametersToJson(this IImplementsParameterAttribute source)
         {
-            //source.UpdateAttributeMap();
             var dict = new Dictionary<string, object>();
 
-            foreach (var prop in source.AttributeMap)
+            foreach (var prop in source.ParameterMap)
             {
                 var value = prop.Value.ParameterAttribute.PropertyInfo.GetValue(source);
                 dict[prop.Key] = value;
@@ -233,16 +229,16 @@ namespace ParameterModel.Extensions
             return JsonSerializer.Serialize(dict);
         }
 
-        private static bool TestOrAssignVariable(this IImplementsParameterAttribute implements, string paramName,
+        private static bool TestOrAssignVariable(this IImplementsParameterAttribute implements, string parameterName,
             IVariablesContext variablesContext, string varName, bool setVarValue)
         {
-            return implements.AttributeMap[paramName].TestOrAssignVariable(variablesContext, varName, setVarValue);
+            return implements.GetParameterModel(parameterName).TestOrAssignVariable(variablesContext, varName, setVarValue);
         }
 
         private static bool TestOrSetParameter(this IImplementsParameterAttribute implements, string paramName,
             string newValue, bool setProperty)
         {
-            return implements.AttributeMap[paramName].TestOrSetParameter(newValue, setProperty);
+            return implements.ParameterMap[paramName].TestOrSetParameter(newValue, setProperty);
         }
 
         /// <summary>
@@ -250,37 +246,51 @@ namespace ParameterModel.Extensions
         /// Exception if not allowed for property, so be sure CanBeVariable is true.
         /// </summary>
         /// <param name="implements"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="newValue"></param>
+        /// <param name="parameterName"></param>
+        /// <param name="variableName"></param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         public static bool TryAssignVariable(this IImplementsParameterAttribute implements,
             IVariablesContext variablesContext,
-            string propertyName, string newValue)
+            string parameterName, string variableName)
         {
-            return implements.TestOrAssignVariable(propertyName,
-                variablesContext, newValue, true);
+            return implements.TestOrAssignVariable(parameterName,
+                variablesContext, variableName, true);
         }
 
         public static bool TrySetParameter(this IImplementsParameterAttribute implements,
-            string propertyName, string newValue)
+            string parameterName, string newValue)
         {
-            return implements.AttributeMap[propertyName].TestOrSetParameter(newValue, true);
+            return implements.GetParameterModel(parameterName).TestOrSetParameter(newValue, true);
         }
 
         public static bool TestAssignVariable(this IImplementsParameterAttribute implements,
             IVariablesContext variablesContext,
-            string propertyName, string newValue)
+            string parameterName, string variableName)
         {
-            return implements.TestOrAssignVariable(propertyName,
-                variablesContext, newValue, false);
+            return implements.TestOrAssignVariable(parameterName,
+                variablesContext, variableName, false);
         }
 
         public static bool TestSetParameter(this IImplementsParameterAttribute implements,
-            string propertyName, string newValue)
+            string parameterName, string newValue)
         {
-            return implements.AttributeMap[propertyName].TestOrSetParameter(newValue, false);
+            return implements.GetParameterModel(parameterName).TestOrSetParameter(newValue, false);
+        }
+
+        private static IParameterModel GetParameterModel(this IImplementsParameterAttribute implements,
+            string parameterName)
+        {
+            if (parameterName == null)
+            {
+                throw new ArgumentNullException($"Parameter cannot be null.");
+            }
+            if (!implements.ParameterMap.ContainsKey(parameterName))
+            {
+                throw new ArgumentException($"No parameter named '{parameterName}'.");
+            }
+            return implements.ParameterMap[parameterName];
         }
     }
 }

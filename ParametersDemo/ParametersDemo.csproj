@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MvvmModelMessaging\MileHighWpf.MvvmModelMessaging\MileHighWpf.MvvmModelMessaging.csproj" />
     <ProjectReference Include="..\ParameterModel\ParameterModel.csproj" />
+    <ProjectReference Include="..\ParameterTests\ParameterTests.csproj" />
     <ProjectReference Include="..\ParameterViews\ParameterViews.csproj" />
     <ProjectReference Include="..\PythonWrapper\PythonWrapper.csproj" />
   </ItemGroup>
