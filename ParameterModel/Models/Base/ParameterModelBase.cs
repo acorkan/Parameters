@@ -48,7 +48,7 @@ namespace ParameterModel.Models.Base
         {
             if (!ParameterAttribute.CanBeVariable)
             {
-                throw new InvalidOperationException($"Property '{ParameterName}' is not marked as a variable assignment.");
+                throw new InvalidOperationException($"Property '{ParameterName}' is not marked as allowing a variable assignment.");
             }
             else if (variablesContext == null)
             {
@@ -78,6 +78,23 @@ namespace ParameterModel.Models.Base
                 ParameterAttribute.ImplementsParameterAttributes.VariableAssignments[ParameterName] = varName;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Return the variable name that is assigned to this property.
+        /// Throw an exception if the property is not marked as allowing a variable assignment.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public string GetVariableAssignment()
+        {
+            if (!ParameterAttribute.CanBeVariable)
+            {
+                throw new InvalidOperationException($"Property '{ParameterName}' is not marked as a variable assignment.");
+            }
+            return ParameterAttribute.ImplementsParameterAttributes.VariableAssignments.ContainsKey(ParameterName) ?
+                ParameterAttribute.ImplementsParameterAttributes.VariableAssignments[ParameterName] :
+                null;
         }
 
         /// <summary>

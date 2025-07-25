@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace ParameterTests.TestClasses
 {
-    public class FloatTestClass : IntTestClass
+    public class IntAndFloatTestClass : IntTestClass
     {
         /// <summary>
         /// Simple parameter but no variable option.
         /// </summary>
         [Parameter]
-        public float Float1 { get; set; } = 1;
+        public float Float1 { get; set; } = 1.1F;
 
         /// <summary>
         /// Parameter with variable option.
         /// </summary>
         [Parameter(true)]
-        public float Float2 { get; set; } = 2;
+        public float Float2 { get; set; } = 2.2F;
 
         /// <summary>
         /// Parameter with variable option.
@@ -28,12 +28,12 @@ namespace ParameterTests.TestClasses
         /// </summary>
         [Parameter(true)]
         [Editable(false)]
-        public float Float3 { get; set; } = 3;
+        public float Float3 { get; set; } = 3.3F;
 
         /// <summary>
         /// Not a parameter.
         /// </summary>
-        public float Float4 { get; set; } = 4;
+        public float Float4 { get; set; } = 4.4F;
         // Should pass.
 
         /// <summary>
@@ -42,6 +42,6 @@ namespace ParameterTests.TestClasses
         /// </summary>
         [Parameter]
         [Editable(false)]
-        public float Float5 { get; set; } = 5;
+        public float Float5 { get; set; } = 5.5F;
     }
 }

@@ -15,7 +15,8 @@ namespace ParameterModel.Models.Base
         /// <summary>
         /// Maps the variable assignments to the property names.
         /// </summary>
-        public Dictionary<string, string> VariableAssignments { get; } = new Dictionary<string, string>();
+        [JsonInclude]
+        public Dictionary<string, string> VariableAssignments { get; protected set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Map of the names of properties that are attributed as Parameter to their corresponding IParameterModel instances.

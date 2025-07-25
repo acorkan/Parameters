@@ -183,6 +183,8 @@ namespace ParameterModel.Extensions
             }
         }
 
+        private static readonly string JsonVariablesKey = "__va__";
+
         public static void UpdateParametersFromJson<T>(this IImplementsParameterAttribute dest, string json)
         {
             var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
@@ -208,6 +210,16 @@ namespace ParameterModel.Extensions
                     }
                 }
             }
+            // Handle the special __va__ key for variable assignments.
+            if (dict.TryGetValue(JsonVariablesKey, out var varsElement))
+            {
+                Dictionary<string, string> variableAssignments = JsonSerializer.Deserialize<Dictionary<string, string>>(varsElement.GetRawText());
+                dest.VariableAssignments.Clear();
+                foreach (var kvp in variableAssignments)
+                {
+                    dest.VariableAssignments.Add(kvp.Key, kvp.Value);
+                }
+            }
         }
 
         private static object? JsonElementToType(JsonElement element, Type type)
@@ -217,7 +229,7 @@ namespace ParameterModel.Extensions
             return JsonSerializer.Deserialize(raw, type);
         }
 
-        public static string SerializeParametersToJson(this IImplementsParameterAttribute source)
+        public static string SerializeParametersToJson(this IImplementsParameterAttribute source, bool includeVariablesAssignment = true)
         {
             var dict = new Dictionary<string, object>();
 
@@ -225,6 +237,10 @@ namespace ParameterModel.Extensions
             {
                 var value = prop.Value.ParameterAttribute.PropertyInfo.GetValue(source);
                 dict[prop.Key] = value;
+            }
+            if (includeVariablesAssignment)
+            {
+                dict[JsonVariablesKey] = source.VariableAssignments;
             }
             return JsonSerializer.Serialize(dict);
         }
@@ -277,6 +293,12 @@ namespace ParameterModel.Extensions
             string parameterName, string newValue)
         {
             return implements.GetParameterModel(parameterName).TestOrSetParameter(newValue, false);
+        }
+
+        public static string GetAssignedVariable(this IImplementsParameterAttribute implements,
+            string parameterName)
+        {
+            return implements.GetParameterModel(parameterName).GetVariableAssignment();
         }
 
         private static IParameterModel GetParameterModel(this IImplementsParameterAttribute implements,

@@ -3,11 +3,12 @@ using ParameterModel.Factories;
 using ParameterModel.Interfaces;
 using ParameterModel.Models.Base;
 using ParameterTests.TestClasses;
+using System.Text.Json;
 
 namespace ParameterTests.Tests
 {
     [TestFixture]
-    public class BoolParameterModelTests
+    internal class BoolParameterModelTests
     {
         private ParameterModelFactory _parameterModelFactory;
         private IVariablesContext _variablesContext;
@@ -26,7 +27,7 @@ namespace ParameterTests.Tests
         }
 
         [Test]
-        public void TestBoolSerialize()
+        public void TestBoolSerializeParameters()
         {
             BoolTestClass testClass1 = new BoolTestClass();
             testClass1.Bool1 = !testClass1.Bool1;
@@ -43,7 +44,69 @@ namespace ParameterTests.Tests
             Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
             Assert.AreNotEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should not be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
         }
+
+        [Test]
+        public void TestBoolSerializeParametersWithVariables()
+        {
+            _variablesContext.AddVariable("BoolVar1", VariableType.Boolean).SetValue(true);
+            _variablesContext.AddVariable("BoolVar2", VariableType.Boolean).SetValue(false);
+
+            BoolTestClass testClass1 = new BoolTestClass();
+
+            bool testResult;
+            testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar2");
+            testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+
+            string json = testClass1.SerializeParametersToJson();
+
+            BoolTestClass testClass2 = new BoolTestClass();
+            testClass2.UpdateParametersFromJson<BoolTestClass>(json);
+            Assert.That("BoolVar2", Is.EqualTo(testClass1.VariableAssignments["Bool3"]));
+            Assert.That("BoolVar1", Is.EqualTo(testClass1.VariableAssignments["Bool2"]));
+            Assert.That("BoolVar2", Is.EqualTo(testClass2.VariableAssignments["Bool3"]));
+            Assert.That("BoolVar1", Is.EqualTo(testClass2.VariableAssignments["Bool2"]));
+            //Assert.AreEqual(testClass1.Bool1, testClass2.Bool1, "Bool1 should be equal after serialization and deserialization.");
+            //Assert.AreEqual(testClass1.Bool2, testClass2.Bool2, "Bool2 should be equal after serialization and deserialization.");
+            //Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
+            //Assert.AreNotEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should not be equal after serialization and deserialization.");
+            //Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
+        }
+
+        [Test]
+        public void TestBoolGenericSerialize()
+        {
+            _variablesContext.AddVariable("BoolVar1", VariableType.Boolean).SetValue(true);
+            _variablesContext.AddVariable("BoolVar2", VariableType.Boolean).SetValue(false);
+
+            BoolTestClass testClass1 = new BoolTestClass();
+            testClass1.Bool1 = !testClass1.Bool1;
+            testClass1.Bool4 = !testClass1.Bool4;
+            testClass1.Bool5 = !testClass1.Bool5;
+
+            bool testResult;
+            testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar2");
+            testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+
+            string json = JsonSerializer.Serialize(testClass1);
+
+            BoolTestClass testClass2 = JsonSerializer.Deserialize<BoolTestClass>(json);
+
+            Assert.AreEqual(testClass1.Bool1, testClass2.Bool1, "Bool1 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool2, testClass2.Bool2, "Bool2 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+        }
+
 
         [Test]
         public void TestBoolWithRangeAttribute()

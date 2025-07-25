@@ -63,5 +63,7 @@ namespace ParameterModel.Interfaces
         bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue);
 
         bool TestOrSetParameter(string newValue, bool setProperty);
+
+        string GetVariableAssignment();
     }
 }

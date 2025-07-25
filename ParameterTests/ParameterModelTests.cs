@@ -161,39 +161,6 @@ namespace ParameterTests
         }
 
 
-        [Test]
-        public void TestIntAndFloatSerialize()
-        {
-            IntAndFloatTestClass testClass1 = new IntAndFloatTestClass();
-            testClass1.TestInt1++;
-            testClass1.TestInt2++;
-            testClass1.TestInt3++;
-            testClass1.TestInt4++;
-            testClass1.TestInt5++;
-
-            testClass1.TestFloat1++;
-            testClass1.TestFloat2++;
-            testClass1.TestFloat3++;
-            testClass1.TestFloat4++;
-            testClass1.TestFloat5++;
-
-            string json = testClass1.SerializeParametersToJson();
-
-            IntAndFloatTestClass testClass2 = new IntAndFloatTestClass();// JsonSerializer.Deserialize<BoolTestClass>(json1);
-            testClass2.UpdateParametersFromJson<IntAndFloatTestClass>(json);
-
-            Assert.AreEqual(testClass1.TestInt1, testClass2.TestInt1, "TestInt1 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestInt2, testClass2.TestInt2, "TestInt2 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestInt3, testClass2.TestInt3, "TestInt3 should be equal after serialization and deserialization.");
-            Assert.AreNotEqual(testClass1.TestInt4, testClass2.TestInt4, "TestInt4 should not be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestInt5, testClass2.TestInt5, "TestInt5 should be equal after serialization and deserialization.");
-
-            Assert.AreEqual(testClass1.TestFloat1, testClass2.TestFloat1, "TestFloat1 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestFloat2, testClass2.TestFloat2, "TestFloat2 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestFloat3, testClass2.TestFloat3, "TestFloat3 should be equal after serialization and deserialization.");
-            Assert.AreNotEqual(testClass1.TestFloat4, testClass2.TestFloat4, "TestFloat4 should not be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.TestFloat5, testClass2.TestFloat5, "TestFloat5 should be equal after serialization and deserialization.");
-        }
 
         [Test]
         public void TestIntAndFloatWithRangeAttribute()
