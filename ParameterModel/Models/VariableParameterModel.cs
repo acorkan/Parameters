@@ -13,7 +13,7 @@ namespace ParameterModel.Models
 
         public override VariableType[] AllowedVariableTypes { get; }
 
-        public VariableParameterModel(VariableAssignmentAttribute parameterPromptAttribute) : 
+        public VariableParameterModel(ParameterAttribute parameterPromptAttribute) : 
             base(parameterPromptAttribute)
         {
             VariableAssignmentAttribute dfAttrib = ParameterAttribute.PropertyInfo.GetCustomAttribute<VariableAssignmentAttribute>();

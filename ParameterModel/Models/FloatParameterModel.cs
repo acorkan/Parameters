@@ -41,7 +41,7 @@ namespace ParameterModel.Models
         protected override string GetDisplayString()
         {
             float f = (int)ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
-            return string.IsNullOrEmpty(_displayFormat) ? f.ToString() : f.ToString(_displayFormat);
+            return string.IsNullOrEmpty(DataFormatString) ? f.ToString() : f.ToString(DataFormatString);
         }
     }
 }

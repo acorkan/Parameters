@@ -72,6 +72,5 @@ namespace ParameterModel.Interfaces
 
         void ClearVariables();
 
-        bool IsVariableNameValid(string name);
     }
 }
