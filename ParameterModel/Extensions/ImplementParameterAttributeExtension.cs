@@ -197,11 +197,11 @@ namespace ParameterModel.Extensions
                 // Ignore the non-PArameterAttribute properties.
                 if (dest.ParameterMap.ContainsKey(prop.Name) && prop.CanWrite && dict.TryGetValue(prop.Name, out var jsonElement))
                 {
-                    if (prop.PropertyType == typeof(Variable))
+                    if (prop.PropertyType == typeof(VariableProperty))
                     {
                         // Special case for Variable type, we need to deserialize it differently.
-                        var variable = JsonSerializer.Deserialize<Variable>(jsonElement.GetRawText());
-                        ((Variable)prop.GetValue(dest)).Assignment = variable.Assignment;
+                        var variable = JsonSerializer.Deserialize<VariableProperty>(jsonElement.GetRawText());
+                        ((VariableProperty)prop.GetValue(dest)).Assignment = variable.Assignment;
                     }
                     else
                     {

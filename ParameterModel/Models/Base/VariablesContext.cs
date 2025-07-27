@@ -10,7 +10,7 @@ namespace ParameterModel.Models.Base
 {
     public class VariablesContext : IVariablesContext
     {
-        public char VariablePrefix { get; } = '%'; // Used to indicate a variable in the string value.
+        public static char VariablePrefix { get; } = '%'; // Used to indicate a variable in the string value.
 
         private static string _varRegexPattern = @"^[A-Za-z_][A-Za-z0-9_]*$";
 
@@ -18,7 +18,7 @@ namespace ParameterModel.Models.Base
         {
         }
 
-        protected System.Text.RegularExpressions.Regex VariableNameRegex { get; } = new System.Text.RegularExpressions.Regex(_varRegexPattern);
+        protected static System.Text.RegularExpressions.Regex VariableNameRegex { get; } = new System.Text.RegularExpressions.Regex(_varRegexPattern);
 
 
         public List<VariableBase> Variables { get; } = new List<VariableBase>();
@@ -72,15 +72,26 @@ namespace ParameterModel.Models.Base
             return Variables.Find(v => (v.Name == name) && (v.Type == variableType));
         }
 
-        public bool IsVariableNameValid(string name)
+        //public bool IsVariableNameValid(string name)
+        //{
+        //    if (name.StartsWith(VariablePrefix))
+        //    {
+        //        // Remove the prefix for validation
+        //        name = name.Substring(1);
+        //    }
+        //    // This will throw an exception if the regex is invalid, which is not expected in this context.
+        //    return VariableNameRegex.IsMatch(name); 
+        //}
+
+        public static bool IsVariableNameValid(string name)
         {
-            if (name.StartsWith(VariablePrefix))
+            if (name.StartsWith(VariablesContext.VariablePrefix))
             {
                 // Remove the prefix for validation
                 name = name.Substring(1);
             }
             // This will throw an exception if the regex is invalid, which is not expected in this context.
-            return VariableNameRegex.IsMatch(name); 
+            return VariablesContext.VariableNameRegex.IsMatch(name);
         }
     }
 }

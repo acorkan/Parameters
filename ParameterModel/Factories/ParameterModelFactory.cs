@@ -33,7 +33,7 @@ namespace ParameterModel.Factories
                 {
                     parameterModel = new StringParameterModel(kvp.Value);
                 }
-                else if (type == typeof(Variable))
+                else if (type == typeof(VariableProperty))
                 {
                     parameterModel = new VariableParameterModel(kvp.Value);
                 }

@@ -136,108 +136,59 @@ namespace ParameterModel.Attributes
             { 
                 typeof(int), new List<Type>()
                 {
-                    //typeof(RequiredAttribute),
-                    //typeof(StringLengthAttribute),
                     typeof(RangeAttribute),
-                    //typeof(EmailAddressAttribute),
-                    //typeof(PhoneAttribute),
-                    //typeof(UrlAttribute),
-                    //typeof(DataTypeAttribute),
-                    //typeof(FileExtensionsAttribute),
                     typeof(DisplayAttribute),
                     typeof(DisplayFormatAttribute),
                     typeof(EditableAttribute),
+                    //typeof(CustomValidationAttribute),
                 }
             },
             { 
                 typeof(float), new List<Type>()
                 {
-                    //typeof(RequiredAttribute),
-                    //typeof(StringLengthAttribute),
                     typeof(RangeAttribute),
-                    //typeof(EmailAddressAttribute),
-                    //typeof(PhoneAttribute),
-                    //typeof(UrlAttribute),
-                    //typeof(DataTypeAttribute),
-                    //typeof(FileExtensionsAttribute),
-                    //typeof(CustomValidationAttribute),
                     typeof(DisplayAttribute),
                     typeof(DisplayFormatAttribute),
                     typeof(EditableAttribute),
+                    //typeof(CustomValidationAttribute),
                 }
             },
             { 
                 typeof(string), new List<Type>()
                 {
-                    typeof(RequiredAttribute),
                     typeof(StringLengthAttribute),
-                    //typeof(RangeAttribute),
-                    typeof(EmailAddressAttribute),
-                    typeof(PhoneAttribute),
-                    typeof(UrlAttribute),
-                    //typeof(DataTypeAttribute),
-                    typeof(FileExtensionsAttribute),
-                    //typeof(CustomValidationAttribute),
                     typeof(DisplayAttribute),
-                    //typeof(DisplayFormatAttribute),
                     typeof(EditableAttribute),
+                    //typeof(CustomValidationAttribute),
                 }
             },
             { 
                 typeof(Enum), new List<Type>()
                 {
-                    //typeof(RequiredAttribute),
-                    //typeof(StringLengthAttribute),
-                    //typeof(RangeAttribute),
-                    //typeof(EmailAddressAttribute),
-                    //typeof(PhoneAttribute),
-                    //typeof(UrlAttribute),
-                    //typeof(DataTypeAttribute),
-                    //typeof(FileExtensionsAttribute),
-                    //typeof(CustomValidationAttribute),
                     typeof(DisplayAttribute),
-                    //typeof(DisplayFormatAttribute),
                     typeof(EditableAttribute),
+                    //typeof(CustomValidationAttribute),
                 }
             },
             {
                 typeof(string[]), new List<Type>()
                 {
-                    typeof(RequiredAttribute),
-                    //typeof(StringLengthAttribute),
-                    //typeof(RangeAttribute),
-                    //typeof(EmailAddressAttribute),
-                    //typeof(PhoneAttribute),
-                    //typeof(UrlAttribute),
-                    //typeof(DataTypeAttribute),
-                    //typeof(FileExtensionsAttribute),
-                    //typeof(CustomValidationAttribute),
                     typeof(DisplayAttribute),
-                    //typeof(DisplayFormatAttribute),
                     typeof(EditableAttribute),
+                    //typeof(CustomValidationAttribute),
                 }
             },
             { 
                 typeof(bool), new List<Type>()
                 {
-                    //typeof(RequiredAttribute),
-                    //typeof(StringLengthAttribute),
-                    //typeof(RangeAttribute),
-                    //typeof(EmailAddressAttribute),
-                    //typeof(PhoneAttribute),
-                    //typeof(UrlAttribute),
-                    //typeof(DataTypeAttribute),
-                    //typeof(FileExtensionsAttribute),
-                    //typeof(CustomValidationAttribute),
                     typeof(DisplayAttribute),
-                    //typeof(DisplayFormatAttribute),
                     typeof(EditableAttribute),
+                    //typeof(CustomValidationAttribute),
                 }
             },
             {
-                typeof(Variable), new List<Type>()
+                typeof(VariableProperty), new List<Type>()
                 {
-                    typeof(RequiredAttribute),
                     typeof(DisplayAttribute),
                     typeof(EditableAttribute),
                 }

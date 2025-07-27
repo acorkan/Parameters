@@ -8,15 +8,26 @@ namespace ParameterModel.Models
 {
     public class FloatParameterModel : ParameterModelBase
     {
-        protected readonly string _displayFormat;
+        public float Min { get; } = -1;
+        public float Max { get; } = -1;
+        public bool IsMinExclusive { get; } = false;
+        public bool IsMaxExclusive { get; } = false;
+        public string DataFormatString { get; } = null;
         public FloatParameterModel(ParameterAttribute parameterPromptAttribute) :
             base(parameterPromptAttribute)
         {
-            // Access the display format if provided.
-            DisplayFormatAttribute formatAttribute = ParameterAttribute.PropertyInfo.GetCustomAttribute<DisplayFormatAttribute>();
-            if (formatAttribute != null)
+            RangeAttribute attrib = ParameterAttribute.PropertyInfo.GetCustomAttribute<RangeAttribute>();
+            if (attrib != null)
             {
-                _displayFormat = formatAttribute.DataFormatString;
+                Min = (int)(attrib?.Minimum ?? -1);
+                Max = (int)(attrib?.Maximum ?? -1);
+                IsMinExclusive = attrib?.MinimumIsExclusive ?? false;
+                IsMaxExclusive = attrib?.MaximumIsExclusive ?? false;
+            }
+            DisplayFormatAttribute dfAttrib = ParameterAttribute.PropertyInfo.GetCustomAttribute<DisplayFormatAttribute>();
+            if (dfAttrib != null)
+            {
+                DataFormatString = dfAttrib.DataFormatString ?? "";
             }
         }
 

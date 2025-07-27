@@ -55,7 +55,7 @@ namespace ParameterViews.Factories
                 {
                     paramViewModel = new StrArrayParamViewModel(kvp.Value as StringArrayParameterModel, variablesContext, showPrompt);
                 }
-                else if (kvp.Value.ParameterType == typeof(Variable))
+                else if (kvp.Value.ParameterType == typeof(VariableProperty))
                 {
                     paramViewModel = new VariableParamViewModel(kvp.Value as VariableParameterModel, variablesContext, showPrompt);
                 }

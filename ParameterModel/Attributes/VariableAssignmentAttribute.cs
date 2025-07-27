@@ -11,13 +11,11 @@ namespace ParameterModel.Attributes
     public enum VariableAccessType
     {
         ReadOnly,
-        WriteOnly,
         ReadWrite
     }
 
     /// <summary>
-    /// This attribute regulates the assignment of a variable type to a property.
-    /// The underlying property type must be a string.
+    /// This attribute regulates the assignment of a variable type to a property of type VariableProperty.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public  class VariableAssignmentAttribute : ParameterAttribute

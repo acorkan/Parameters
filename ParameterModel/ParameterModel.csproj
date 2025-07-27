@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Docs\.~lock.ParameterModels.odt#" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\MvvmModelMessaging\MileHighWpf.MvvmModelMessaging\MileHighWpf.MvvmModelMessaging.csproj" />
   </ItemGroup>
 

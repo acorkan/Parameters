@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ParameterModel.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,12 @@ using System.Xml.Linq;
 
 namespace ParameterModel.Variables
 {
-    public class Variable 
+    /// <summary>
+    /// The VariableProperty is used to hold the name of a variable, which must exists in the active IVariablesContext. 
+    /// Which variable types can be assigned to this, and wether the allowed variable instances can be read-only or not is
+    /// set using the VariableAssignmentAttribute on the property.
+    /// </summary>
+    public class VariableProperty
     {
         public string Assignment { get; set; } = string.Empty;
 
@@ -16,7 +22,7 @@ namespace ParameterModel.Variables
             return (Assignment != null) ? Assignment : "";
         }
 
-        public Variable(string assignment)
+        public VariableProperty(string assignment)
         {
             Assignment = assignment;
         }
@@ -30,7 +36,7 @@ namespace ParameterModel.Variables
                 return false;
             }
 
-            Variable other = (Variable)obj;
+            VariableProperty other = (VariableProperty)obj;
             return Assignment == other.Assignment;
         }
 
@@ -41,7 +47,7 @@ namespace ParameterModel.Variables
         }
 
         // Overload == operator
-        public static bool operator ==(Variable obj1, Variable obj2)
+        public static bool operator ==(VariableProperty obj1, VariableProperty obj2)
         {
             // Check for null and use ReferenceEquals for optimization
             if (ReferenceEquals(obj1, obj2))
@@ -54,7 +60,7 @@ namespace ParameterModel.Variables
         }
 
         // Overload != operator
-        public static bool operator !=(Variable obj1, Variable obj2)
+        public static bool operator !=(VariableProperty obj1, VariableProperty obj2)
         {
             return !(obj1 == obj2); // Defer to the == operator
         }

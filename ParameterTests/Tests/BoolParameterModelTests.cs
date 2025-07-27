@@ -44,10 +44,10 @@ namespace ParameterTests.Tests
             Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
             Assert.AreNotEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should not be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
         }
 
         [Test]
@@ -101,10 +101,10 @@ namespace ParameterTests.Tests
             Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1"), "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
         }
 
 
