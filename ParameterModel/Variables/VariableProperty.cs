@@ -1,12 +1,4 @@
-﻿using ParameterModel.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
-namespace ParameterModel.Variables
+﻿namespace ParameterModel.Variables
 {
     /// <summary>
     /// The VariableProperty is used to hold the name of a variable, which must exists in the active IVariablesContext. 

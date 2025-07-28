@@ -1,6 +1,7 @@
 ﻿using ParameterModel.Attributes;
 using ParameterModel.Interfaces;
 using ParameterModel.Variables;
+using System.Diagnostics.Eventing.Reader;
 using System.Reflection;
 using System.Text.Json;
 
@@ -200,8 +201,25 @@ namespace ParameterModel.Extensions
                     if (prop.PropertyType == typeof(VariableProperty))
                     {
                         // Special case for Variable type, we need to deserialize it differently.
-                        var variable = JsonSerializer.Deserialize<VariableProperty>(jsonElement.GetRawText());
-                        ((VariableProperty)prop.GetValue(dest)).Assignment = variable.Assignment;
+                        var jsonCopy = JsonSerializer.Deserialize<VariableProperty>(jsonElement.GetRawText());
+                        // If the source is null then make sure the dest is null.
+                        if (jsonCopy == null)
+                        {
+                            prop.SetValue(dest, (VariableProperty)null);
+                        }
+                        else // If the source is not null then set the dest.
+                        {
+                            var varProp = (VariableProperty)prop.GetValue(dest);
+                            // If the dest is null then create a new one, otherwise just update the assignment.
+                            if (varProp == null)
+                            {
+                                prop.SetValue(dest, new VariableProperty(jsonCopy.Assignment));
+                            }
+                            else
+                            {
+                                ((VariableProperty)prop.GetValue(dest)).Assignment = jsonCopy.Assignment;
+                            }
+                        }
                     }
                     else
                     {
@@ -246,9 +264,9 @@ namespace ParameterModel.Extensions
         }
 
         private static bool TestOrAssignVariable(this IImplementsParameterAttribute implements, string parameterName,
-            IVariablesContext variablesContext, string varName, bool setVarValue)
+            IVariablesContext variablesContext, string varName, bool setVarValue, out string error)
         {
-            return implements.GetParameterModel(parameterName).TestOrAssignVariable(variablesContext, varName, setVarValue);
+            return implements.GetParameterModel(parameterName).TestOrAssignVariable(variablesContext, varName, setVarValue, out error);
         }
 
         private static bool TestOrSetParameter(this IImplementsParameterAttribute implements, string paramName,
@@ -269,10 +287,10 @@ namespace ParameterModel.Extensions
         /// <exception cref="InvalidOperationException"></exception>
         public static bool TryAssignVariable(this IImplementsParameterAttribute implements,
             IVariablesContext variablesContext,
-            string parameterName, string variableName)
+            string parameterName, string variableName, out string error)
         {
             return implements.TestOrAssignVariable(parameterName,
-                variablesContext, variableName, true);
+                variablesContext, variableName, true, out error);
         }
 
         public static bool TrySetParameter(this IImplementsParameterAttribute implements,
@@ -283,10 +301,10 @@ namespace ParameterModel.Extensions
 
         public static bool TestAssignVariable(this IImplementsParameterAttribute implements,
             IVariablesContext variablesContext,
-            string parameterName, string variableName)
+            string parameterName, string variableName, out string error)
         {
             return implements.TestOrAssignVariable(parameterName,
-                variablesContext, variableName, false);
+                variablesContext, variableName, false, out error);
         }
 
         public static bool TestSetParameter(this IImplementsParameterAttribute implements,

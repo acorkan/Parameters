@@ -80,8 +80,8 @@ namespace ParameterTests.Tests
             Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
             Assert.IsFalse(testClass1.ValidateParameters(null, errors));
             Assert.IsTrue(errors.Count == 2);
-            Assert.IsTrue(errors.ContainsKey("intRange1_8"));
-            Assert.IsTrue(errors.ContainsKey("floatRange4_11"));
+            Assert.IsTrue(errors.ContainsKey("Int1"));
+            Assert.IsTrue(errors.ContainsKey("Float5"));
         }
 
     }

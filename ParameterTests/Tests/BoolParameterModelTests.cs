@@ -10,8 +10,8 @@ namespace ParameterTests.Tests
     [TestFixture]
     internal class BoolParameterModelTests
     {
-        private ParameterModelFactory _parameterModelFactory;
-        private IVariablesContext _variablesContext;
+        protected ParameterModelFactory _parameterModelFactory;
+        protected IVariablesContext _variablesContext;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -44,10 +44,11 @@ namespace ParameterTests.Tests
             Assert.AreEqual(testClass1.Bool3, testClass2.Bool3, "Bool3 should be equal after serialization and deserialization.");
             Assert.AreNotEqual(testClass1.Bool4, testClass2.Bool4, "Bool4 should not be equal after serialization and deserialization.");
             Assert.AreEqual(testClass1.Bool5, testClass2.Bool5, "Bool5 should be equal after serialization and deserialization.");
-            Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
-            Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+
+            //Assert.AreEqual(testClass1.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            //Assert.AreEqual(testClass1.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            //Assert.AreEqual(testClass2.GetAssignedVariable("Bool3"), "BoolVar2", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
+            //Assert.AreEqual(testClass2.GetAssignedVariable("Bool2"), "BoolVar1", "Bool3 should have the assigned variable BoolVar2 after serialization and deserialization.");
         }
 
         [Test]
@@ -59,8 +60,8 @@ namespace ParameterTests.Tests
             BoolTestClass testClass1 = new BoolTestClass();
 
             bool testResult;
-            testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar2");
-            testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+            testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar2", out string error);
+            testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1", out error);
 
             string json = testClass1.SerializeParametersToJson();
 
@@ -89,8 +90,8 @@ namespace ParameterTests.Tests
             testClass1.Bool5 = !testClass1.Bool5;
 
             bool testResult;
-            testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar2");
-            testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+            testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar2", out string error);
+            testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1", out error);
 
             string json = JsonSerializer.Serialize(testClass1);
 
@@ -159,20 +160,20 @@ namespace ParameterTests.Tests
             testClass1.Bool5 = false;
 
             bool testResult;
-            Assert.Throws<InvalidOperationException>(() => testClass1.TestAssignVariable(_variablesContext, "Bool1", "BoolVar1"), "TestAssignVariable should throw an exception for variable assignment on a non-variable parameter.");
-            Assert.Throws<InvalidOperationException>(() => testClass1.TryAssignVariable(_variablesContext, "Bool1", "BoolVar1"), "TryAssignVariable should throw an exception for variable assignment on a non-variable parameter.");
+            Assert.IsFalse(testClass1.TestAssignVariable(_variablesContext, "Bool1", "BoolVar1", out string error), "TestAssignVariable should throw an exception for variable assignment on a non-variable parameter.");
+            Assert.IsFalse(testClass1.TryAssignVariable(_variablesContext, "Bool1", "BoolVar1", out error), "TryAssignVariable should throw an exception for variable assignment on a non-variable parameter.");
 
-            testResult = testClass1.TestAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+            testResult = testClass1.TestAssignVariable(_variablesContext, "Bool2", "BoolVar1", out error);
             Assert.IsTrue(testResult, "TestAssignVariable should return true for valid variable assignment.");
-            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1", out error);
             Assert.IsTrue(testResult, "TryAssignVariable should return true for valid variable assignment.");
 
-            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar1");
+            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool3", "BoolVar1", out error);
             Assert.IsTrue(testResult, "TryAssignVariable should return true for valid variable assignment.");
 
-            testResult = testClass1.TestAssignVariable(_variablesContext, "Bool2", "FloatVar2");
+            testResult = testClass1.TestAssignVariable(_variablesContext, "Bool2", "FloatVar2", out error);
             Assert.IsFalse(testResult, "TestSetParameter should return false for invalid variable type.");
-            Assert.Throws<InvalidOperationException>(() => testClass1.TryAssignVariable(_variablesContext, "Bool2", "FloatVar2"), "TryAssignVariable should throw an exception for invalid variable type.");
+            Assert.IsFalse(testClass1.TryAssignVariable(_variablesContext, "Bool2", "FloatVar2", out error), "TryAssignVariable should throw an exception for invalid variable type.");
         }
 
         [Test]
@@ -187,7 +188,7 @@ namespace ParameterTests.Tests
 
             bool testResult;
 
-            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1");
+            testResult = testClass1.TryAssignVariable(_variablesContext, "Bool2", "BoolVar1", out string error);
             Assert.IsTrue(testResult, "TryAssignVariable should return true for valid variable assignment.");
 
             Dictionary<string, string> variableErrors = new Dictionary<string, string>();

@@ -60,7 +60,7 @@ namespace ParameterModel.Interfaces
         /// <returns></returns>
         string[] GetSelectionItems();
 
-        bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue);
+        bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue, out string error);
 
         bool TestOrSetParameter(string newValue, bool setProperty);
 

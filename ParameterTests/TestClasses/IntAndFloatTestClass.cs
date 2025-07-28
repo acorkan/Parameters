@@ -42,6 +42,7 @@ namespace ParameterTests.TestClasses
         /// </summary>
         [Parameter]
         [Editable(false)]
+        [System.ComponentModel.DataAnnotations.Range(0.0, 5.2)]
         public float Float5 { get; set; } = 5.5F;
     }
 }

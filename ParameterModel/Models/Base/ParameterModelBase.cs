@@ -44,15 +44,20 @@ namespace ParameterModel.Models.Base
         /// <param name="errorMessage"></param>
         /// <param name="setVarValue"></param>
         /// <returns></returns>
-        public virtual bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue)
+        public virtual bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue, out string error)
         {
+            error = "";
             if (!ParameterAttribute.CanBeVariable)
             {
-                throw new InvalidOperationException($"Property '{ParameterName}' is not marked as allowing a variable assignment.");
+                //throw new InvalidOperationException($"Property '{ParameterName}' is not marked as allowing a variable assignment.");
+                error = $"Property '{ParameterName}' is not marked as allowing a variable assignment.";
+                return false;
             }
-            else if (variablesContext == null)
+            if (variablesContext == null)
             {
-                throw new InvalidOperationException($"VariablesContext cannot be null because property {ParameterAttribute.PropertyInfo.Name} has CanBeVariable set.");
+                //throw new InvalidOperationException($"VariablesContext cannot be null because property {ParameterAttribute.PropertyInfo.Name} has CanBeVariable set.");
+                error = $"VariablesContext cannot be null because property {ParameterAttribute.PropertyInfo.Name} has CanBeVariable set.";
+                return false;
             }
 
             // Alow code to change the variable assignment.
@@ -63,12 +68,20 @@ namespace ParameterModel.Models.Base
 
             if (string.IsNullOrEmpty(varName))
             {
-                throw new ArgumentNullException("Variable name cannot be null or empty.");
+                //throw new ArgumentNullException("Variable name cannot be null or empty.");
+                error = "Variable name cannot be null or empty.";
+                return false;
             }
 
             VariableBase variable = variablesContext.GetVariable(varName);
-            if ((variable == null) || !AllowedVariableTypes.Contains(variable.Type))
+            if (variable == null)
             {
+                error = $"Variable '{varName}' does not exist in the VariablesContext.";
+                return false;
+            }
+            if (!AllowedVariableTypes.Contains(variable.Type))
+            {
+                error = $"Variable '{varName}' is of type {variable.Type}, but only types {string.Join(", ", AllowedVariableTypes)} are allowed for property '{ParameterName}'.";
                 return false;
             }
 

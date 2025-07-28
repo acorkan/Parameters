@@ -19,8 +19,10 @@ namespace ParameterModel.Models
             RangeAttribute attrib = ParameterAttribute.PropertyInfo.GetCustomAttribute<RangeAttribute>();
             if (attrib != null)
             {
-                Min = (int)(attrib?.Minimum ?? -1);
-                Max = (int)(attrib?.Maximum ?? -1);
+                double min = (double)(attrib?.Minimum ?? -1.0);
+                double max = (double)(attrib?.Maximum ?? -1.0);
+                Min = (float)min;
+                Max = (float)max;
                 IsMinExclusive = attrib?.MinimumIsExclusive ?? false;
                 IsMaxExclusive = attrib?.MaximumIsExclusive ?? false;
             }
