@@ -57,6 +57,8 @@ namespace ParametersDemo
         [RelayCommand]
         public void Prompt3()
         {
+            EnumTestClass paramTestClass = new EnumTestClass();
+            Prompt("Command 1 Prompt", paramTestClass);
         }
 
         [RelayCommand]

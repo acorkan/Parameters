@@ -14,8 +14,8 @@ namespace ParameterModel.Attributes
     public class ParameterAttribute : Attribute
     {
         private Array _enumValues;
-        protected Dictionary<int, string> _enumIntDisplayDict;
-        protected Dictionary<Enum, string> _enumItemsDisplayDict;
+        public Dictionary<int, string> EnumIntDisplayDict { get; protected set; }
+        public Dictionary<Enum, string> EnumItemsDisplayDict { get; protected set; }
         public IImplementsParameterAttribute ImplementsParameterAttributes { get; protected set; }
 
         /// <summary>
@@ -56,21 +56,16 @@ namespace ParameterModel.Attributes
         }
 
         public ParameterAttribute() : this(false) { }
-
-
-        public Dictionary<Enum, string> GetEnumItemsDisplay()
-        {
-            return _enumItemsDisplayDict;
-        }
+       
         public bool IsVariableSelected { get => ImplementsParameterAttributes.VariableAssignments.ContainsKey(PropertyInfo.Name); }
-
 
         public static bool TestAllowedValidationAttributes(PropertyInfo propertyInfo, List<string> invalidAttributeNames)
         {
             invalidAttributeNames.Clear();
             Type type = propertyInfo.PropertyType;
+            string typeString = type.IsEnum ? "Enum" : type.Name;
             List<Type> atts = propertyInfo.GetCustomAttributes<ValidationAttribute>().Select(s => s.GetType()).ToList();
-            List<Type> allowed = ParameterAttribute.AllowedValidationAttributes[type];
+            List<Type> allowed = ParameterAttribute.AllowedValidationAttributes[typeString];
             foreach (var attribute in atts)
             {
                 if (!allowed.Contains(attribute))
@@ -114,12 +109,16 @@ namespace ParameterModel.Attributes
                 parameterAttribute._enumValues = Enum.GetValues(parameterAttribute.PropertyInfo.PropertyType);//);.EnumType);
                 if (parameterAttribute._enumValues.Length == 0)
                 {
-                    throw new ArgumentException($"Enum type {parameterAttribute.PropertyInfo.PropertyType} does not contain any values.", nameof(parameterAttribute.PropertyInfo.Name));
+                    throw new InvalidOperationException($"Enum property '{parameterAttribute.PropertyInfo.Name}' of type {parameterAttribute.PropertyInfo.PropertyType} does not contain any values.");
                 }
-                parameterAttribute._enumItemsDisplayDict =
+                parameterAttribute.EnumItemsDisplayDict =
                     parameterAttribute._enumValues.Cast<Enum>().ToDictionary(s => s, s => EnumToDescriptionOrString(s));
-                parameterAttribute._enumIntDisplayDict = 
+                parameterAttribute.EnumIntDisplayDict = 
                     parameterAttribute._enumValues.Cast<Enum>().ToDictionary(e => Convert.ToInt32(e), e => EnumToDescriptionOrString(e));
+                if(!parameterAttribute.EnumIntDisplayDict.ContainsKey(0))
+                {
+                    throw new InvalidOperationException($"Enum property '{parameterAttribute.PropertyInfo.Name}' of type {parameterAttribute.PropertyInfo.PropertyType} must have a default value mapped to 0.");
+                }
             }
         }
 
@@ -131,10 +130,10 @@ namespace ParameterModel.Attributes
                        .FirstOrDefault()?.Description ?? value.ToString();
         }
 
-        public static Dictionary<Type, List<Type>> AllowedValidationAttributes { get; } = new Dictionary<Type, List<Type>>()
+        public static Dictionary<string, List<Type>> AllowedValidationAttributes { get; } = new Dictionary<string, List<Type>>()
         {
             { 
-                typeof(int), new List<Type>()
+                typeof(int).Name, new List<Type>()
                 {
                     typeof(RangeAttribute),
                     typeof(DisplayAttribute),
@@ -144,7 +143,7 @@ namespace ParameterModel.Attributes
                 }
             },
             { 
-                typeof(float), new List<Type>()
+                typeof(float).Name, new List<Type>()
                 {
                     typeof(RangeAttribute),
                     typeof(DisplayAttribute),
@@ -154,7 +153,7 @@ namespace ParameterModel.Attributes
                 }
             },
             { 
-                typeof(string), new List<Type>()
+                typeof(string).Name, new List<Type>()
                 {
                     typeof(StringLengthAttribute),
                     typeof(DisplayAttribute),
@@ -163,7 +162,7 @@ namespace ParameterModel.Attributes
                 }
             },
             { 
-                typeof(Enum), new List<Type>()
+                "Enum", new List<Type>()
                 {
                     typeof(DisplayAttribute),
                     typeof(EditableAttribute),
@@ -171,7 +170,7 @@ namespace ParameterModel.Attributes
                 }
             },
             {
-                typeof(string[]), new List<Type>()
+                typeof(string[]).Name, new List<Type>()
                 {
                     typeof(DisplayAttribute),
                     typeof(EditableAttribute),
@@ -179,7 +178,7 @@ namespace ParameterModel.Attributes
                 }
             },
             { 
-                typeof(bool), new List<Type>()
+                typeof(bool).Name, new List<Type>()
                 {
                     typeof(DisplayAttribute),
                     typeof(EditableAttribute),
@@ -187,7 +186,7 @@ namespace ParameterModel.Attributes
                 }
             },
             {
-                typeof(VariableProperty), new List<Type>()
+                typeof(VariableProperty).Name, new List<Type>()
                 {
                     typeof(DisplayAttribute),
                     typeof(EditableAttribute),

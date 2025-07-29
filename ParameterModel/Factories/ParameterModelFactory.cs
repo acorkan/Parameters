@@ -25,7 +25,7 @@ namespace ParameterModel.Factories
                 {
                     parameterModel = new BoolParameterModel(kvp.Value);
                 }
-                else if (type.IsEnum && (type == typeof(Enum)))
+                else if (type.IsEnum)
                 {
                     parameterModel = new EnumParameterModel(kvp.Value);
                 }

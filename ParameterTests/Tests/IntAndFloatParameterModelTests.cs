@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace ParameterTests.Tests
 {
     [TestFixture]
-    internal class IntAndFloatParameterModelTests
+    public class IntAndFloatParameterModelTests : BoolTestClass
     {
         private ParameterModelFactory _parameterModelFactory;
         private IVariablesContext _variablesContext;

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ParameterTests.TestClasses
 {
-    public class IntTestClass : ImplementsParametersBase
+    public class IntTestClass : BoolTestClass
     {
         /// <summary>
         /// Simple parameter but no variable option.
@@ -17,6 +17,7 @@ namespace ParameterTests.TestClasses
         /// </summary>
         [Parameter]
         [System.ComponentModel.DataAnnotations.Range(2, 4)]
+        [Display(Description = "Select an integer between 2 and 4", Prompt = "Prompt for Int1")]
         public int Int1 { get; set; } = 1;
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace ParameterTests.TestClasses
         /// </summary>
         [Parameter(true)]
         [System.ComponentModel.DataAnnotations.Range(1, 8)]
+        [Display(Description = "Select an integer between 2 and 4 or a variable", Prompt = "Prompt for Int2")]
         public int Int2 { get; set; } = 2;
 
         /// <summary>

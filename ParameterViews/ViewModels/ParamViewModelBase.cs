@@ -44,7 +44,7 @@ namespace ParameterViews.ViewModels
         /// <summary>
         /// Use this to control whgether the user sees a simple edit option or the option to select a variable.
         /// </summary>
-        public bool IsVariableOption => _model.ParameterAttribute.CanBeVariable;
+        public bool IsVariableOption => _model.ParameterAttribute.CanBeVariable || _model.ParameterType.IsEnum;
 
         [ObservableProperty]
         private string _errorMsgToolTip;
@@ -134,17 +134,18 @@ namespace ParameterViews.ViewModels
             ShowPrompt = showPrompt;
             ParameterAttribute parameterAttribute = model.ParameterAttribute;
             PromptToolTip = parameterAttribute.Description;
+            IsReadOnly = _model.IsReadOnly;
 
             string prompt = parameterAttribute.Prompt;
             prompt += ":";
             Prompt = prompt;
 
-            // Get initial value
-            if (IsVariableOption)
-            {
+            //// Get initial value
+            //if (IsVariableOption)
+            //{
                 SelectionItems = new ObservableCollection<string>(model.GetSelectionItems(variablesContext));
                 //UserInput = ((SelectionItems != null) && SelectionItems.Any()) ? SelectionItems[0] : "";
-            }
+            //}
             //else 
             //{
             //    UserInput = GetDisplayString(out bool isVariableAssignment);

@@ -10,32 +10,41 @@ namespace ParameterModel.Models
         public EnumParameterModel(ParameterAttribute parameterPromptAttribute) : 
             base(parameterPromptAttribute)
         {
-            _defaultSelections = parameterPromptAttribute.GetEnumItemsDisplay().Values.ToArray();
+            _defaultSelections = parameterPromptAttribute.EnumItemsDisplayDict.Values.ToArray();
         }
 
         public override VariableType[] AllowedVariableTypes => [VariableType.String];
 
         public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
-            Enum value = null;
-            string valueString = null;
-            Dictionary<Enum, string> enumItemsDisplayDict = ParameterAttribute.GetEnumItemsDisplay();
-            for (int i = 0; i < enumItemsDisplayDict.Count; i++)
+            //Enum value = null;
+            string selection = null;
+            // First test for int value.
+            if (int.TryParse(newValue, out int index) && ParameterAttribute.EnumIntDisplayDict.ContainsKey(index))
             {
-                if (enumItemsDisplayDict.ElementAt(i).Key.ToString().Equals(newValue, StringComparison.OrdinalIgnoreCase) ||
-                    enumItemsDisplayDict.ElementAt(i).Value.Equals(newValue, StringComparison.OrdinalIgnoreCase))
+                selection = ParameterAttribute.EnumIntDisplayDict[index];
+            }
+            else
+            {
+                Dictionary<Enum, string> enumItemsDisplayDict = ParameterAttribute.EnumItemsDisplayDict;
+                for (int i = 0; i < enumItemsDisplayDict.Count; i++)
                 {
-                    value = enumItemsDisplayDict.ElementAt(i).Key;
-                    break;
+                    if (enumItemsDisplayDict.ElementAt(i).Key.ToString().Equals(newValue, StringComparison.OrdinalIgnoreCase) ||
+                        enumItemsDisplayDict.ElementAt(i).Value.Equals(newValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        selection = enumItemsDisplayDict.ElementAt(i).Value;
+                        index = ParameterAttribute.EnumIntDisplayDict.ElementAt(i).Key;
+                        break;
+                    }
                 }
             }
-            if (value != null)
+            if (selection != null)
             {
-                if (Enum.TryParse(ParameterAttribute.PropertyInfo.PropertyType, valueString, true, out object e))
+                //if (Enum.TryParse(ParameterAttribute.PropertyInfo.PropertyType, newValue, true, out object e))
                 {
                     if (setProperty)
                     {
-                        ParameterAttribute.PropertyInfo.SetValue(ParameterAttribute.ImplementsParameterAttributes, e);
+                        ParameterAttribute.PropertyInfo.SetValue(ParameterAttribute.ImplementsParameterAttributes, index);
                     }
                     return true;
                 }
@@ -46,19 +55,14 @@ namespace ParameterModel.Models
 
         protected override string GetDisplayString()
         {
-            string displayString;
             if (ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes) is Enum typeValue)
             {
-                Dictionary<Enum, string> enumItemsDisplayDict = ParameterAttribute.GetEnumItemsDisplay();
-                if (enumItemsDisplayDict.ContainsKey(typeValue))
+                int index = Convert.ToInt32(typeValue);
+                //Dictionary<Enum, string> enumItemsDisplayDict = ParameterAttribute.EnumItemsDisplayDict;
+                if (ParameterAttribute.EnumIntDisplayDict.ContainsKey(index))
                 {
-                    displayString = enumItemsDisplayDict[typeValue];
+                    return ParameterAttribute.EnumIntDisplayDict[index];
                 }
-                else
-                {
-                    displayString = typeValue.ToString();
-                }
-                return displayString;
             }
             throw new InvalidOperationException($"Can not resolve property {ParameterName} from enum type {ParameterAttribute.PropertyInfo.PropertyType}");
         }

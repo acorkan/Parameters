@@ -6,10 +6,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using ParameterModel.Interfaces;
+using ParameterTests.Tests;
 
 namespace ParameterTests.TestClasses
 {
-    public class VariableParamTestClass : BoolTestClass
+    public class VariableParamTestClass : IntAndFloatParameterModelTests
     {
         /// <summary>
         /// Boolean varaible type.
