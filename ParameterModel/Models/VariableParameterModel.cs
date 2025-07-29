@@ -33,7 +33,15 @@ namespace ParameterModel.Models
                     VariableProperty vp = (VariableProperty)ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
                     if(AccessType.Equals(VariableAccessType.ReadWrite))
                     {
-                        vp.Assignment = newValue;
+                        if(vp == null) 
+                        {
+                            // Create a new variable property if it does not exist.
+                            ParameterAttribute.PropertyInfo.SetValue(ParameterAttribute.ImplementsParameterAttributes, new VariableProperty(newValue));
+                        }
+                        else
+                        {
+                            vp.Assignment = newValue;
+                        }
                         return true;
                     }
                 }
@@ -43,7 +51,8 @@ namespace ParameterModel.Models
 
         protected override string GetDisplayString()
         {
-            return ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes).ToString();
+            VariableProperty vp = (VariableProperty)ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
+            return (vp == null) ? "" : vp.ToString();
         }
     }
 }

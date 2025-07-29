@@ -56,9 +56,10 @@ namespace ParameterModel.Interfaces
         /// <summary>
         /// Return possible selection options for a prompt.
         /// Use this for bool, enum, or string[] types.
+        /// The variable context it supplied in case the parameter can be assigned to a variable.
         /// </summary>
         /// <returns></returns>
-        string[] GetSelectionItems();
+        List<string> GetSelectionItems(IVariablesContext variablesContext);
 
         bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue, out string error);
 

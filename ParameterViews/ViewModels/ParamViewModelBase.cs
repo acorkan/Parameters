@@ -82,10 +82,10 @@ namespace ParameterViews.ViewModels
             // If the new value can be used then set it.
             // Does not mean that it passed validations!
             bool varAssignOk = false;
-            bool paramAssignOk = _model.TestOrSetParameter(newInput, false);
+            bool paramAssignOk = _model.TestOrSetParameter(newInput, true);
             if (!paramAssignOk && IsVariableOption)
             {
-                varAssignOk = _model.TestOrAssignVariable(_variablesContext, newInput, true);
+                varAssignOk = _model.TestOrAssignVariable(_variablesContext, newInput, true, out string error);
             }
             if (varAssignOk)
             {
@@ -133,7 +133,6 @@ namespace ParameterViews.ViewModels
             _variablesContext = variablesContext;
             ShowPrompt = showPrompt;
             ParameterAttribute parameterAttribute = model.ParameterAttribute;
-
             PromptToolTip = parameterAttribute.Description;
 
             string prompt = parameterAttribute.Prompt;
@@ -143,13 +142,14 @@ namespace ParameterViews.ViewModels
             // Get initial value
             if (IsVariableOption)
             {
-                SelectionItems = new ObservableCollection<string>(model.GetSelectionItems());
-                UserInput = SelectionItems[0];
+                SelectionItems = new ObservableCollection<string>(model.GetSelectionItems(variablesContext));
+                //UserInput = ((SelectionItems != null) && SelectionItems.Any()) ? SelectionItems[0] : "";
             }
-            else 
-            {
-                UserInput = GetDisplayString(out bool isVariableAssignment);
-            }
+            //else 
+            //{
+            //    UserInput = GetDisplayString(out bool isVariableAssignment);
+            //}
+            UserInput = GetDisplayString(out bool isVariableAssignment);
         }
 
         protected string GetDisplayString(out bool isVariableAssignment)

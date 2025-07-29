@@ -20,5 +20,9 @@ namespace ParametersDemo
         {
             InitializeComponent();
         }
+        public MainWindow(MainViewModel viewModel) : this()
+        {
+            DataContext = viewModel;
+        }
     }
 }

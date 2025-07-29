@@ -22,7 +22,8 @@
         <TextBlock Grid.Column="0" Text="{Binding Prompt}" d:Text="String Parameter Prompt" FontSize="12" HorizontalAlignment="Left"
             ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"/>
         <TextBlock Grid.Column="1" Text="!" Foreground="Red" Margin="10,0,4,0"
-                   FontWeight="Bold" FontSize="14"
+            FontWeight="Bold" FontSize="14"
+            ToolTip="{Binding ErrorMsgToolTip}" ToolTipService.ShowOnDisabled="True"
             Visibility="{Binding IsError, Converter={StaticResource booleanToVisibilityConverter}}"/>
         <TextBox Grid.Column="2" MinWidth="400" FontSize="12" 
             d:Text="string" 

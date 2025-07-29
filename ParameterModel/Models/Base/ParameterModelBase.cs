@@ -14,6 +14,8 @@ namespace ParameterModel.Models.Base
     /// </summary>
     public abstract class ParameterModelBase : ModelBase<ParameterModelMessage>, IParameterModel
     {
+        protected string[] _defaultSelections = Array.Empty<string>();
+
         public ParameterModelBase(ParameterAttribute parameterPromptAttribute)
         {
             ParameterAttribute = parameterPromptAttribute;
@@ -29,12 +31,6 @@ namespace ParameterModel.Models.Base
         public string ParameterName { get => ParameterAttribute.PropertyInfo.Name; }
         public List<string> Errors { get; } = new List<string>();
         public bool IsVariableSelected { get => ParameterAttribute.IsVariableSelected; }
-
-        /// <summary>
-        /// This returns selections that can be used in a combobox.
-        /// </summary>
-        /// <returns></returns>
-        public virtual string[] GetSelectionItems() => Array.Empty<string>(); // Default implementation returns an empty array.
 
         /// <summary>
         /// Return true if the variable assingment can be made.
@@ -158,9 +154,25 @@ namespace ParameterModel.Models.Base
             return !errors.Any();
         }
 
+        /// <summary>
+        /// This returns selections that can be used in a combobox.
+        /// </summary>
+        /// <param name="variablesContext"></param>
+        /// <returns></returns>
+        public List<string> GetSelectionItems(IVariablesContext variablesContext)
+        {
+            List<string> selection = new List<string>(_defaultSelections);
+            if (variablesContext != null)
+            {
+                foreach (var type in AllowedVariableTypes)
+                {
+                    selection.AddRange(variablesContext.GetVariableNames(type));
+                }
+            }
+            return selection;
+        }
         #endregion IParameterModel
     }
-
 
     public class ParameterModelMessage : ModelDependentMessage 
     {

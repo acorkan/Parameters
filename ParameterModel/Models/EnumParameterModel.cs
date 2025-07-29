@@ -7,18 +7,10 @@ namespace ParameterModel.Models
 {
     public class EnumParameterModel : ParameterModelBase
     {
-        private readonly string[] _selections;
-
         public EnumParameterModel(ParameterAttribute parameterPromptAttribute) : 
             base(parameterPromptAttribute)
         {
-
-            _selections = parameterPromptAttribute.GetEnumItemsDisplay().Values.ToArray();
-        }
-
-        public override string[] GetSelectionItems()
-        {
-            return _selections;
+            _defaultSelections = parameterPromptAttribute.GetEnumItemsDisplay().Values.ToArray();
         }
 
         public override VariableType[] AllowedVariableTypes => [VariableType.String];

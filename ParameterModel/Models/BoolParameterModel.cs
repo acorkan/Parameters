@@ -6,15 +6,10 @@ namespace ParameterModel.Models
 {
     public class BoolParameterModel : ParameterModelBase
     {
-        private readonly string[] _selections = { "False", "True" };
-
         public BoolParameterModel(ParameterAttribute parameterPromptAttribute) : 
                 base(parameterPromptAttribute)
-        { }
-
-        public override string[] GetSelectionItems()
         {
-            return _selections;
+            _defaultSelections = ["False", "True"];
         }
 
         public override bool TestOrSetParameter(string newValue, bool setProperty)

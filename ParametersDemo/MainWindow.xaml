@@ -8,7 +8,23 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <paramCtrls:ParamCollectionCtrl DataContext="{Binding}"/>
+        <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <paramCtrls:ParamCollectionCtrl DataContext="{Binding}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical">
+                <Button Content="Button1" Command="{Binding Prompt1Command}"/>
+                <Button Content="Button2" Command="{Binding Prompt2Command}"/>
+                <Button Content="Button3" Command="{Binding Prompt3Command}"/>
+                <Button Content="Button4" Command="{Binding Prompt4Command}"/>
+                <Button Content="Button5" Command="{Binding Prompt5Command}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal">
+            
+        </StackPanel>
+        </StackPanel>
 
     </Grid>
 </Window>

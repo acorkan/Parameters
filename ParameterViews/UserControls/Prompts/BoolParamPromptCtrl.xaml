@@ -39,6 +39,7 @@
         <CheckBox Grid.Column="2" IsChecked="{Binding IsUserInput}" 
                   VerticalAlignment="Center" 
                   IsEnabled="{Binding IsEnabled}"
+                  ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
                   Visibility="{Binding IsVariableOption, Converter={StaticResource inverseBooleanToVisibilityConverter}}"/>
         <ComboBox Grid.Column="2" 
                   IsEditable="True"

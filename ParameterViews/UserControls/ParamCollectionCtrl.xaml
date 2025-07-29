@@ -19,16 +19,16 @@
                         <promptCtrls:BoolParamPromptCtrl/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type vms:FloatParamViewModel}">
-                        <promptCtrls:NumberParamPromptCtrl/>
+                        <promptCtrls:EnumParamPromptCtrl/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type vms:IntParamViewModel}">
-                        <promptCtrls:NumberParamPromptCtrl/>
+                        <promptCtrls:EnumParamPromptCtrl/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type vms:StringParamViewModel}">
-                        <promptCtrls:StringParamPromptCtrl/>
+                        <promptCtrls:EnumParamPromptCtrl/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type vms:StrArrayParamViewModel}">
-                        <promptCtrls:StringParamPromptCtrl/>
+                        <promptCtrls:EnumParamPromptCtrl/>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type vms:EnumParamViewModel}">
                         <promptCtrls:EnumParamPromptCtrl/>

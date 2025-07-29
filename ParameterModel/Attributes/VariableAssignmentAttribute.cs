@@ -10,8 +10,14 @@ namespace ParameterModel.Attributes
 {
     public enum VariableAccessType
     {
-        ReadOnly,
-        ReadWrite
+        /// <summary>
+        /// Means any variable can be selected because the value of the variable will be used.
+        /// </summary>
+        ReadWrite,
+        /// <summary>
+        /// Means the selected variable will be modified and therefore it can not be a read-only.
+        /// </summary>
+        WriteOnly
     }
 
     /// <summary>

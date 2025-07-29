@@ -37,12 +37,20 @@ namespace ParameterModel.Models
 
         public override bool TestOrSetParameter(string newValue, bool setProperty)
         {
-            throw new NotImplementedException();
+            if (float.TryParse(newValue, out float f))
+            {
+                if (setProperty)
+                {
+                    ParameterAttribute.PropertyInfo.SetValue(ParameterAttribute.ImplementsParameterAttributes, f);
+                }
+                return true;
+            }
+            return false;
         }
 
         protected override string GetDisplayString()
         {
-            float f = (int)ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
+            float f = (float)ParameterAttribute.PropertyInfo.GetValue(ParameterAttribute.ImplementsParameterAttributes);
             return string.IsNullOrEmpty(DataFormatString) ? f.ToString() : f.ToString(DataFormatString);
         }
     }

@@ -72,5 +72,6 @@ namespace ParameterModel.Interfaces
 
         void ClearVariables();
 
+        List<string> GetVariableNames(VariableType variableType);
     }
 }

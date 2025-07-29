@@ -93,5 +93,9 @@ namespace ParameterModel.Models.Base
             // This will throw an exception if the regex is invalid, which is not expected in this context.
             return VariablesContext.VariableNameRegex.IsMatch(name);
         }
+        public List<string> GetVariableNames(VariableType variableType)
+        {
+            return Variables.Where(v => v.Type == variableType).Select(v => v.Name).ToList();
+        }
     }
 }

@@ -11,6 +11,14 @@
         <convs:BooleanToVisibilityConverter
             x:Key="booleanToVisibilityConverter" 
             True="Visible" 
+            False="Collapsed"/>
+        <convs:BooleanToVisibilityConverter
+            x:Key="inverseBooleanToVisibilityConverter" 
+            True="Collapsed" 
+            False="Visible"/>
+        <convs:BooleanToVisibilityConverter
+            x:Key="booleanToHiddenConverter" 
+            True="Visible" 
             False="Hidden"/>
     </UserControl.Resources>
     <Grid Margin="5">
@@ -23,12 +31,31 @@
                        ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"/>
         <TextBlock Grid.Column="1" Text="!" Foreground="Red" Margin="10,0,4,0"
             FontWeight="Bold" FontSize="14"
-            Visibility="{Binding IsError, Converter={StaticResource booleanToVisibilityConverter}}"/>
-        <ComboBox Grid.Column="2" 
+            ToolTip="{Binding ErrorMsgToolTip}" ToolTipService.ShowOnDisabled="True"
+            Visibility="{Binding IsError, Converter={StaticResource booleanToHiddenConverter}}"/>
+        <!-- ComboBox Grid.Column="2" 
                   SelectedIndex="{Binding SelectedIndex, UpdateSourceTrigger=PropertyChanged}"
                   ItemsSource="{Binding EnumItemsSource}"
                   MinWidth="200"
                   IsEnabled="{Binding IsEnabled}"
-                  d:Text="string" FontSize="12" HorizontalAlignment="Left"/>
+                  d:Text="string" FontSize="12" HorizontalAlignment="Left"/  -->
+        
+        <!-- Show either textbox or combo -->
+        <TextBox Grid.Column="2" MinWidth="400" FontSize="12" 
+            d:Text="string" 
+            VerticalAlignment="Center" 
+            IsEnabled="{Binding IsEnabled}"
+            ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
+            Text="{Binding UserInput, UpdateSourceTrigger=PropertyChanged}"
+            IsReadOnly="{Binding IsReadOnly}"
+            Visibility="{Binding IsVariableOption, Converter={StaticResource inverseBooleanToVisibilityConverter}}"/>
+        <ComboBox Grid.Column="2" 
+            IsEditable="True"
+            ItemsSource="{Binding SelectionItems}"
+            SelectedItem="{Binding SelectedItem}"
+            Text="{Binding UserInput}"
+            VerticalAlignment="Center" 
+            ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
+            Visibility="{Binding IsVariableOption, Converter={StaticResource booleanToVisibilityConverter}}"/>
     </Grid>
 </UserControl>
