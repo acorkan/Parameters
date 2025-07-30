@@ -54,12 +54,18 @@ namespace ParameterModel.Interfaces
         bool ValidateParameter(List<string> errors);
 
         /// <summary>
-        /// Return possible selection options for a prompt.
-        /// Use this for bool, enum, or string[] types.
-        /// The variable context it supplied in case the parameter can be assigned to a variable.
+        /// Get the fixed seklection items for the type.
         /// </summary>
+        /// <param name="variablesContext"></param>
         /// <returns></returns>
-        List<string> GetSelectionItems(IVariablesContext variablesContext);
+        List<string> GetSelectionItems();
+
+        /// <summary>
+        /// Get the allowed variables for the type.
+        /// </summary>
+        /// <param name="variablesContext"></param>
+        /// <returns></returns>
+        List<string> GetSelectionVariables(IVariablesContext variablesContext);
 
         bool TestOrAssignVariable(IVariablesContext variablesContext, string varName, bool setVarValue, out string error);
 

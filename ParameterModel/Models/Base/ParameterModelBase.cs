@@ -159,9 +159,14 @@ namespace ParameterModel.Models.Base
         /// </summary>
         /// <param name="variablesContext"></param>
         /// <returns></returns>
-        public List<string> GetSelectionItems(IVariablesContext variablesContext)
+        public List<string> GetSelectionItems()
         {
-            List<string> selection = new List<string>(_defaultSelections);
+            return _defaultSelections.ToList();
+        }
+
+        public List<string> GetSelectionVariables(IVariablesContext variablesContext)
+        {
+            List<string> selection = new();
             if (variablesContext != null)
             {
                 foreach (var type in AllowedVariableTypes)

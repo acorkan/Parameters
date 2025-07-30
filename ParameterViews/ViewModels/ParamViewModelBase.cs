@@ -53,15 +53,15 @@ namespace ParameterViews.ViewModels
         private bool _isError = false;
 
         [ObservableProperty]
-        private string _userInput;
+        private EnumComboBoxItemData _userInput;
         /// <summary>
         /// Only notify of a change if the value valid.
         /// Always call Validate() first.
         /// </summary>
         /// <param name="value"></param>
-        partial void OnUserInputChanged(string value)
+        partial void OnUserInputChanged(EnumComboBoxItemData value)
         {
-            ApplyUserInputChanged(value);
+            ApplyUserInputChanged(value.Text);
             //Validate();
             //if (TryGetResult(out T result))
             //{
@@ -70,7 +70,7 @@ namespace ParameterViews.ViewModels
         }
 
         [ObservableProperty]
-        private ObservableCollection<string> _selectionItems;
+        private ObservableCollection<EnumComboBoxItemData> _selectionItems;
 
 
         /// <summary>
@@ -140,17 +140,14 @@ namespace ParameterViews.ViewModels
             prompt += ":";
             Prompt = prompt;
 
-            //// Get initial value
-            //if (IsVariableOption)
-            //{
-                SelectionItems = new ObservableCollection<string>(model.GetSelectionItems(variablesContext));
-                //UserInput = ((SelectionItems != null) && SelectionItems.Any()) ? SelectionItems[0] : "";
-            //}
-            //else 
-            //{
-            //    UserInput = GetDisplayString(out bool isVariableAssignment);
-            //}
-            UserInput = GetDisplayString(out bool isVariableAssignment);
+            List<EnumComboBoxItemData> selections =
+            [
+                .. _model.GetSelectionItems().Select(i => new EnumComboBoxItemData() { Text = i, IsVariable = false }),
+                .. _model.GetSelectionVariables(variablesContext).Select(i => new EnumComboBoxItemData() { Text = i, IsVariable = true }),
+            ];
+            SelectionItems = new ObservableCollection<EnumComboBoxItemData>(selections);
+
+            UserInput = new EnumComboBoxItemData() { Text = GetDisplayString(out bool isVariableAssignment), IsVariable = isVariableAssignment }));
         }
 
         protected string GetDisplayString(out bool isVariableAssignment)

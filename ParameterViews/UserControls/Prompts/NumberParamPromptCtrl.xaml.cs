@@ -5,9 +5,9 @@ namespace ParameterViews.UserControls.Prompts
     /// <summary>
     /// Interaction logic for NumberParamPromptCtrl.xaml
     /// </summary>
-    public partial class NumberParamPromptCtrl : UserControl
+    public partial class _NumberParamPromptCtrl : UserControl
     {
-        public NumberParamPromptCtrl()
+        public _NumberParamPromptCtrl()
         {
             InitializeComponent();
         }

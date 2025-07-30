@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:convs="clr-namespace:ParameterViews.Converters"
+             xmlns:vms="clr-namespace:ParameterViews.ViewModels"
              xmlns:local="clr-namespace:ParameterViews.UserControls.Prompts"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -48,6 +49,22 @@
                   Text="{Binding UserInput}"
                   VerticalAlignment="Center" 
                   ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
-                  Visibility="{Binding IsVariableOption, Converter={StaticResource booleanToVisibilityConverter}}"/>
+                  Visibility="{Binding IsVariableOption, Converter={StaticResource booleanToVisibilityConverter}}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type vms:EnumComboBoxItemData}">
+                    <TextBlock Text="{Binding Text}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsVariable}" Value="True">
+                                        <Setter Property="FontStyle" Value="Italic"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
     </Grid>
 </UserControl>
