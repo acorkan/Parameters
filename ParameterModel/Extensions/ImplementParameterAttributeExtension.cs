@@ -171,7 +171,7 @@ namespace ParameterModel.Extensions
         }
 
 
-        public static void CopyParameters(this IImplementsParameterAttribute source, IImplementsParameterAttribute dest)
+        public static void CopyParametersTo(this IImplementsParameterAttribute source, IImplementsParameterAttribute dest)
         {
             if (source.GetType() != dest.GetType())
             {
