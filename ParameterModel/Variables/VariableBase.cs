@@ -144,13 +144,16 @@ namespace ParameterModel.Variables
             }
             else if (Type == VariableType.JSON)
             {
-                if(!IsJson(newValue))
+                if (!IsJson(newValue))
                 {
                     throw new ArgumentException("Provided string is not valid JSON.", nameof(newValue));
                 }
                 _stringValue = newValue;
             }
-            throw new InvalidOperationException("Variable type is not String or JSON.");
+            else
+            {
+                throw new InvalidOperationException("Variable type is not String or JSON.");
+            }
         }
 
         public void SetValue(bool newValue)
