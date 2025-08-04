@@ -28,6 +28,18 @@ namespace ParametersDemo
 
             _variablesContext.AddVariable("trueVar", VariableType.Boolean).SetValue(true);
             _variablesContext.AddVariable("falseVar", VariableType.Boolean).SetValue(false);
+
+            _variablesContext.AddVariable("intVar1", VariableType.Integer).SetValue(1);
+            _variablesContext.AddVariable("intVar2", VariableType.Integer).SetValue(20);
+            _variablesContext.AddVariable("intVar3", VariableType.Integer).SetValue(300);
+
+            _variablesContext.AddVariable("floatVar1", VariableType.Float).SetValue(1.1F);
+            _variablesContext.AddVariable("floatVar2", VariableType.Float).SetValue(2.2F);
+            _variablesContext.AddVariable("floatVar3", VariableType.Float).SetValue(3.3F);
+
+            _variablesContext.AddVariable("stringVar3", VariableType.String).SetValue("foo");
+            _variablesContext.AddVariable("stringVar3", VariableType.String).SetValue("Boo");
+            _variablesContext.AddVariable("stringVar3", VariableType.String).SetValue("Bar");
         }
 
         private bool Prompt(string title, IImplementsParameterAttribute implements)
