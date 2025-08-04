@@ -4,5 +4,9 @@
     {
         public string Text { get; set; }
         public bool IsVariable { get; set; }
+        public override string ToString()
+        {
+            return Text;
+        }
     }
 }

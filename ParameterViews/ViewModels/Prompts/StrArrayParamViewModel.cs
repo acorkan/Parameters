@@ -9,6 +9,7 @@ namespace ParameterViews.ViewModels.Prompts
             base(stringArrayParameterModel, variablesContext, showPrompt) 
         {
             //UserInput = string.Join(" ", ((string[])PropertyInfo.GetValue(_propertyOwner)));
+            IsEditable = true;
         }
     }
 }

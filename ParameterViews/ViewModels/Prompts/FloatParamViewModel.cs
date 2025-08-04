@@ -9,6 +9,7 @@ namespace ParameterViews.ViewModels.Prompts
         public FloatParamViewModel(FloatParameterModel floatParameterModel, IVariablesContext variablesContext, bool showPrompt) :
             base(floatParameterModel, variablesContext, showPrompt)
         {
+            IsEditable = true;
         }
     }
 }

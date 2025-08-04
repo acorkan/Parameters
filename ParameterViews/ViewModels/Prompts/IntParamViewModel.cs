@@ -8,6 +8,7 @@ namespace ParameterViews.ViewModels.Prompts
         public IntParamViewModel(IntParameterModel intParameterModel, IVariablesContext variablesContext, bool showPrompt) :
             base(intParameterModel, variablesContext, showPrompt)
         {
+            IsEditable = true;
         }
     }
 }
