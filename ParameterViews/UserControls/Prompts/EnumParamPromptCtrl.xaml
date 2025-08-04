@@ -51,7 +51,7 @@
             IsReadOnly="{Binding IsReadOnly}"
             Visibility="{Binding IsVariableOption, Converter={StaticResource inverseBooleanToVisibilityConverter}}"/>
         <ComboBox Grid.Column="2" 
-            IsEditable="True"
+            IsEditable="{Binding IsEditable}"
             ItemsSource="{Binding SelectionItems}"
             SelectedItem="{Binding SelectedItem}"
             Text="{Binding UserInput}"
