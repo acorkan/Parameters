@@ -1,5 +1,6 @@
 ﻿using ParameterModel.Factories;
 using ParameterModel.Interfaces;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace ParameterModel.Models.Base
@@ -16,12 +17,14 @@ namespace ParameterModel.Models.Base
         /// Maps the variable assignments to the property names.
         /// </summary>
         [JsonInclude]
+        [NotMapped]
         public Dictionary<string, string> VariableAssignments { get; protected set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Map of the names of properties that are attributed as Parameter to their corresponding IParameterModel instances.
         /// </summary>
         [JsonIgnore]
+        [NotMapped]
         public Dictionary<string, IParameterModel> ParameterMap { get; } = new Dictionary<string, IParameterModel>();
 
         /// <summary>
