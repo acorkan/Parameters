@@ -1,10 +1,5 @@
 ﻿using ParameterModel.Interfaces;
 using ParameterModel.Variables;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ParameterModel.Models.Base
 {
