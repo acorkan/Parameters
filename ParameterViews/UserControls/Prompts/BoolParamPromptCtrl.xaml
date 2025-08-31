@@ -24,25 +24,35 @@
     </UserControl.Resources>
     <Grid Margin="5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
+        
+        <!-- This is the left side prompt.
+             It can be hidden if the prompt is embedded in a control,
+             or it can be displayed in a dialog prompt. -->
         <TextBlock Name="promptText" Grid.Column="0" Text="{Binding Prompt}" 
-                   d:Text="String Parameter Prompt" FontSize="12" HorizontalAlignment="Left"
+                   d:Text="Bool Parameter Prompt" FontSize="12" 
+                   HorizontalAlignment="Left" Width="250"
                    ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
                    Visibility="{Binding ShowPrompt, Converter={StaticResource booleanToVisibilityConverter}}"/>
-        <TextBlock Name="errorNotice" Grid.Column="1" Text="!" Foreground="Red" Margin="10,0,4,0"
+
+        <!-- This is the error notice. If there is an error it will be displayed with
+             the error in the tooltip. It is Hidden when there is no error. -->
+        <TextBlock Name="errorNotice" Grid.Column="1" 
+            Text="!" Foreground="Red" Margin="10,0,4,0"
             FontWeight="Bold" FontSize="14"
             ToolTip="{Binding ErrorMsgToolTip}" ToolTipService.ShowOnDisabled="True"
             Visibility="{Binding IsError, Converter={StaticResource booleanToHiddenConverter}}"/>
+
         <!-- Show either checkbox or combo -->
         <CheckBox Grid.Column="2" IsChecked="{Binding IsUserInput}" 
-                  VerticalAlignment="Center" 
+                  VerticalAlignment="Center"  
                   IsEnabled="{Binding IsEnabled}"
                   ToolTip="{Binding PromptToolTip}" ToolTipService.ShowOnDisabled="True"
                   Visibility="{Binding IsVariableOption, Converter={StaticResource inverseBooleanToVisibilityConverter}}"/>
-        <ComboBox Grid.Column="2" 
+        <ComboBox Name="comboBox" Grid.Column="2" 
                   IsEditable="False"
                   ItemsSource="{Binding SelectionItems}"
                   SelectedItem="{Binding SelectedItem}"
@@ -58,6 +68,9 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsVariable}" Value="True">
                                         <Setter Property="FontStyle" Value="Italic"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Background" Value="Red"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

@@ -14,7 +14,7 @@
         </StackPanel>
 
         <StackPanel Orientation="Vertical">
-                <Button Content="Button1" Command="{Binding Prompt1Command}"/>
+                <Button Content="Bool prompts, no variables" Command="{Binding Prompt1Command}"/>
                 <Button Content="Button2" Command="{Binding Prompt2Command}"/>
                 <Button Content="Button3" Command="{Binding Prompt3Command}"/>
                 <!-- Button Content="Button4" Command="{Binding Prompt4Command}"/>

@@ -47,16 +47,23 @@ namespace ParametersDemo
             List<ParamViewModelBase> vms = _parameterViewModelFactory.GetParameterViewModels(implements,
                 _variablesContext, true);
             EditParamDialogViewModel promptVM = new EditParamDialogViewModel(title, vms, false, false);
-            EditLabwareDialog dlg = new EditLabwareDialog();
+            EditParametersDialog dlg = new EditParametersDialog();
             dlg.DataContext = promptVM;
             bool? ret = dlg.ShowDialog();
             return promptVM.AcceptChanges;
         }
+        //[RelayCommand]
+        //public void Prompt1()
+        //{
+        //    VariableParamTestClass variableParamTestClass = new VariableParamTestClass();
+        //    Prompt("Command 1 Prompt", variableParamTestClass);
+        //}
+
         [RelayCommand]
         public void Prompt1()
         {
-            VariableParamTestClass variableParamTestClass = new VariableParamTestClass();
-            Prompt("Command 1 Prompt", variableParamTestClass);
+            //VariableParamTestClass variableParamTestClass = new VariableParamTestClass();
+            Prompt("Bool prompts, no variables", new BoolTestClass());
         }
 
         [RelayCommand]

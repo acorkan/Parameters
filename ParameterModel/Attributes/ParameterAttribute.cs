@@ -95,9 +95,17 @@ namespace ParameterModel.Attributes
                 }
                 else
                 {
-                    parameterAttribute.Prompt = propertyInfo.Name; // Default label to property name if not set
                     parameterAttribute.PresentationOrder = 5; // Default order
-                    parameterAttribute.Description = null; // Default to empty if not set
+                }
+                if (string.IsNullOrEmpty(parameterAttribute.Prompt))
+                {
+                    parameterAttribute.Prompt = $"Value for {propertyInfo.Name}"; // Default label to property name if not set.
+                }
+                if (string.IsNullOrEmpty(parameterAttribute.Description))
+                {
+                    parameterAttribute.Description = $"{propertyInfo.Name} is type {propertyInfo.PropertyType.Name}"; // Default label to property name if not set.
+                    parameterAttribute.Description += parameterAttribute.IsReadOnly ? ", ReadOnly" : "";
+                    //parameterAttribute.Description += parameterAttribute.CanBeVariable ? (", Variable(s): " + ???) : "";
                 }
             }
         }

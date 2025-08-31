@@ -14,13 +14,11 @@ namespace ParameterViews.ViewModels
         /// If set then the dialog is a new object and the OK option should always be set.
         /// </summary>
         private bool _isNew;
-        //private Dictionary<PropertyInfo, ParameterPromptAttribute> _attributeMap;
-
-        //[ObservableProperty]
-        //private ObservableCollection<ViewModelBase> _parameters;
 
         public string Title { get; }
-        
+
+        public string Caption { get; }
+
         [RelayCommand]
         private void Cancel()
         {
@@ -79,11 +77,12 @@ namespace ParameterViews.ViewModels
             return isChanged;
         }
 
-        public EditParamDialogViewModel(string title, List<ParamViewModelBase> parameters, bool isReadOnly, bool isNew) :
+        public EditParamDialogViewModel(string title, List<ParamViewModelBase> parameters, bool isReadOnly, bool isNew, string caption = null) :
             base(parameters, isReadOnly)
         {
             CanCloseDialog = true;
             Title = title;
+            Caption = caption;
             _isNew = isNew;
             //_attributeMap = ParameterPromptAttribute.GetAttributeMap(model);
             //Parameters = GetParamViewModelCollection(model, _attributeMap);
@@ -91,6 +90,10 @@ namespace ParameterViews.ViewModels
             //{
             //    (param as ParamViewModelNotifyBase).OnUserInputChanged += ParamViewModel_OnPropertyChanged;
             //}
+            if(isReadOnly)
+            {
+                Title += " (ReadOnly)"; 
+            }
         }
 
         protected override void ParamViewModel_OnPropertyChanged(object sender, string propertyName)
@@ -103,56 +106,5 @@ namespace ParameterViews.ViewModels
         public Action CloseDialog { get; set; }
         public bool CanCloseDialog { get; protected set; }
         #endregion ICanCloseDialog
-
-//        public static List<ViewModelBase> GetParamViewModelCollection(IImplementsParameterPrompt model, Dictionary<PropertyInfo, ParameterPromptAttribute> attributeMap)
-//        {
-//            List<ViewModelBase> ret = new List<ViewModelBase>();
-//            foreach (KeyValuePair<PropertyInfo, ParameterPromptAttribute> kvp in attributeMap)
-//            {
-//                ParamViewModelNotifyBase paramViewModel = null;
-//                // Get the property name and value
-//                string typeLabel;
-//                if (kvp.Key.PropertyType == typeof(string))
-//                {
-//                    typeLabel = "string";
-//                    paramViewModel = new StringParamViewModel(kvp.Value, kvp.Key, model);
-//                }
-//                else if (kvp.Key.PropertyType == typeof(int))
-//                {
-//                    typeLabel = "int";
-//                    paramViewModel = new IntParamViewModel(kvp.Value, kvp.Key, model, (int)kvp.Value.Min, (int)kvp.Value.Max);
-//                }
-//                else if (kvp.Key.PropertyType == typeof(float))
-//                {
-//                    typeLabel = "float";
-//                    paramViewModel = new FloatParamViewModel(kvp.Value, kvp.Key, model, kvp.Value.Min, kvp.Value.Max);
-//                }
-//                else if (kvp.Key.PropertyType == typeof(bool))
-//                {
-//                    typeLabel = "bool";
-//                    paramViewModel = new BoolParamViewModel(kvp.Value, kvp.Key, model);
-//                }
-//                else if (kvp.Key.PropertyType == typeof(string[]))
-//                {
-//                    typeLabel = "string[]";
-//                    paramViewModel = new StrArrayParamViewModel(kvp.Value, kvp.Key, model);
-//                }
-//                else if (kvp.Key.PropertyType.IsEnum)
-//                {
-//                    typeLabel = "enum";
-//                    paramViewModel = new EnumParamViewModel(kvp.Value, kvp.Key, model);
-//                }
-//                else
-//                {
-//                    throw new InvalidOperationException($"Unsupported property type {kvp.Key.PropertyType}, must be string, int, float, bool, or string[].");
-//                }
-//#if DEBUG
-//                //paramViewModel.Prompt += $" ({typeLabel}{range})";
-//#endif
-//                // Add the view model to the list of parameters
-//                ret.Add(paramViewModel);
-//            }
-//            return ret;
-//        }
     }
 }

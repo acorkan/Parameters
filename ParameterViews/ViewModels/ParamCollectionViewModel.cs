@@ -25,7 +25,7 @@ namespace ParameterViews.ViewModels
             foreach (ParamViewModelBase param in Parameters)
             {
             //    param as ParamViewModelBase).OnUserInputChanged += ParamViewModel_OnPropertyChanged;
-                (param as ParamViewModelBase).IsReadOnly = isReadOnly;
+                (param as ParamViewModelBase).IsReadOnly |= _isReadOnly;
             }
         }
 

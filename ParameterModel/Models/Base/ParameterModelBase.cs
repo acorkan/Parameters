@@ -21,7 +21,6 @@ namespace ParameterModel.Models.Base
             ParameterAttribute = parameterPromptAttribute;
         }
 
-
         #region IParameterModel
         public ParameterAttribute ParameterAttribute { get; }
         public bool CanBeVariable { get => ParameterAttribute.CanBeVariable; }

@@ -5,9 +5,9 @@ namespace ParameterViews.Dialogs
     /// <summary>
     /// Interaction logic for ParamEditDialog.xaml
     /// </summary>
-    public partial class EditLabwareDialog : Window
+    public partial class EditParametersDialog : Window
     {
-        public EditLabwareDialog()
+        public EditParametersDialog()
         {
             InitializeComponent();
         }

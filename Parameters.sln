@@ -9,11 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParameterModel", "Parameter
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MileHighWpf.MvvmModelMessaging", "..\MvvmModelMessaging\MileHighWpf.MvvmModelMessaging\MileHighWpf.MvvmModelMessaging.csproj", "{00BFA7E6-E7C1-B809-2C54-C62076F5E556}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonWrapper", "PythonWrapper\PythonWrapper.csproj", "{C8DF6B43-18FA-BA39-2569-3651DDFA000A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParameterTests", "ParameterTests\ParameterTests.csproj", "{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PyWrapperTests", "PyWrapperTests\PyWrapperTests.csproj", "{2D831E01-4D45-49F9-AC4D-645C0F263EF3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParametersDemo", "ParametersDemo\ParametersDemo.csproj", "{5C2DBB23-7246-4F7D-B727-080A79C2D3EA}"
 EndProject
@@ -49,14 +45,6 @@ Global
 		{00BFA7E6-E7C1-B809-2C54-C62076F5E556}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00BFA7E6-E7C1-B809-2C54-C62076F5E556}.Release|x64.ActiveCfg = Release|x64
 		{00BFA7E6-E7C1-B809-2C54-C62076F5E556}.Release|x64.Build.0 = Release|x64
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Debug|x64.ActiveCfg = Debug|x64
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Debug|x64.Build.0 = Debug|x64
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Release|x64.ActiveCfg = Release|x64
-		{C8DF6B43-18FA-BA39-2569-3651DDFA000A}.Release|x64.Build.0 = Release|x64
 		{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}.Debug|x64.ActiveCfg = Debug|x64
@@ -65,14 +53,6 @@ Global
 		{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}.Release|x64.ActiveCfg = Release|Any CPU
 		{A78E22B7-E9B3-4C5B-AE2A-1D2FCE81C801}.Release|x64.Build.0 = Release|Any CPU
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Debug|x64.ActiveCfg = Debug|x64
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Debug|x64.Build.0 = Debug|x64
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Release|x64.ActiveCfg = Release|Any CPU
-		{2D831E01-4D45-49F9-AC4D-645C0F263EF3}.Release|x64.Build.0 = Release|Any CPU
 		{5C2DBB23-7246-4F7D-B727-080A79C2D3EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C2DBB23-7246-4F7D-B727-080A79C2D3EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C2DBB23-7246-4F7D-B727-080A79C2D3EA}.Debug|x64.ActiveCfg = Debug|x64
