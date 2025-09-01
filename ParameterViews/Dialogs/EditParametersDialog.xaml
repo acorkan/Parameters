@@ -8,9 +8,9 @@
         xmlns:convs="clr-namespace:ParameterViews.Converters"
         mc:Ignorable="d"
         Title="{Binding Title}" 
-        Height="250" Width="400"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <convs:NullToVisibilityConverter
@@ -18,19 +18,21 @@
             True="Collapsed" 
             False="Visible"/>
     </Window.Resources>
-    <Grid>
-        <StackPanel Orientation="Vertical" Margin="10">
-            <TextBlock Text="{Binding Caption}" 
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="{Binding Caption}" 
                 Visibility="{Binding Caption, Converter={StaticResource nullVisibilityConverter}}"                       
                 MaxWidth="200" FontWeight="Bold"
                 Margin="5,0,0,10" HorizontalAlignment="Left"/>
-            <paramCtrls:ParamCollectionCtrl DataContext="{Binding}"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+            <paramCtrls:ParamCollectionCtrl Grid.Row="1" 
+                DataContext="{Binding}" VerticalAlignment="Stretch"/>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
                 <Button Content="OK" Command="{Binding OkCommand}" Margin="5" Width="80" Height="30"  HorizontalAlignment="Left"/>
                 <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="5" Width="80" Height="30" HorizontalAlignment="Right"/>
             </StackPanel>
-            <!--  Just testing  paramCtrls:ParamGridViewCtrl 
-                DataContext="{Binding}"/ -->
-        </StackPanel>
     </Grid>
 </Window>

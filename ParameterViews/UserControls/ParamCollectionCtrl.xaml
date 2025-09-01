@@ -6,14 +6,21 @@
              xmlns:local="clr-namespace:ParameterViews.UserControls"
              xmlns:vms="clr-namespace:ParameterViews.ViewModels.Prompts"
              xmlns:promptCtrls="clr-namespace:ParameterViews.UserControls.Prompts"
+             xmlns:convs="clr-namespace:ParameterViews.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="400">
+    <UserControl.Resources>
+        <convs:ClampHeightConverter x:Key="clampHeight" MaxHeight="550"/>
+    </UserControl.Resources>
     <Grid>
-        <StackPanel Orientation="Vertical">
-            <!-- <TextBlock Text="{Binding Title}" d:Text="String Parameter Prompt" FontSize="16" Margin="5" HorizontalAlignment="Left"/> -->
-
+            <Border Name="controlBorder" BorderBrush="Transparent" BorderThickness="1"
+                HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                    Height="{Binding ActualHeight, ElementName=items, Converter={StaticResource clampHeight}}">
+            <ScrollViewer 
+                Height="{Binding ElementName=controlBorder, Path=ActualHeight}"
+                VerticalScrollBarVisibility="Auto">
             <!-- Can this be repackaged as a style? -->
-            <ItemsControl ItemsSource="{Binding Parameters}">
+            <ItemsControl x:Name="items" ItemsSource="{Binding Parameters}">
                 <ItemsControl.Resources>
                     <DataTemplate DataType="{x:Type vms:BoolParamViewModel}">
                         <promptCtrls:BoolParamPromptCtrl/>
@@ -38,6 +45,7 @@
                     </DataTemplate>
                 </ItemsControl.Resources>
             </ItemsControl>
-        </StackPanel>
+            </ScrollViewer>
+            </Border>
     </Grid>
 </UserControl>

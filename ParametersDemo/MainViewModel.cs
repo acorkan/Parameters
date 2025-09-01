@@ -69,8 +69,8 @@ namespace ParametersDemo
         [RelayCommand]
         public void Prompt2()
         {
-            IntAndFloatTestClass paramTestClass = new IntAndFloatTestClass();
-            Prompt("Command 1 Prompt", paramTestClass);
+            //IntAndFloatTestClass paramTestClass = new IntAndFloatTestClass();
+            Prompt("General prompts", new GeneralTestClass());
         }
 
         [RelayCommand]

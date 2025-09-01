@@ -9,9 +9,9 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
+        <!-- StackPanel Orientation="Horizontal">
             <paramCtrls:ParamCollectionCtrl DataContext="{Binding}"/>
-        </StackPanel>
+        </StackPanel -->
 
         <StackPanel Orientation="Vertical">
                 <Button Content="Bool prompts, no variables" Command="{Binding Prompt1Command}"/>
