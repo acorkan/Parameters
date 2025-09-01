@@ -12,40 +12,40 @@
     <UserControl.Resources>
         <convs:ClampHeightConverter x:Key="clampHeight" MaxHeight="550"/>
     </UserControl.Resources>
-    <Grid>
+        <Grid>
             <Border Name="controlBorder" BorderBrush="Transparent" BorderThickness="1"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"
                     Height="{Binding ActualHeight, ElementName=items, Converter={StaticResource clampHeight}}">
             <ScrollViewer 
                 Height="{Binding ElementName=controlBorder, Path=ActualHeight}"
                 VerticalScrollBarVisibility="Auto">
-            <!-- Can this be repackaged as a style? -->
-            <ItemsControl x:Name="items" ItemsSource="{Binding Parameters}">
-                <ItemsControl.Resources>
-                    <DataTemplate DataType="{x:Type vms:BoolParamViewModel}">
-                        <promptCtrls:BoolParamPromptCtrl/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vms:FloatParamViewModel}">
-                        <promptCtrls:EnumParamPromptCtrl/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vms:IntParamViewModel}">
-                        <promptCtrls:EnumParamPromptCtrl/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vms:StringParamViewModel}">
-                        <promptCtrls:EnumParamPromptCtrl/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vms:StrArrayParamViewModel}">
-                        <promptCtrls:EnumParamPromptCtrl/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vms:EnumParamViewModel}">
-                        <promptCtrls:EnumParamPromptCtrl/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type vms:VariableParamViewModel}">
-                        <promptCtrls:EnumParamPromptCtrl/>
-                    </DataTemplate>
-                </ItemsControl.Resources>
-            </ItemsControl>
+                <!-- Can this be repackaged as a style? -->
+                <ItemsControl x:Name="items" ItemsSource="{Binding Parameters}">
+                    <ItemsControl.Resources>
+                        <DataTemplate DataType="{x:Type vms:BoolParamViewModel}">
+                            <promptCtrls:BoolParamPromptCtrl/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vms:FloatParamViewModel}">
+                            <promptCtrls:EnumParamPromptCtrl/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vms:IntParamViewModel}">
+                            <promptCtrls:EnumParamPromptCtrl/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vms:StringParamViewModel}">
+                            <promptCtrls:EnumParamPromptCtrl/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vms:StrArrayParamViewModel}">
+                            <promptCtrls:EnumParamPromptCtrl/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vms:EnumParamViewModel}">
+                            <promptCtrls:EnumParamPromptCtrl/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vms:VariableParamViewModel}">
+                            <promptCtrls:EnumParamPromptCtrl/>
+                        </DataTemplate>
+                    </ItemsControl.Resources>
+                </ItemsControl>
             </ScrollViewer>
-            </Border>
+        </Border>
     </Grid>
 </UserControl>

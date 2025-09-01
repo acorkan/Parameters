@@ -6,6 +6,8 @@ namespace ParameterViews.ViewModels.Prompts
 {
     public partial class BoolParamViewModel : ParamViewModelBase
     {
+        private bool _intialValue;
+
         /// <summary>
         /// This is in case we are not implementing a variable option and just want a checkbox.
         /// </summary>

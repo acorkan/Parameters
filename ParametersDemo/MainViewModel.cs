@@ -42,11 +42,11 @@ namespace ParametersDemo
             _variablesContext.AddVariable("stringVar3", VariableType.String).SetValue("Bar");
         }
 
-        private bool Prompt(string title, IImplementsParameterAttribute implements)
+        private bool Prompt(string title, IImplementsParameterAttribute implements, string caption = null)
         {
             List<ParamViewModelBase> vms = _parameterViewModelFactory.GetParameterViewModels(implements,
                 _variablesContext, true);
-            EditParamDialogViewModel promptVM = new EditParamDialogViewModel(title, vms, false, false);
+            EditParamDialogViewModel promptVM = new EditParamDialogViewModel(title, vms, false, false, caption);
             EditParametersDialog dlg = new EditParametersDialog();
             dlg.DataContext = promptVM;
             bool? ret = dlg.ShowDialog();
@@ -63,14 +63,14 @@ namespace ParametersDemo
         public void Prompt1()
         {
             //VariableParamTestClass variableParamTestClass = new VariableParamTestClass();
-            Prompt("Bool prompts, no variables", new BoolTestClass());
+            Prompt("Bool prompts, no variables", new BoolTestClass(), bigCaption);
         }
 
         [RelayCommand]
         public void Prompt2()
         {
             //IntAndFloatTestClass paramTestClass = new IntAndFloatTestClass();
-            Prompt("General prompts", new GeneralTestClass());
+            Prompt("General prompts", new GeneralTestClass(), bigCaption);
         }
 
         [RelayCommand]
@@ -90,5 +90,6 @@ namespace ParametersDemo
         {
         }
 
+        private string bigCaption = "So how about another snap election? If Macron calls one, the political landscape could still be mired in exactly the same impasse — but the blame after a vote would more obviously fall on him rather than on his prime minister. And all that time, the financial markets will be running out of patience regarding France’s ability to put its books in order.";
     }
 }

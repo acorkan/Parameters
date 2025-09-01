@@ -10,6 +10,7 @@ namespace ParameterViews.ViewModels
     /// </summary>
     public partial class EditParamDialogViewModel : ParamPromptViewModel, ParameterViews.Interfaces.ICanCloseDialog
     {
+        private readonly List<ParamViewModelBase> _parameters;
         /// <summary>
         /// If set then the dialog is a new object and the OK option should always be set.
         /// </summary>
@@ -50,6 +51,10 @@ namespace ParameterViews.ViewModels
                     //}
                 }
             }
+            foreach (ParamViewModelBase param in _parameters)
+            {
+                param.PropertyChanged -= Param_PropertyChanged;
+            }
             CloseDialog?.Invoke();
         }
 
@@ -65,16 +70,16 @@ namespace ParameterViews.ViewModels
             // Check if all parameters are valid, or changed.
             foreach (ParamViewModelBase param in Parameters)
             {
-                //if (!param.IsValid)
-                //{
-                //    isValid = false;
-                //}
-                //if (param.IsDirty)
-                //{
-                //    isChanged = true;
-                //}
+                if (param.IsError)
+                {
+                    isValid = false;
+                }
+                if (param.IsModified)
+                {
+                    isChanged = true;
+                }
             }
-            return isChanged;
+            return isChanged && isValid;
         }
 
         public EditParamDialogViewModel(string title, List<ParamViewModelBase> parameters, bool isReadOnly, bool isNew, string caption = null) :
@@ -86,14 +91,21 @@ namespace ParameterViews.ViewModels
             _isNew = isNew;
             //_attributeMap = ParameterPromptAttribute.GetAttributeMap(model);
             //Parameters = GetParamViewModelCollection(model, _attributeMap);
-            //foreach (ViewModelBase param in Parameters)
-            //{
-            //    (param as ParamViewModelNotifyBase).OnUserInputChanged += ParamViewModel_OnPropertyChanged;
-            //}
-            if(isReadOnly)
+            _parameters = parameters;
+            foreach (ParamViewModelBase param in _parameters)
+            {
+                param.PropertyChanged += Param_PropertyChanged;  // += ParamViewModel_OnPropertyChanged;
+            }
+            if (isReadOnly)
             {
                 Title += " (ReadOnly)"; 
             }
+        }
+
+        private void Param_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            base.ParamViewModel_OnPropertyChanged(sender, e.PropertyName);
+            OkCommand.NotifyCanExecuteChanged();
         }
 
         protected override void ParamViewModel_OnPropertyChanged(object sender, string propertyName)

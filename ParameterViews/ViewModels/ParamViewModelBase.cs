@@ -16,6 +16,7 @@ namespace ParameterViews.ViewModels
     {
         protected readonly IVariablesContext _variablesContext;
         protected readonly ParameterModelBase _model;
+        protected readonly string _initialStringValue;
         //public event ParamViewModelChangedDelegate OnUserInputChanged;
 
         /// <summary>
@@ -28,8 +29,9 @@ namespace ParameterViews.ViewModels
         /// <summary>
         /// Tooltip for the prompt.
         /// Same as Prompt but applied to the user input control.
-        /// </summary>
-        public string PromptToolTip { get; }
+        /// </summary>     
+        [ObservableProperty]
+        private string _promptToolTip;
 
         /// <summary>
         /// Echoes a dat annotation that this parameter is read-only.
@@ -139,22 +141,39 @@ namespace ParameterViews.ViewModels
         {
             ErrorMsgToolTip = errorMsg;
             IsError = !string.IsNullOrEmpty(errorMsg);
+            if(IsError)
+            {
+                PromptToolTip = _model.ParameterAttribute.Description + 
+                    Environment.NewLine + errorMsg;
+            }
+            else
+            {
+                PromptToolTip = _model.ParameterAttribute.Description;
+            }
         }
 
-        //public abstract bool IsDirty { get; }
+        public virtual bool IsModified
+        {
+            get
+            {
+                string displayString = GetDisplayString(out bool isVariableAssignment);
+                return _initialStringValue != displayString;
+            }
+        }
 
         protected ParamViewModelBase(ParameterModelBase model, IVariablesContext variablesContext, bool showPrompt)
         {
             _model = model;
             _variablesContext = variablesContext;
             ShowPrompt = showPrompt;
-            ParameterAttribute parameterAttribute = model.ParameterAttribute;
+            ParameterAttribute parameterAttribute = _model.ParameterAttribute;
             PromptToolTip = parameterAttribute.Description;
             IsReadOnly = _model.IsReadOnly;
 
-            string prompt = parameterAttribute.Prompt;
-            prompt += ":";
-            Prompt = prompt;
+            if (ShowPrompt)
+            {
+                Prompt = parameterAttribute.Prompt + ":";
+            }
 
             List<EnumComboBoxItemData> selections =
             [
@@ -165,6 +184,7 @@ namespace ParameterViews.ViewModels
 
             //            UserInput = new EnumComboBoxItemData() { Text = GetDisplayString(out bool isVariableAssignment), IsVariable = isVariableAssignment };
             UserInput = GetDisplayString(out bool isVariableAssignment);
+            _initialStringValue = UserInput;
         }
 
         protected string GetDisplayString(out bool isVariableAssignment)
